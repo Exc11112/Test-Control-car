@@ -7,13 +7,18 @@ public class CarController : MonoBehaviour
     private float moveInput;
     private float turnInput;
     private bool isCarGrounded;
+    private float currentSpeed;
 
     public float airDrag;
     public float groundDrag;
 
-    public float fwdSpeed;
-    public float revSpeed;
+    public float maxFwdSpeed;
+    public float maxRevSpeed;
+    public float acceleration;
+    public float deceleration;
+    public float brakeForce;
     public float turnSpeed;
+    public float dForce;
     public LayerMask groundLayer;
 
     public Rigidbody sphereRB;
@@ -23,6 +28,7 @@ public class CarController : MonoBehaviour
     {
         // Detach the sphere from the car object
         sphereRB.transform.parent = null;
+        currentSpeed = 0f;
     }
 
     // Update is called once per frame
@@ -32,8 +38,31 @@ public class CarController : MonoBehaviour
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
 
-        // Adjust moveInput for forward and reverse speeds
-        moveInput *= moveInput > 0 ? fwdSpeed : revSpeed;
+        // Gradually adjust current speed based on moveInput
+        if (moveInput > 0)
+        {
+            currentSpeed += acceleration * Time.deltaTime;
+            currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
+        }
+        else if (moveInput < 0)
+        {
+            currentSpeed -= brakeForce * Time.deltaTime;
+            currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
+        }
+        else
+        {
+            // Decelerate if no input is provided
+            if (currentSpeed > 0)
+            {
+                currentSpeed -= deceleration * Time.deltaTime;
+                if (currentSpeed < 0) currentSpeed = 0;
+            }
+            else if (currentSpeed < 0)
+            {
+                currentSpeed += deceleration * Time.deltaTime;
+                if (currentSpeed > 0) currentSpeed = 0;
+            }
+        }
 
         // Update car position to match the sphere's position
         transform.position = sphereRB.transform.position;
@@ -41,7 +70,7 @@ public class CarController : MonoBehaviour
         if (isCarGrounded)
         {
             // Rotate the car based on turn input and vertical input
-            float newRotation = turnInput * turnSpeed * Time.deltaTime * Input.GetAxisRaw("Vertical");
+            float newRotation = turnInput * turnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
             transform.Rotate(0, newRotation, 0, Space.World);
         }
 
@@ -64,12 +93,12 @@ public class CarController : MonoBehaviour
         if (isCarGrounded)
         {
             // Apply forward force when grounded
-            sphereRB.AddForce(transform.forward * moveInput, ForceMode.Acceleration);
+            sphereRB.AddForce(transform.forward * currentSpeed, ForceMode.Acceleration);
         }
         else
         {
             // Apply downward force when in the air
-            sphereRB.AddForce(transform.up * -25f);
+            sphereRB.AddForce(transform.up * dForce);
         }
     }
 }
