@@ -92,7 +92,7 @@ public class CarController : MonoBehaviour
         }
 
         // Lerp to the target turn speed
-        turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 5f);
+        turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
 
         // Gradually adjust current turn speed based on turn input
         if (turnInput != 0)
