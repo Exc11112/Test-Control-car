@@ -9,29 +9,41 @@ public class CarController : MonoBehaviour
     private bool isCarGrounded;
     private float currentSpeed;
     private float currentTurnSpeed;
+    public int currentGear { get; private set; }
+    public float currentRPM { get; private set; }
 
     public float airDrag;
     public float groundDrag;
 
     public float maxFwdSpeed;
     public float maxRevSpeed;
-    public float acceleration;
+    public float baseAcceleration;
+    private float currentAcceleration;
     public float deceleration;
     public float brakeForce;
 
     public float turnSpeed;
-    public float turnSpeeddef;
-    public float turnSpeedHight;//วงการเลี้ยวแคบ(เป็นค่าความเร็วในการเลี้ยว ยิ่งเยอะยิ่งวงเลี้ยวแคบ)
-    public float turnSpeedlow;//วงการเลี้ยวกว้าง(เป็นค่าความเร็วในการเลี้ยว ยิ่งน้อยยิ่งวงเลี้ยวกว้าง)
-    public float hightturnRadiusAt;//ถ้าความต่ำกว่าค่าที่ตั้งนี้วงเลี้ยวจะแคบ
-    public float lowturnRadiusAt;//ถ้าความสูงกว่าค่าที่ตั้งนี้วงเลี้ยวจะกว้าง
+    public float defaultTurnSpeed;
+    public float highTurnSpeed;
+    public float lowTurnSpeed;
+    public float highTurnRadiusAt;
+    public float lowTurnRadiusAt;
 
-    public float turnAcceleration; // Acceleration of turning force
-    public float turnDeceleration; // Deceleration of turning force
-    public float dForce; // Downward force when in the air
+    public float turnAcceleration;
+    public float turnDeceleration;
+    public float dForce;
     public LayerMask groundLayer;
 
     public Rigidbody sphereRB;
+
+    public float[] gearRatios; // Gear ratios
+    public float shiftUpRPM; // RPM to shift up
+    public float shiftDownRPM; // RPM to shift down
+    public float maxRPM; // Maximum RPM
+    public float minRPM; // Minimum RPM
+
+    private float shiftDelay = 0.5f; // Time delay between shifts to avoid rapid shifting
+    private float lastShiftTime; // Time of the last shift
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +52,10 @@ public class CarController : MonoBehaviour
         sphereRB.transform.parent = null;
         currentSpeed = 0f;
         currentTurnSpeed = 0f;
+        currentGear = 0; // Start at first gear
+        currentRPM = minRPM;
+        lastShiftTime = Time.time;
+        currentAcceleration = baseAcceleration * gearRatios[currentGear];
     }
 
     // Update is called once per frame
@@ -49,10 +65,26 @@ public class CarController : MonoBehaviour
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
 
+        // Calculate current RPM
+        currentRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM;
+
+        // Gear shifting logic with time delay
+        if (Time.time - lastShiftTime > shiftDelay)
+        {
+            if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+            {
+                ShiftUp();
+            }
+            else if (currentRPM < shiftDownRPM && currentGear > 0)
+            {
+                ShiftDown();
+            }
+        }
+
         // Gradually adjust current speed based on moveInput
         if (moveInput > 0)
         {
-            currentSpeed += acceleration * Time.deltaTime;
+            currentSpeed += currentAcceleration * Time.deltaTime;
             currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
         }
         else if (moveInput < 0)
@@ -76,19 +108,15 @@ public class CarController : MonoBehaviour
         }
 
         // Adjust turnSpeed based on currentSpeed
-        float targetTurnSpeed = 0f;
+        float targetTurnSpeed = defaultTurnSpeed;
 
-        if (currentSpeed > lowturnRadiusAt)
+        if (currentSpeed > lowTurnRadiusAt)
         {
-            targetTurnSpeed = turnSpeedlow;
+            targetTurnSpeed = lowTurnSpeed;
         }
-        else if (currentSpeed < hightturnRadiusAt)
+        else if (currentSpeed < highTurnRadiusAt)
         {
-            targetTurnSpeed = turnSpeedHight;
-        }
-        else if (currentSpeed != hightturnRadiusAt || currentSpeed != lowturnRadiusAt)
-        {
-            targetTurnSpeed = turnSpeeddef; // Default turn speed
+            targetTurnSpeed = highTurnSpeed;
         }
 
         // Lerp to the target turn speed
@@ -151,5 +179,21 @@ public class CarController : MonoBehaviour
             // Apply downward force when in the air
             sphereRB.AddForce(transform.up * dForce);
         }
+    }
+
+    private void ShiftUp()
+    {
+        currentGear++;
+        lastShiftTime = Time.time;
+        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
+    }
+
+    private void ShiftDown()
+    {
+        currentGear--;
+        lastShiftTime = Time.time;
+        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        currentRPM = Mathf.Clamp(currentRPM * gearRatios[currentGear], minRPM, maxRPM);
     }
 }
