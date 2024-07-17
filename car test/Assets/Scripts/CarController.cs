@@ -37,12 +37,13 @@ public class CarController : MonoBehaviour
     public Rigidbody sphereRB;
 
     public float[] gearRatios; // Gear ratios
+    public float[] rpmDeceleration;
     public float shiftUpRPM; // RPM to shift up
     public float shiftDownRPM; // RPM to shift down
     public float maxRPM; // Maximum RPM
     public float minRPM; // Minimum RPM
 
-    private float shiftDelay = 0.5f; // Time delay between shifts to avoid rapid shifting
+    private float shiftDelay = 0.9f; // Time delay between shifts to avoid rapid shifting
     private float lastShiftTime; // Time of the last shift
 
     void Start()
@@ -200,14 +201,6 @@ public class CarController : MonoBehaviour
 
     private void AdjustAcceleration()
     {
-        // Adjust the base acceleration for higher gears
-        if (currentGear >= 4) // Assuming gear 5 is index 4
-        {
-            currentAcceleration = baseAcceleration * gearRatios[currentGear] * 0.1f; // Decrease acceleration
-        }
-        else
-        {
-            currentAcceleration = baseAcceleration * gearRatios[currentGear];
-        }
+        currentAcceleration = baseAcceleration * gearRatios[currentGear] * rpmDeceleration[currentGear];
     }
 }
