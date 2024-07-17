@@ -45,7 +45,6 @@ public class CarController : MonoBehaviour
     private float shiftDelay = 0.5f; // Time delay between shifts to avoid rapid shifting
     private float lastShiftTime; // Time of the last shift
 
-    // Start is called before the first frame update
     void Start()
     {
         // Detach the sphere from the car object
@@ -58,15 +57,14 @@ public class CarController : MonoBehaviour
         currentAcceleration = baseAcceleration * gearRatios[currentGear];
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Get input for movement and turning
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
 
-        // Calculate current RPM
-        currentRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM;
+        // Calculate current RPM based on speed and gear ratios
+        currentRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
 
         // Gear shifting logic with time delay
         if (Time.time - lastShiftTime > shiftDelay)
@@ -80,6 +78,9 @@ public class CarController : MonoBehaviour
                 ShiftDown();
             }
         }
+
+        // Adjust current acceleration based on the current gear
+        AdjustAcceleration();
 
         // Gradually adjust current speed based on moveInput
         if (moveInput > 0)
@@ -185,7 +186,7 @@ public class CarController : MonoBehaviour
     {
         currentGear++;
         lastShiftTime = Time.time;
-        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        AdjustAcceleration();
         currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
     }
 
@@ -193,7 +194,20 @@ public class CarController : MonoBehaviour
     {
         currentGear--;
         lastShiftTime = Time.time;
-        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        AdjustAcceleration();
         currentRPM = Mathf.Clamp(currentRPM * gearRatios[currentGear], minRPM, maxRPM);
+    }
+
+    private void AdjustAcceleration()
+    {
+        // Adjust the base acceleration for higher gears
+        if (currentGear >= 4) // Assuming gear 5 is index 4
+        {
+            currentAcceleration = baseAcceleration * gearRatios[currentGear] * 0.1f; // Decrease acceleration
+        }
+        else
+        {
+            currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        }
     }
 }
