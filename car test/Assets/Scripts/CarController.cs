@@ -36,15 +36,17 @@ public class CarController : MonoBehaviour
 
     public Rigidbody sphereRB;
 
-    public float[] gearRatios; // Gear ratios
     public float[] rpmDeceleration;
+    public float[] gearRatios; // Gear ratios
     public float shiftUpRPM; // RPM to shift up
     public float shiftDownRPM; // RPM to shift down
     public float maxRPM; // Maximum RPM
     public float minRPM; // Minimum RPM
 
-    private float shiftDelay = 0.9f; // Time delay between shifts to avoid rapid shifting
+    private float shiftDelay = 1f; // Time delay between shifts to avoid rapid shifting
     private float lastShiftTime; // Time of the last shift
+
+    public float maxRPMRateIncrease; // Maximum RPM rate increase in highest gear
 
     void Start()
     {
@@ -63,25 +65,6 @@ public class CarController : MonoBehaviour
         // Get input for movement and turning
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
-
-        // Calculate current RPM based on speed and gear ratios
-        currentRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
-
-        // Gear shifting logic with time delay
-        if (Time.time - lastShiftTime > shiftDelay)
-        {
-            if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
-            {
-                ShiftUp();
-            }
-            else if (currentRPM < shiftDownRPM && currentGear > 0)
-            {
-                ShiftDown();
-            }
-        }
-
-        // Adjust current acceleration based on the current gear
-        AdjustAcceleration();
 
         // Gradually adjust current speed based on moveInput
         if (moveInput > 0)
@@ -167,6 +150,34 @@ public class CarController : MonoBehaviour
 
         // Adjust drag based on whether the car is grounded
         sphereRB.drag = isCarGrounded ? groundDrag : airDrag;
+
+        // Calculate current RPM based on speed and gear ratios
+        float targetRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
+
+        if (currentGear == gearRatios.Length - 1) // If in highest gear
+        {
+            currentRPM = Mathf.MoveTowards(currentRPM, targetRPM, maxRPMRateIncrease * Time.deltaTime);
+        }
+        else
+        {
+            currentRPM = targetRPM;
+        }
+
+        // Gear shifting logic with time delay
+        if (Time.time - lastShiftTime > shiftDelay)
+        {
+            if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+            {
+                ShiftUp();
+            }
+            else if (currentRPM < shiftDownRPM && currentGear > 0)
+            {
+                ShiftDown();
+            }
+        }
+
+        // Adjust current acceleration based on the current gear
+        AdjustAcceleration();
     }
 
     private void FixedUpdate()

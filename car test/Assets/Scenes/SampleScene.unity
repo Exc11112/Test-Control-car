@@ -675,22 +675,23 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   sphereRB: {fileID: 1865335241}
-  gearRatios:
-  - 1.8
-  - 1.3
-  - 1.15
-  - 1.05
-  - 1
   rpmDeceleration:
   - 0.5
   - 0.4
   - 0.2
   - 0.1
   - 0.05
+  gearRatios:
+  - 1.8
+  - 1.3
+  - 1.15
+  - 1.05
+  - 1
   shiftUpRPM: 9000
   shiftDownRPM: 6000
   maxRPM: 10000
   minRPM: 1000
+  maxRPMRateIncrease: 1000
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
