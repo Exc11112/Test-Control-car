@@ -48,6 +48,8 @@ public class CarController : MonoBehaviour
 
     public float maxRPMRateIncrease; // Maximum RPM rate increase in highest gear
 
+    private bool isManual = false; // Is the car in manual mode?
+
     void Start()
     {
         // Detach the sphere from the car object
@@ -62,12 +64,27 @@ public class CarController : MonoBehaviour
 
     void Update()
     {
+        // Toggle manual mode with 'R' key
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            isManual = !isManual;
+        }
+
         // Get input for movement and turning
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
 
-        // Gradually adjust current speed based on moveInput
-        if (moveInput > 0)
+        // Calculate current RPM based on speed and gear ratios
+        float targetRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
+
+        // Cap the RPM to the maxRPM
+        currentRPM = Mathf.Min(targetRPM, maxRPM);
+
+        // Prevent speed increase if RPM is at its maximum
+        bool isAtMaxRPM = currentRPM >= maxRPM;
+
+        // Gradually adjust current speed based on moveInput and RPM cap
+        if (moveInput > 0 && !isAtMaxRPM)
         {
             currentSpeed += currentAcceleration * Time.deltaTime;
             currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
@@ -151,26 +168,29 @@ public class CarController : MonoBehaviour
         // Adjust drag based on whether the car is grounded
         sphereRB.drag = isCarGrounded ? groundDrag : airDrag;
 
-        // Calculate current RPM based on speed and gear ratios
-        float targetRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
-
-        if (currentGear == gearRatios.Length - 1) // If in highest gear
+        if (!isManual)
         {
-            currentRPM = Mathf.MoveTowards(currentRPM, targetRPM, maxRPMRateIncrease * Time.deltaTime);
+            // Automatic gear shifting logic with time delay
+            if (Time.time - lastShiftTime > shiftDelay)
+            {
+                if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+                {
+                    ShiftUp();
+                }
+                else if (currentRPM < shiftDownRPM && currentGear > 0)
+                {
+                    ShiftDown();
+                }
+            }
         }
         else
         {
-            currentRPM = targetRPM;
-        }
-
-        // Gear shifting logic with time delay
-        if (Time.time - lastShiftTime > shiftDelay)
-        {
-            if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+            // Manual gear shifting logic
+            if (Input.GetKeyDown(KeyCode.LeftShift) && currentGear < gearRatios.Length - 1)
             {
                 ShiftUp();
             }
-            else if (currentRPM < shiftDownRPM && currentGear > 0)
+            else if (Input.GetKeyDown(KeyCode.LeftControl) && currentGear > 0)
             {
                 ShiftDown();
             }
