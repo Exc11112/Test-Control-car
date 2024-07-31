@@ -37,18 +37,25 @@ public class CarController : MonoBehaviour
     public Rigidbody sphereRB;
 
     public float[] rpmDeceleration;
-    public float[] gearRatios; // Gear ratios
-    public float shiftUpRPM; // RPM to shift up
-    public float shiftDownRPM; // RPM to shift down
-    public float maxRPM; // Maximum RPM
-    public float minRPM; // Minimum RPM
+    public float[] gearRatios;
+    public float shiftUpRPM;
+    public float shiftDownRPM;
+    public float maxRPM;
+    public float minRPM;
 
-    private float shiftDelay = 1f; // Time delay between shifts to avoid rapid shifting
-    private float lastShiftTime; // Time of the last shift
+    private float shiftDelay = 1f;
+    private float lastShiftTime;
 
-    public float maxRPMRateIncrease; // Maximum RPM rate increase in highest gear
+    public float maxRPMRateIncrease;
 
-    private bool isManual = false; // Is the car in manual mode?
+    private bool isManual = false;
+    private bool isNeutral = true; // Start in Neutral gear
+    private float neutralStartTime;
+
+    private bool isBoosted = false; // Indicates if the temporary acceleration boost is active
+    private float boostStartTime; // Time when the acceleration boost started
+    private float gear1Acceleration; // Acceleration for gear 1
+    private float gear1Deceleration; // Deceleration for gear 1
 
     void Start()
     {
@@ -59,7 +66,14 @@ public class CarController : MonoBehaviour
         currentGear = 0; // Start at first gear
         currentRPM = minRPM;
         lastShiftTime = Time.time;
-        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+
+        // Initialize acceleration and deceleration for gear 1
+        gear1Acceleration = baseAcceleration * gearRatios[0];
+        gear1Deceleration = deceleration;
+
+        // Start in neutral for 3 seconds
+        isNeutral = true;
+        neutralStartTime = Time.time;
     }
 
     void Update()
@@ -74,130 +88,179 @@ public class CarController : MonoBehaviour
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
 
-        // Calculate current RPM based on speed and gear ratios
-        float targetRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
-
-        // Cap the RPM to the maxRPM
-        currentRPM = Mathf.Min(targetRPM, maxRPM);
-
-        // Prevent speed increase if RPM is at its maximum
-        bool isAtMaxRPM = currentRPM >= maxRPM;
-
-        // Gradually adjust current speed based on moveInput and RPM cap
-        if (moveInput > 0 && !isAtMaxRPM)
+        if (isNeutral)
         {
-            currentSpeed += currentAcceleration * Time.deltaTime;
-            currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
-        }
-        else if (moveInput < 0)
-        {
-            currentSpeed -= brakeForce * Time.deltaTime;
-            currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
+            // In Neutral state, only RPM can go up to max 10000 without affecting speed
+            if (moveInput > 0)
+            {
+                currentRPM += gear1Acceleration * Time.deltaTime * 25; // Increase RPM faster in neutral
+                currentRPM = Mathf.Clamp(currentRPM, minRPM, 10000);
+            }
+            else
+            {
+                currentRPM -= gear1Deceleration * Time.deltaTime * 25;
+                currentRPM = Mathf.Max(currentRPM, minRPM);
+            }
+
+            // Check if 3 seconds have passed to switch to normal state
+            if (Time.time - neutralStartTime > 3f)
+            {
+                isNeutral = false;
+
+                // Check if the player kept RPM between 4000 and 5000 during neutral state
+                if (currentRPM >= 4000 && currentRPM <= 5000)
+                {
+                    isBoosted = true;
+                    boostStartTime = Time.time;
+                }
+            }
         }
         else
         {
-            // Decelerate if no input is provided
-            if (currentSpeed > 0)
+            // Calculate current RPM based on speed and gear ratios
+            float targetRPM = Mathf.Abs(currentSpeed) / maxFwdSpeed * maxRPM * gearRatios[currentGear];
+
+            // Cap the RPM to the maxRPM
+            currentRPM = Mathf.Min(targetRPM, maxRPM);
+
+            // Prevent speed increase if RPM is at its maximum
+            bool isAtMaxRPM = currentRPM >= maxRPM;
+
+            // Gradually adjust current speed based on moveInput and RPM cap
+            if (moveInput > 0 && !isAtMaxRPM)
             {
-                currentSpeed -= deceleration * Time.deltaTime;
-                if (currentSpeed < 0) currentSpeed = 0;
+                currentSpeed += currentAcceleration * Time.deltaTime;
+                currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
             }
-            else if (currentSpeed < 0)
+            else if (moveInput < 0)
             {
-                currentSpeed += deceleration * Time.deltaTime;
-                if (currentSpeed > 0) currentSpeed = 0;
+                currentSpeed -= brakeForce * Time.deltaTime;
+                currentSpeed = Mathf.Clamp(currentSpeed, -maxRevSpeed, maxFwdSpeed);
             }
-        }
-
-        // Adjust turnSpeed based on currentSpeed
-        float targetTurnSpeed = defaultTurnSpeed;
-
-        if (currentSpeed > lowTurnRadiusAt)
-        {
-            targetTurnSpeed = lowTurnSpeed;
-        }
-        else if (currentSpeed < highTurnRadiusAt)
-        {
-            targetTurnSpeed = highTurnSpeed;
-        }
-
-        // Lerp to the target turn speed
-        turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
-
-        // Gradually adjust current turn speed based on turn input
-        if (turnInput != 0)
-        {
-            currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
-            currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
-        }
-        else
-        {
-            // Decelerate turn speed if no input is provided
-            if (currentTurnSpeed > 0)
+            else
             {
-                currentTurnSpeed -= turnDeceleration * Time.deltaTime;
-                if (currentTurnSpeed < 0) currentTurnSpeed = 0;
+                // Decelerate if no input is provided
+                if (currentSpeed > 0)
+                {
+                    currentSpeed -= deceleration * Time.deltaTime;
+                    if (currentSpeed < 0) currentSpeed = 0;
+                }
+                else if (currentSpeed < 0)
+                {
+                    currentSpeed += deceleration * Time.deltaTime;
+                    if (currentSpeed > 0) currentSpeed = 0;
+                }
             }
-            else if (currentTurnSpeed < 0)
+
+            // Check if the temporary acceleration boost should be active
+            if (isBoosted)
             {
-                currentTurnSpeed += turnDeceleration * Time.deltaTime;
-                if (currentTurnSpeed > 0) currentTurnSpeed = 0;
+                if (Time.time - boostStartTime < 3f)
+                {
+                    // Double the acceleration during the boost period
+                    currentAcceleration = gear1Acceleration * 0.6f;
+                }
+                else
+                {
+                    // End the boost period
+                    isBoosted = false;
+                    AdjustAcceleration();
+                }
             }
-        }
 
-        // Update car position to match the sphere's position
-        transform.position = sphereRB.transform.position;
+            // Adjust turnSpeed based on currentSpeed
+            float targetTurnSpeed = defaultTurnSpeed;
 
-        if (isCarGrounded)
-        {
-            // Rotate the car based on current turn speed
-            float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
-            transform.Rotate(0, newRotation, 0, Space.World);
-        }
-
-        // Check if the car is grounded
-        RaycastHit hit;
-        isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
-
-        // Align the car with the ground normal
-        if (isCarGrounded)
-        {
-            transform.rotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-        }
-
-        // Adjust drag based on whether the car is grounded
-        sphereRB.drag = isCarGrounded ? groundDrag : airDrag;
-
-        if (!isManual)
-        {
-            // Automatic gear shifting logic with time delay
-            if (Time.time - lastShiftTime > shiftDelay)
+            if (currentSpeed > lowTurnRadiusAt)
             {
-                if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+                targetTurnSpeed = lowTurnSpeed;
+            }
+            else if (currentSpeed < highTurnRadiusAt)
+            {
+                targetTurnSpeed = highTurnSpeed;
+            }
+
+            // Lerp to the target turn speed
+            turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
+
+            // Gradually adjust current turn speed based on turn input
+            if (turnInput != 0)
+            {
+                currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
+                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
+            }
+            else
+            {
+                // Decelerate turn speed if no input is provided
+                if (currentTurnSpeed > 0)
+                {
+                    currentTurnSpeed -= turnDeceleration * Time.deltaTime;
+                    if (currentTurnSpeed < 0) currentTurnSpeed = 0;
+                }
+                else if (currentTurnSpeed < 0)
+                {
+                    currentTurnSpeed += turnDeceleration * Time.deltaTime;
+                    if (currentTurnSpeed > 0) currentTurnSpeed = 0;
+                }
+            }
+
+            // Update car position to match the sphere's position
+            transform.position = sphereRB.transform.position;
+
+            if (isCarGrounded)
+            {
+                // Rotate the car based on current turn speed
+                float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
+                transform.Rotate(0, newRotation, 0, Space.World);
+            }
+
+            // Check if the car is grounded
+            RaycastHit hit;
+            isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
+
+            // Align the car with the ground normal
+            if (isCarGrounded)
+            {
+                transform.rotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+            }
+
+            // Adjust drag based on whether the car is grounded
+            sphereRB.drag = isCarGrounded ? groundDrag : airDrag;
+
+            if (!isManual)
+            {
+                // Automatic gear shifting logic with time delay
+                if (Time.time - lastShiftTime > shiftDelay)
+                {
+                    if (currentRPM > shiftUpRPM && currentGear < gearRatios.Length - 1)
+                    {
+                        ShiftUp();
+                    }
+                    else if (currentRPM < shiftDownRPM && currentGear > 0)
+                    {
+                        ShiftDown();
+                    }
+                }
+            }
+            else
+            {
+                // Manual gear shifting logic
+                if (Input.GetKeyDown(KeyCode.LeftShift) && currentGear < gearRatios.Length - 1)
                 {
                     ShiftUp();
                 }
-                else if (currentRPM < shiftDownRPM && currentGear > 0)
+                else if (Input.GetKeyDown(KeyCode.LeftControl) && currentGear > 0)
                 {
                     ShiftDown();
                 }
             }
         }
-        else
-        {
-            // Manual gear shifting logic
-            if (Input.GetKeyDown(KeyCode.LeftShift) && currentGear < gearRatios.Length - 1)
-            {
-                ShiftUp();
-            }
-            else if (Input.GetKeyDown(KeyCode.LeftControl) && currentGear > 0)
-            {
-                ShiftDown();
-            }
-        }
 
-        // Adjust current acceleration based on the current gear
-        AdjustAcceleration();
+        // Adjust current acceleration based on the current gear if not boosted
+        if (!isBoosted)
+        {
+            AdjustAcceleration();
+        }
     }
 
     private void FixedUpdate()
