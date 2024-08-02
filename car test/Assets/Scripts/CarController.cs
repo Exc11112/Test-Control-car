@@ -36,6 +36,9 @@ public class CarController : MonoBehaviour
 
     public Rigidbody sphereRB;
 
+    public float pStartRpmSpeed;
+    public float tStart;
+
     public float[] rpmDeceleration;
     public float[] gearRatios;
     public float shiftUpRPM;
@@ -93,17 +96,17 @@ public class CarController : MonoBehaviour
             // In Neutral state, only RPM can go up to max 10000 without affecting speed
             if (moveInput > 0)
             {
-                currentRPM += gear1Acceleration * Time.deltaTime * 25; // Increase RPM faster in neutral
+                currentRPM += gear1Acceleration * Time.deltaTime * pStartRpmSpeed; // Increase RPM faster in neutral
                 currentRPM = Mathf.Clamp(currentRPM, minRPM, 10000);
             }
             else
             {
-                currentRPM -= gear1Deceleration * Time.deltaTime * 25;
+                currentRPM -= gear1Deceleration * Time.deltaTime * pStartRpmSpeed;
                 currentRPM = Mathf.Max(currentRPM, minRPM);
             }
 
             // Check if 3 seconds have passed to switch to normal state
-            if (Time.time - neutralStartTime > 3f)
+            if (Time.time - neutralStartTime > tStart)
             {
                 isNeutral = false;
 
@@ -186,6 +189,8 @@ public class CarController : MonoBehaviour
             // Gradually adjust current turn speed based on turn input
             if (turnInput != 0)
             {
+                currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
+                currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
                 currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
                 currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
             }
@@ -211,7 +216,7 @@ public class CarController : MonoBehaviour
             {
                 // Rotate the car based on current turn speed
                 float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
-                transform.Rotate(0, newRotation, 0, Space.World);
+                transform.Rotate(0, newRotation, 0, Space.World); 
             }
 
             // Check if the car is grounded
