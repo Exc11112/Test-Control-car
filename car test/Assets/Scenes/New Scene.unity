@@ -134,31 +134,13 @@ GameObject:
   - component: {fileID: 39917272}
   - component: {fileID: 39917271}
   - component: {fileID: 39917270}
-  - component: {fileID: 39917269}
   m_Layer: 0
   m_Name: Cube (1)
-  m_TagString: Untagged
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &39917269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 39917268}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 15012bd753563ce48b2c26036c7bc4b0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  carLayer: car
-  switch1Layer: switch1
-  switch2Layer: switch2
-  swap1Layer: swap1
-  swap2Layer: swap2
 --- !u!65 &39917270
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -364,9 +346,10 @@ GameObject:
   - component: {fileID: 375615310}
   - component: {fileID: 375615309}
   - component: {fileID: 375615313}
-  m_Layer: 0
+  - component: {fileID: 375615314}
+  m_Layer: 10
   m_Name: Cube
-  m_TagString: Untagged
+  m_TagString: car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -484,6 +467,47 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &375615314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 375615308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4070b8f800ea8146b44b05cbb1f5570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  airDrag: 0
+  groundDrag: 0
+  maxFwdSpeed: 0
+  maxRevSpeed: 0
+  baseAcceleration: 0
+  deceleration: 0
+  brakeForce: 0
+  turnSpeed: 0
+  defaultTurnSpeed: 0
+  highTurnSpeed: 0
+  lowTurnSpeed: 0
+  highTurnRadiusAt: 0
+  lowTurnRadiusAt: 0
+  turnAcceleration: 0
+  turnDeceleration: 0
+  dForce: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  sphereRB: {fileID: 375615313}
+  pStartRpmSpeed: 0
+  tStart: 0
+  rpmDeceleration: []
+  gearRatios: []
+  shiftUpRPM: 0
+  shiftDownRPM: 0
+  maxRPM: 0
+  minRPM: 0
+  maxRPMRateIncrease: 0
 --- !u!1 &1243435722
 GameObject:
   m_ObjectHideFlags: 0

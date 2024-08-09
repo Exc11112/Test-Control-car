@@ -60,6 +60,18 @@ public class CarController : MonoBehaviour
     private float gear1Acceleration; // Acceleration for gear 1
     private float gear1Deceleration; // Deceleration for gear 1
 
+    private bool isCollidingWithWall = false;
+    private float originalBaseAcceleration;
+
+    public float timer = 0f;
+    public bool isTimerRunning = false;
+    private float checkpointTime;
+    private float finishPointTime;
+
+    public string checkpointLayer = "checkpoint";
+    public string fpointLayer = "fpoint";
+    private bool hasStartedTimer = false; // Flag to ensure the timer starts only once
+
     void Start()
     {
         // Detach the sphere from the car object
@@ -73,6 +85,9 @@ public class CarController : MonoBehaviour
         // Initialize acceleration and deceleration for gear 1
         gear1Acceleration = baseAcceleration * gearRatios[0];
         gear1Deceleration = deceleration;
+
+        // Store the original base acceleration
+        originalBaseAcceleration = baseAcceleration;
 
         // Start in neutral for 3 seconds
         isNeutral = true;
@@ -90,6 +105,18 @@ public class CarController : MonoBehaviour
         // Get input for movement and turning
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
+
+        // Timer management
+        if (!isNeutral && !isTimerRunning && !hasStartedTimer && Time.time - neutralStartTime > tStart)
+        {
+            isTimerRunning = true;
+            timer = 0f;
+            hasStartedTimer = true; // Set the flag to true so this block won't run again
+        }
+        if (isTimerRunning)
+        {
+            timer += Time.deltaTime;
+        }
 
         if (isNeutral)
         {
@@ -216,7 +243,7 @@ public class CarController : MonoBehaviour
             {
                 // Rotate the car based on current turn speed
                 float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
-                transform.Rotate(0, newRotation, 0, Space.World); 
+                transform.Rotate(0, newRotation, 0, Space.World);
             }
 
             // Check if the car is grounded
@@ -300,6 +327,68 @@ public class CarController : MonoBehaviour
 
     private void AdjustAcceleration()
     {
+        // Continuously reduce the current speed to 5 if colliding with a wall
+        if (isCollidingWithWall)
+        {
+            Debug.Log("wwwwwww");
+            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 50f);
+            moveInput = 0f;
+            //currentRPM = 0f;
+        }
+        //else
+        //{
+        //    currentSpeed = Mathf.Lerp(currentSpeed, originalBaseAcceleration, Time.deltaTime * 2f);
+        //}
+
         currentAcceleration = baseAcceleration * gearRatios[currentGear] * rpmDeceleration[currentGear];
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        // Check if the car collides with a wall
+        if (collision.gameObject.CompareTag("wall"))
+        {
+            Debug.Log("asd");
+            isCollidingWithWall = true;
+        }
+        // Check if the car hits a checkpoint
+        if (collision.gameObject.layer == LayerMask.NameToLayer("checkpoint"))
+        {
+            checkpointTime = timer;
+            Debug.Log("Checkpoint Time: " + checkpointTime);
+            DeactivateObjectsInLayer(checkpointLayer);
+        }
+
+        // Check if the car hits the finish point
+        if (collision.gameObject.layer == LayerMask.NameToLayer("fpoint"))
+        {
+            finishPointTime = timer;
+            Debug.Log("Finish Point Time: " + finishPointTime);
+            isTimerRunning = false; // Stop the timer
+            DeactivateObjectsInLayer(fpointLayer);
+        }
+    }
+
+    public void OnCollisionExit(Collision collision)
+    {
+        // Check if the car stops colliding with a wall
+        if (collision.gameObject.CompareTag("wall"))
+        {
+            isCollidingWithWall = false;
+        }
+    }
+
+    private void DeactivateObjectsInLayer(string layerName)
+    {
+        int layer = LayerMask.NameToLayer(layerName);
+        GameObject[] objectsInLayer = FindObjectsOfType<GameObject>();
+
+        foreach (GameObject obj in objectsInLayer)
+        {
+            if (obj.layer == layer)
+            {
+                obj.SetActive(false);
+            }
+        }
     }
 }

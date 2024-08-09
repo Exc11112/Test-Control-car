@@ -11,6 +11,7 @@ public class SpeedDisplay : MonoBehaviour
     public Text speedLabel; // The label that displays the speed
     public Text rpmLabel;   // The label that displays the RPM
     public Text gearLabel;  // The label that displays the current gear
+    public Text timers;
 
     private float speed = 0.0f;
 
@@ -27,5 +28,8 @@ public class SpeedDisplay : MonoBehaviour
 
         if (gearLabel != null && car != null)
             gearLabel.text = "Gear: " + (car.currentGear + 1); // Add 1 to display gears starting from 1
+
+        if (timers != null)
+            timers.text = Mathf.FloorToInt(car.timer) + " sec";
     }
 }
