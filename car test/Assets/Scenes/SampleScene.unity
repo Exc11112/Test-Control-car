@@ -3550,7 +3550,7 @@ MonoBehaviour:
   turnSpeed: 0
   defaultTurnSpeed: 100
   highTurnSpeed: 150
-  lowTurnSpeed: 60
+  lowTurnSpeed: 150
   highTurnRadiusAt: 160
   lowTurnRadiusAt: 120
   turnAcceleration: 250
@@ -6202,7 +6202,6 @@ GameObject:
   - component: {fileID: 1411117594}
   - component: {fileID: 1411117593}
   - component: {fileID: 1411117592}
-  - component: {fileID: 1411117596}
   - component: {fileID: 1411117597}
   m_Layer: 15
   m_Name: Cube (11)
@@ -6297,25 +6296,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1411117596
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1411117591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4041df64d840936468a1251a42a772ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  carLayer: car
-  timer: 0
-  car: {fileID: 688534278}
-  checkpointTime: 0
-  finishPointTime: 0
-  checkpointLayer: checkpoint
-  fpointLayer: fpoint
 --- !u!54 &1411117597
 Rigidbody:
   m_ObjectHideFlags: 0
