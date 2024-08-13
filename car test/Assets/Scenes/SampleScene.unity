@@ -4033,7 +4033,7 @@ Transform:
   m_GameObject: {fileID: 688534276}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 5.5, y: 0.8, z: -398.7}
+  m_LocalPosition: {x: -36, y: 0.8, z: -329}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -4055,7 +4055,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4070b8f800ea8146b44b05cbb1f5570, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  airDrag: 0.5
+  airDrag: 0.3
   groundDrag: 3
   maxFwdSpeed: 280
   maxRevSpeed: 100
@@ -4064,13 +4064,14 @@ MonoBehaviour:
   brakeForce: 155
   turnSpeed: 0
   defaultTurnSpeed: 100
-  highTurnSpeed: 150
+  highTurnSpeed: 250
   lowTurnSpeed: 150
   highTurnRadiusAt: 160
   lowTurnRadiusAt: 120
-  turnAcceleration: 200
-  turnDeceleration: 100
-  dForce: -22
+  turnAcceleration: 250
+  turnDeceleration: 150
+  dForce: -30
+  alignToGroundTime: 10
   groundLayer:
     serializedVersion: 2
     m_Bits: 64

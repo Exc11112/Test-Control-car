@@ -32,6 +32,7 @@ public class CarController : MonoBehaviour
     public float turnAcceleration;
     public float turnDeceleration;
     public float dForce;
+    public float alignToGroundTime;
     public LayerMask groundLayer;
 
     public Rigidbody sphereRB;
@@ -253,7 +254,8 @@ public class CarController : MonoBehaviour
             // Align the car with the ground normal
             if (isCarGrounded)
             {
-                transform.rotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+                Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal)* transform.rotation;
+                transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, alignToGroundTime * Time.deltaTime);
             }
 
             // Adjust drag based on whether the car is grounded
