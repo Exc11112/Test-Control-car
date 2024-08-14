@@ -73,6 +73,13 @@ public class CarController : MonoBehaviour
     public string fpointLayer = "fpoint";
     private bool hasStartedTimer = false; // Flag to ensure the timer starts only once
 
+    private bool isEnhancedTurning = false;
+    private float enhancedTurnStartTime;
+    private bool isSKeyPressed = false;
+    private float sKeyPressTime;
+    private float maxTimeBetweenSAndW = 1.0f; // Maximum time allowed between pressing S and W
+
+
     void Start()
     {
         // Detach the sphere from the car object
@@ -294,6 +301,48 @@ public class CarController : MonoBehaviour
         if (!isBoosted)
         {
             AdjustAcceleration();
+        }
+
+        if (currentSpeed > 100f && Input.GetKeyDown(KeyCode.S))
+        {
+            isSKeyPressed = true;
+            sKeyPressTime = Time.time;
+        }
+
+        if (isSKeyPressed && Time.time - sKeyPressTime <= maxTimeBetweenSAndW && Input.GetKeyDown(KeyCode.W))
+        {
+            isEnhancedTurning = true;
+            enhancedTurnStartTime = Time.time;
+
+            // Double the turn-related parameters
+            lowTurnSpeed *= 2;
+            turnAcceleration *= 2;
+            turnDeceleration *= 2;
+
+            isSKeyPressed = false; // Reset after successful sequence
+        }
+
+        // If time runs out and W is not pressed, reset the flag
+        if (isSKeyPressed && Time.time - sKeyPressTime > maxTimeBetweenSAndW)
+        {
+            isSKeyPressed = false;
+        }
+
+        if (isEnhancedTurning)
+        {
+            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 1.5f)
+            {
+                // Reset the turn-related parameters to their original values
+                lowTurnSpeed /= 2;
+                turnAcceleration /= 2;
+                turnDeceleration /= 2;
+                isEnhancedTurning = false;
+            }
+            else if (turnInput != 0)
+            {
+                // Reset the timer if there is turn input
+                enhancedTurnStartTime = Time.time;
+            }
         }
     }
 
