@@ -303,13 +303,13 @@ public class CarController : MonoBehaviour
             AdjustAcceleration();
         }
 
-        if (currentSpeed > 100f && Input.GetKeyDown(KeyCode.S))
+        if (!isEnhancedTurning && currentSpeed > 100f && Input.GetKeyDown(KeyCode.S))
         {
             isSKeyPressed = true;
             sKeyPressTime = Time.time;
         }
 
-        if (isSKeyPressed && Time.time - sKeyPressTime <= maxTimeBetweenSAndW && Input.GetKeyDown(KeyCode.W))
+        if (!isEnhancedTurning && isSKeyPressed && Time.time - sKeyPressTime <= maxTimeBetweenSAndW && Input.GetKeyDown(KeyCode.W))
         {
             isEnhancedTurning = true;
             enhancedTurnStartTime = Time.time;
@@ -330,7 +330,7 @@ public class CarController : MonoBehaviour
 
         if (isEnhancedTurning)
         {
-            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 1.5f)
+            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 0.5f)
             {
                 // Reset the turn-related parameters to their original values
                 lowTurnSpeed /= 2;
