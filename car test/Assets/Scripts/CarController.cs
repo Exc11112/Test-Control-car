@@ -64,9 +64,12 @@ public class CarController : MonoBehaviour
     private bool isCollidingWithWall = false;
     private float originalBaseAcceleration;
 
+    public int maxCheckpoints = 5; // Example: 5 checkpoints
+    private float[] checkpointTimes;
+    private int checkpointIndex = 0;
+
     public float timer = 0f;
     public bool isTimerRunning = false;
-    private float checkpointTime;
     private float finishPointTime;
 
     public string checkpointLayer = "checkpoint";
@@ -78,6 +81,7 @@ public class CarController : MonoBehaviour
     private bool isSKeyPressed = false;
     private float sKeyPressTime;
     private float maxTimeBetweenSAndW = 1.0f; // Maximum time allowed between pressing S and W
+    private float totalSpeedAtCheckpoints = 0f; // Stores the sum of speeds at all checkpoints
 
 
     void Start()
@@ -100,6 +104,8 @@ public class CarController : MonoBehaviour
         // Start in neutral for 3 seconds
         isNeutral = true;
         neutralStartTime = Time.time;
+
+        checkpointTimes = new float[maxCheckpoints];
     }
 
     void Update()
@@ -402,19 +408,35 @@ public class CarController : MonoBehaviour
             Debug.Log("asd");
             isCollidingWithWall = true;
         }
+
         // Check if the car hits a checkpoint
-        if (collision.gameObject.layer == LayerMask.NameToLayer("checkpoint"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer))
         {
-            checkpointTime = timer;
-            Debug.Log("Checkpoint Time: " + checkpointTime);
-            DeactivateObjectsInLayer(checkpointLayer);
+            if (checkpointIndex < maxCheckpoints)
+            {
+                checkpointTimes[checkpointIndex] = timer;
+                Debug.Log("Checkpoint " + (checkpointIndex + 1) + " Time: " + checkpointTimes[checkpointIndex]);
+
+                float currentSpeedAtCheckpoint = currentSpeed; // Get the current speed at this checkpoint
+                totalSpeedAtCheckpoints += currentSpeedAtCheckpoint; // Add it to the total speed
+                Debug.Log("Speed at Checkpoint " + (checkpointIndex + 1) + ": " + currentSpeedAtCheckpoint + " km/h");
+                Debug.Log("Total Speed after Checkpoint " + (checkpointIndex + 1) + ": " + totalSpeedAtCheckpoints + " km/h");
+
+                DeactivateObject(collision.gameObject); // Deactivate the specific checkpoint
+                checkpointIndex++; // Move to the next checkpoint
+            }
+            else
+            {
+                Debug.LogWarning("All checkpoints have been hit already.");
+            }
         }
 
         // Check if the car hits the finish point
-        if (collision.gameObject.layer == LayerMask.NameToLayer("fpoint"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer))
         {
             finishPointTime = timer;
             Debug.Log("Finish Point Time: " + finishPointTime);
+            Debug.Log("Grand Total Speed at all Checkpoints: " + totalSpeedAtCheckpoints + " km/h");
             isTimerRunning = false; // Stop the timer
             DeactivateObjectsInLayer(fpointLayer);
         }
@@ -441,5 +463,10 @@ public class CarController : MonoBehaviour
                 obj.SetActive(false);
             }
         }
+    }
+
+    private void DeactivateObject(GameObject obj)
+    {
+        obj.SetActive(false);
     }
 }
