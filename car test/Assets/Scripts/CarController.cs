@@ -326,12 +326,14 @@ public class CarController : MonoBehaviour
             AdjustAcceleration();
         }
 
+        // Check if S is pressed and the current speed is above 100 km/h
         if (!isEnhancedTurning && currentSpeed > 100f && Input.GetKeyDown(KeyCode.S))
         {
             isSKeyPressed = true;
             sKeyPressTime = Time.time;
         }
 
+        // Check if W is pressed within the allowed time after S
         if (!isEnhancedTurning && isSKeyPressed && Time.time - sKeyPressTime <= maxTimeBetweenSAndW && Input.GetKeyDown(KeyCode.W))
         {
             isEnhancedTurning = true;
@@ -343,18 +345,21 @@ public class CarController : MonoBehaviour
             turnDeceleration *= 2;
             sphereRB.drag = DiftDrag;
             Debug.Log("Dift");
+
             isSKeyPressed = false; // Reset after successful sequence
         }
 
-        // If time runs out and W is not pressed, reset the flag
+        // Reset the S key flag if W isn't pressed within the allowed time
         if (isSKeyPressed && Time.time - sKeyPressTime > maxTimeBetweenSAndW)
         {
             isSKeyPressed = false;
         }
 
+        // Handle enhanced turning behavior
         if (isEnhancedTurning)
         {
-            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 0.5f)
+            // Check if the enhanced turning has been active for more than 1.5 seconds
+            if (Time.time - enhancedTurnStartTime > 1.5f)
             {
                 // Reset the turn-related parameters to their original values
                 lowTurnSpeed /= 2;
@@ -364,11 +369,11 @@ public class CarController : MonoBehaviour
                 Debug.Log("ground");
                 isEnhancedTurning = false;
             }
-            else if (turnInput != 0)
-            {
-                // Reset the timer if there is turn input
-                enhancedTurnStartTime = Time.time;
-            }
+            //else if (turnInput != 0)
+            //{
+            //    // Reset the timer if there is turn input
+            //    enhancedTurnStartTime = Time.time;
+            //}
         }
     }
 
