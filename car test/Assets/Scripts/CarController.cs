@@ -85,6 +85,10 @@ public class CarController : MonoBehaviour
     private float maxTimeBetweenSAndW = 1.0f; // Maximum time allowed between pressing S and W
     private float totalSpeedAtCheckpoints = 0f; // Stores the sum of speeds at all checkpoints
 
+    public float suspensionStrength = 1000f; // How strong the suspension is
+    public float suspensionDamping = 100f;   // Damping factor to reduce oscillation
+    public float suspensionLength = 0.5f;    // Length of the suspension (distance to ground)
+
 
     void Start()
     {
@@ -276,21 +280,6 @@ public class CarController : MonoBehaviour
             // Adjust drag based on whether the car is grounded
             sphereRB.drag = isCarGrounded ? groundDrag : airDrag;
 
-            //if (isCarGrounded)
-            //{
-            //    // Adjust drag when drifting
-            //    if (Mathf.Abs(turnInput) > 0.1f && Mathf.Abs(currentSpeed) > driftThresholdSpeed)
-            //    {
-            //        // Reduce friction while drifting
-            //        sphereRB.drag = DiftDrag; // ลดแรงเสียดทานในขณะที่ดริฟท์
-            //        Debug.Log("drag=0.5");
-            //    }
-            //    else
-            //    {
-            //        sphereRB.drag = groundDrag;
-            //    }
-            //}
-
             if (!isManual)
             {
                 // Automatic gear shifting logic with time delay
@@ -343,8 +332,9 @@ public class CarController : MonoBehaviour
             lowTurnSpeed *= 2;
             turnAcceleration *= 2;
             turnDeceleration *= 2;
-            sphereRB.drag = DiftDrag;
-            Debug.Log("Dift");
+            sphereRB.drag = groundDrag = 1.5f;
+            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 10000f);
+            Debug.Log(sphereRB.drag);
 
             isSKeyPressed = false; // Reset after successful sequence
         }
@@ -365,8 +355,8 @@ public class CarController : MonoBehaviour
                 lowTurnSpeed /= 2;
                 turnAcceleration /= 2;
                 turnDeceleration /= 2;
-                sphereRB.drag = groundDrag;
-                Debug.Log("ground");
+                sphereRB.drag = groundDrag = 3f;
+                Debug.Log(sphereRB.drag);
                 isEnhancedTurning = false;
             }
             //else if (turnInput != 0)
@@ -384,21 +374,22 @@ public class CarController : MonoBehaviour
             // Apply forward force when grounded
             sphereRB.AddForce(transform.forward * currentSpeed, ForceMode.Acceleration);
 
-            //// Calculate and Apply Centripetal Force when turning
-            //if (turnInput != 0)
-            //{
-            //    //float turnRadius = CalculateTurnRadius(currentSpeed, turnInput);
-            //    float turnRadius = 5000f;
+            // Calculate suspension force
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, -transform.up, out hit, suspensionLength, groundLayer))
+            {
+                // Calculate how much the suspension is compressed
+                float compressionRatio = 1.0f - (hit.distance / suspensionLength);
 
-            //    if (turnRadius > 0.1f) // ตรวจสอบให้แน่ใจว่า turnRadius มีค่าที่ไม่ใกล้ 0
-            //    {
-            //        Vector3 centripetalForce = transform.right * -turnInput * currentSpeed /** currentSpeed / turnRadius*/;
-            //        sphereRB.AddForce(centripetalForce, ForceMode.Acceleration);
-            //    }
+                // Apply suspension force
+                Vector3 suspensionForce = transform.up * compressionRatio * suspensionStrength;
+                sphereRB.AddForce(suspensionForce, ForceMode.Acceleration);
 
-            //    currentSpeed = Mathf.Clamp(currentSpeed, 0, maxFwdSpeed);
-            //    Debug.Log("Turn Radius: " + turnRadius);
-            //}
+                // Apply damping to prevent oscillation
+                Vector3 suspensionVelocity = Vector3.Project(sphereRB.velocity, transform.up);
+                Vector3 dampingForce = -suspensionVelocity * suspensionDamping;
+                sphereRB.AddForce(dampingForce, ForceMode.Acceleration);
+            }
         }
         else
         {
@@ -406,17 +397,6 @@ public class CarController : MonoBehaviour
             sphereRB.AddForce(transform.up * dForce);
         }
     }
-    //private float CalculateTurnRadius(float currentSpeed, float turnInput)
-    //{
-    //    float gravity = 9.81f; // ค่าคงที่แรงโน้มถ่วง
-    //    float turnAngle = Mathf.Lerp(0, Mathf.PI / 2, Mathf.Abs(turnInput)); // ประมาณมุมการเลี้ยว (เป็นเรเดียน)
-
-    //    // คำนวณ turnRadius
-    //    float turnRadius = (currentSpeed * currentSpeed) / (gravity * Mathf.Tan(turnAngle));
-    //    turnRadius = Mathf.Abs(turnRadius); // เอาค่าสัมบูรณ์ของ turnRadius
-    //    turnRadius = Mathf.Max(turnRadius, 0.1f); // ป้องกันการหารด้วย 0 โดยการตั้งค่าต่ำสุดที่ 0.1
-    //    return turnRadius;
-    //}
 
     private void ShiftUp()
     {
