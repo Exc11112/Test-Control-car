@@ -89,6 +89,11 @@ public class CarController : MonoBehaviour
     public float suspensionDamping = 100f;   // Damping factor to reduce oscillation
     public float suspensionLength = 0.5f;    // Length of the suspension (distance to ground)
 
+    public Transform frontLeftWheel;
+    public Transform frontRightWheel;
+    public Transform rearLeftWheel;
+    public Transform rearRightWheel;
+
 
     void Start()
     {
@@ -121,6 +126,12 @@ public class CarController : MonoBehaviour
         {
             isManual = !isManual;
         }
+
+        // Update wheel rotations based on the car's current speed
+        UpdateWheelRotations();
+
+        // Update the turning of the front wheels
+        UpdateFrontWheelTurning();
 
         // Get input for movement and turning
         moveInput = Input.GetAxisRaw("Vertical");
@@ -500,5 +511,32 @@ public class CarController : MonoBehaviour
     private void DeactivateObject(GameObject obj)
     {
         obj.SetActive(false);
+    }
+    private void UpdateWheelRotations()
+    {
+        // Calculate the rotation angle for the wheels based on the current speed
+        float rotationAngle = currentSpeed * Time.deltaTime * 360f / (2 * Mathf.PI * 0.5f); // Assuming wheel radius of 0.5 units
+
+        // Rotate the rear wheels
+        rearLeftWheel.Rotate(Vector3.right, rotationAngle);
+        rearRightWheel.Rotate(Vector3.right, rotationAngle);
+
+        // Rotate the front wheels (before applying turn)
+        frontLeftWheel.Rotate(Vector3.right, rotationAngle);
+        frontRightWheel.Rotate(Vector3.right, rotationAngle);
+    }
+
+    private void UpdateFrontWheelTurning()
+    {
+        // Calculate the desired turning angle based on the current turn input
+        float turnAngle = turnInput * turnSpeed;
+
+        // Reset the Y-axis rotation before applying the turn to prevent continuous rotation
+        frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x, 0, 0);
+        frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, 0, 0);
+
+        // Rotate the front wheels along the Y-axis for turning, while preserving their rotation
+        frontLeftWheel.localRotation *= Quaternion.Euler(0, turnAngle, 0);
+        frontRightWheel.localRotation *= Quaternion.Euler(0, turnAngle, 0);
     }
 }
