@@ -251,6 +251,7 @@ public class CarController : MonoBehaviour
                 currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
                 currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
                 currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
+                currentSpeed -= currentSpeed * 0.5f * Time.deltaTime;
             }
             else
             {
@@ -517,13 +518,17 @@ public class CarController : MonoBehaviour
         // Calculate the rotation angle for the wheels based on the current speed
         float rotationAngle = currentSpeed * Time.deltaTime * 360f / (2 * Mathf.PI * 0.5f); // Assuming wheel radius of 0.5 units
 
-        // Rotate the rear wheels
+        // Rotate the rear wheels (no turning, just rotation)
         rearLeftWheel.Rotate(Vector3.right, rotationAngle);
         rearRightWheel.Rotate(Vector3.right, rotationAngle);
 
-        // Rotate the front wheels (before applying turn)
-        frontLeftWheel.Rotate(Vector3.right, rotationAngle);
-        frontRightWheel.Rotate(Vector3.right, rotationAngle);
+        // Store the current rotation of the front wheels
+        Quaternion leftRotation = frontLeftWheel.localRotation;
+        Quaternion rightRotation = frontRightWheel.localRotation;
+
+        // Rotate the front wheels for spinning (without affecting Y-axis rotation)
+        frontLeftWheel.localRotation = leftRotation * Quaternion.Euler(rotationAngle, 0, 0);
+        frontRightWheel.localRotation = rightRotation * Quaternion.Euler(rotationAngle, 0, 0);
     }
 
     private void UpdateFrontWheelTurning()
@@ -531,12 +536,12 @@ public class CarController : MonoBehaviour
         // Calculate the desired turning angle based on the current turn input
         float turnAngle = turnInput * turnSpeed;
 
-        // Reset the Y-axis rotation before applying the turn to prevent continuous rotation
-        frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x, 0, 0);
-        frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, 0, 0);
+        // Store the current rotation of the front wheels
+        Quaternion leftRotation = frontLeftWheel.localRotation;
+        Quaternion rightRotation = frontRightWheel.localRotation;
 
-        // Rotate the front wheels along the Y-axis for turning, while preserving their rotation
-        frontLeftWheel.localRotation *= Quaternion.Euler(0, turnAngle, 0);
-        frontRightWheel.localRotation *= Quaternion.Euler(0, turnAngle, 0);
+        // Apply the turn to the front wheels (preserving the X-axis rotation)
+        frontLeftWheel.localRotation = Quaternion.Euler(leftRotation.eulerAngles.x, turnAngle, 0);
+        frontRightWheel.localRotation = Quaternion.Euler(rightRotation.eulerAngles.x, turnAngle, 0);
     }
 }
