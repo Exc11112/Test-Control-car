@@ -251,7 +251,7 @@ public class CarController : MonoBehaviour
                 currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
                 currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
                 currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
-                currentSpeed -= currentSpeed* 0.2f * Time.deltaTime;
+                currentSpeed -= currentSpeed * 0.5f * Time.deltaTime;
             }
             else
             {
@@ -343,17 +343,15 @@ public class CarController : MonoBehaviour
             // Double the turn-related parameters
             lowTurnSpeed *= 2;
             turnAcceleration *= 2;
-            //currentTurnSpeed *= 2;
-            //turnDeceleration *= 2;
-            sphereRB.drag = groundDrag = 2f;
-            //currentSpeed -= currentSpeed * 1f * Time.deltaTime;
-            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 700f);
+            turnDeceleration *= 2;
+            sphereRB.drag = groundDrag = 1.5f;
+            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 10000f);
             Debug.Log(sphereRB.drag);
 
             isSKeyPressed = false; // Reset after successful sequence
         }
 
-        // If time runs out and W is not pressed, reset the flag
+        // Reset the S key flag if W isn't pressed within the allowed time
         if (isSKeyPressed && Time.time - sKeyPressTime > maxTimeBetweenSAndW)
         {
             isSKeyPressed = false;
@@ -363,22 +361,21 @@ public class CarController : MonoBehaviour
         if (isEnhancedTurning)
         {
             // Check if the enhanced turning has been active for more than 1.5 seconds
-            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 0.5f)
+            if (Time.time - enhancedTurnStartTime > 1.5f)
             {
                 // Reset the turn-related parameters to their original values
                 lowTurnSpeed /= 2;
                 turnAcceleration /= 2;
-                //currentTurnSpeed /= 2;
-                //turnDeceleration /= 2;
+                turnDeceleration /= 2;
                 sphereRB.drag = groundDrag = 3f;
                 Debug.Log(sphereRB.drag);
                 isEnhancedTurning = false;
             }
-            else if (turnInput != 0)
-            {
-                // Reset the timer if there is turn input
-                enhancedTurnStartTime = Time.time;
-            }
+            //else if (turnInput != 0)
+            //{
+            //    // Reset the timer if there is turn input
+            //    enhancedTurnStartTime = Time.time;
+            //}
         }
     }
 
