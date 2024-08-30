@@ -99,10 +99,13 @@ public class CarController2 : MonoBehaviour
     public Transform rearLeftWheel;
     public Transform rearRightWheel;
 
+    // New public steer angle variable
+    public float steerAngle;
+
     void Start()
     {
         carRigidbody = GetComponent<Rigidbody>();
-        carRigidbody.centerOfMass = new Vector3(0, -0.5f, 0); // ª√—∫®ÿ¥»Ÿπ¬Ï∂Ë«ß¢Õß√∂
+        carRigidbody.centerOfMass = new Vector3(0, -0.5f, 0); // Adjust car's center of mass
         currentSpeed = 0f;
         currentTurnSpeed = 0f;
         currentGear = 0;
@@ -301,36 +304,24 @@ public class CarController2 : MonoBehaviour
             sKeyPressTime = Time.time;
         }
 
-        if (!isEnhancedTurning && isSKeyPressed && Time.time - sKeyPressTime <= maxTimeBetweenSAndW && Input.GetKeyDown(KeyCode.W))
+        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
         {
             isEnhancedTurning = true;
             enhancedTurnStartTime = Time.time;
-
-            lowTurnSpeed *= 2;
-            turnAcceleration *= 2;
-            carRigidbody.drag = groundDrag = 2f;
-            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 700f);
-
-            isSKeyPressed = false;
-        }
-
-        if (isSKeyPressed && Time.time - sKeyPressTime > maxTimeBetweenSAndW)
-        {
             isSKeyPressed = false;
         }
 
         if (isEnhancedTurning)
         {
-            if (turnInput == 0 && Time.time - enhancedTurnStartTime > 0.5f)
+            if (Time.time - enhancedTurnStartTime < 2f)
             {
-                lowTurnSpeed /= 2;
-                turnAcceleration /= 2;
-                carRigidbody.drag = groundDrag = 3f;
-                isEnhancedTurning = false;
+                turnSpeed *= 1.2f;
+                currentAcceleration *= 1.2f;
             }
-            else if (turnInput != 0)
+            else
             {
-                enhancedTurnStartTime = Time.time;
+                isEnhancedTurning = false;
+                AdjustAcceleration();
             }
         }
     }
@@ -339,6 +330,27 @@ public class CarController2 : MonoBehaviour
     {
         if (isCarGrounded)
         {
+            // Rear-wheel drive: Apply motor torque to the rear wheels
+            rearLeftWheelCollider.motorTorque = moveInput * currentAcceleration;
+            rearRightWheelCollider.motorTorque = moveInput * currentAcceleration;
+
+            // Apply braking force to rear wheels
+            if (moveInput < 0)
+            {
+                rearLeftWheelCollider.brakeTorque = brakeForce;
+                rearRightWheelCollider.brakeTorque = brakeForce;
+            }
+            else
+            {
+                rearLeftWheelCollider.brakeTorque = 0;
+                rearRightWheelCollider.brakeTorque = 0;
+            }
+
+            // Apply the steer angle to the front wheels (manual adjustment via Inspector)
+            frontLeftWheelCollider.steerAngle = steerAngle;
+            frontRightWheelCollider.steerAngle = steerAngle;
+
+            // Apply forward force to the car based on the rear-wheel drive
             carRigidbody.AddForce(transform.forward * currentSpeed, ForceMode.Acceleration);
         }
         else
@@ -347,110 +359,73 @@ public class CarController2 : MonoBehaviour
         }
     }
 
+    private void UpdateWheelRotations()
+    {
+        float rotationAngle = currentSpeed * Time.deltaTime * 360f / (2 * Mathf.PI * 0.5f);
+
+        // Rotate rear wheels (which are driven by the motor)
+        rearLeftWheel.Rotate(Vector3.right, rotationAngle);
+        rearRightWheel.Rotate(Vector3.right, rotationAngle);
+
+        // Rotate front wheels to simulate their movement
+        frontLeftWheel.Rotate(Vector3.right, rotationAngle);
+        frontRightWheel.Rotate(Vector3.right, rotationAngle);
+    }
+
+    private void UpdateFrontWheelTurning()
+    {
+        // Adjust front wheels' turning angle based on steerAngle set in the Inspector
+        frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x, steerAngle, 0);
+        frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, steerAngle, 0);
+    }
+
+    private void AdjustAcceleration()
+    {
+        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+    }
+
     private void ShiftUp()
     {
         currentGear++;
         lastShiftTime = Time.time;
-        AdjustAcceleration();
-        currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
     }
 
     private void ShiftDown()
     {
         currentGear--;
         lastShiftTime = Time.time;
-        AdjustAcceleration();
-        currentRPM = Mathf.Clamp(currentRPM * gearRatios[currentGear], minRPM, maxRPM);
     }
 
-    private void AdjustAcceleration()
-    {
-        if (isCollidingWithWall)
-        {
-            currentSpeed = Mathf.Max(5f, currentSpeed - Time.deltaTime * 50f);
-            moveInput = 0f;
-        }
-
-        currentAcceleration = baseAcceleration * gearRatios[currentGear] * rpmDeceleration[currentGear];
-    }
-
-    public void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("wall"))
         {
             isCollidingWithWall = true;
+            baseAcceleration = 5f;
         }
-
-        if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer))
+        else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
         {
-            if (checkpointIndex < maxCheckpoints)
-            {
-                checkpointTimes[checkpointIndex] = timer;
-                float currentSpeedAtCheckpoint = currentSpeed;
-                totalSpeedAtCheckpoints += currentSpeedAtCheckpoint;
-
-                DeactivateObject(collision.gameObject);
-                checkpointIndex++;
-            }
+            float timeAtCheckpoint = timer;
+            checkpointTimes[checkpointIndex] = timeAtCheckpoint;
+            totalSpeedAtCheckpoints += currentSpeed;
+            checkpointIndex = (checkpointIndex + 1) % maxCheckpoints;
         }
-
-        if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer))
+        else if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer) && isTimerRunning)
         {
             finishPointTime = timer;
             isTimerRunning = false;
-            DeactivateObjectsInLayer(fpointLayer);
+            float grandTotalSpeed = totalSpeedAtCheckpoints;
+            Debug.Log("Grand total speed at checkpoints: " + grandTotalSpeed);
+            Debug.Log("Total time to reach finish point: " + finishPointTime);
         }
     }
 
-    public void OnCollisionExit(Collision collision)
+    void OnCollisionExit(Collision collision)
     {
         if (collision.gameObject.CompareTag("wall"))
         {
             isCollidingWithWall = false;
+            baseAcceleration = originalBaseAcceleration;
         }
-    }
-
-    private void DeactivateObjectsInLayer(string layerName)
-    {
-        int layer = LayerMask.NameToLayer(layerName);
-        GameObject[] objectsInLayer = FindObjectsOfType<GameObject>();
-
-        foreach (GameObject obj in objectsInLayer)
-        {
-            if (obj.layer == layer)
-            {
-                obj.SetActive(false);
-            }
-        }
-    }
-
-    private void DeactivateObject(GameObject obj)
-    {
-        obj.SetActive(false);
-    }
-
-    private void UpdateWheelRotations()
-    {
-        float rotationAngle = currentSpeed * Time.deltaTime * 360f / (2 * Mathf.PI * 0.5f);
-
-        rearLeftWheel.Rotate(Vector3.right, rotationAngle);
-        rearRightWheel.Rotate(Vector3.right, rotationAngle);
-
-        Quaternion leftRotation = frontLeftWheel.localRotation;
-        Quaternion rightRotation = frontRightWheel.localRotation;
-
-        frontLeftWheel.localRotation = leftRotation * Quaternion.Euler(rotationAngle, 0, 0);
-        frontRightWheel.localRotation = rightRotation * Quaternion.Euler(rotationAngle, 0, 0);
-    }
-
-    private void UpdateFrontWheelTurning()
-    {
-        float turnAngle = turnInput * turnSpeed;
-
-        Quaternion leftRotation = frontLeftWheel.localRotation;
-        Quaternion rightRotation = frontRightWheel.localRotation;
-
-        frontLeftWheel.localRotation = Quaternion.Euler(leftRotation.eulerAngles.x, turnAngle, 0);
-        frontRightWheel.localRotation = Quaternion.Euler(rightRotation.eulerAngles.x, turnAngle, 0);
     }
 }

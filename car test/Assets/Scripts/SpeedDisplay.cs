@@ -5,7 +5,7 @@ public class SpeedDisplay : MonoBehaviour
 {
     public Rigidbody target;
     public float maxSpeed = 0.0f; // The maximum speed of the target ** IN KM/H **
-    public CarController car;
+    public CarController3 car;
 
     [Header("UI")]
     public Text speedLabel; // The label that displays the speed
@@ -24,12 +24,12 @@ public class SpeedDisplay : MonoBehaviour
             speedLabel.text = Mathf.FloorToInt(speed) + " km/h";
 
         if (rpmLabel != null && car != null)
-            rpmLabel.text = Mathf.FloorToInt(car.currentRPM) + " RPM";
+            rpmLabel.text = Mathf.FloorToInt(car.RPM) + " RPM";
 
         if (gearLabel != null && car != null)
             gearLabel.text = "Gear: " + (car.currentGear + 1); // Add 1 to display gears starting from 1
 
-        if (timers != null)
-            timers.text = Mathf.FloorToInt(car.timer) + " sec";
+        //if (timers != null)
+        //    timers.text = Mathf.FloorToInt(car.timer) + " sec";
     }
 }

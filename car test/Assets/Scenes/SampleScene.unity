@@ -1220,7 +1220,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1002083442}
   maxSpeed: 0
-  car: {fileID: 574014187}
+  car: {fileID: 0}
   speedLabel: {fileID: 99959040}
   rpmLabel: {fileID: 1778600146}
   gearLabel: {fileID: 2125921383}
@@ -5080,7 +5080,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1865335241}
   maxSpeed: 0
-  car: {fileID: 688534278}
+  car: {fileID: 0}
   speedLabel: {fileID: 533183720}
   rpmLabel: {fileID: 362938756}
   gearLabel: {fileID: 1197740929}
@@ -8833,7 +8833,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 1865335241}
   maxSpeed: 0
-  car: {fileID: 688534278}
+  car: {fileID: 0}
   speedLabel: {fileID: 975744626}
   rpmLabel: {fileID: 1701228108}
   gearLabel: {fileID: 307651610}
@@ -10234,6 +10234,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3251324209142693365, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_Drag
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3251324209142693365, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_Mass
+      value: 1500
+      objectReference: {fileID: 0}
     - target: {fileID: 6404994835764895986, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.725
@@ -10249,6 +10257,10 @@ PrefabInstance:
     - target: {fileID: 8768679496103357335, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_Name
       value: car (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8768679496103357335, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13496,7 +13508,7 @@ MonoBehaviour:
     FLWheel: {fileID: 880601629}
     RRWheel: {fileID: 825603144}
     RLWheel: {fileID: 1710552960}
-  motorPower: 100
+  motorPower: 20
   brakePower: 50000
   slipAngle: 120
   speed: 0
@@ -13525,7 +13537,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isEngineRunning: 0
+  isEngineRunning: 1
   RPM: 0
   redLine: 6500
   idleRPM: 800
@@ -13533,12 +13545,11 @@ MonoBehaviour:
   gearText: {fileID: 687337303}
   currentGear: 0
   gearRatios:
-  - 3
-  - 2.5
   - 2
   - 1.5
   - 1
   - 0.8
+  - 0.5
   differentialRatio: 4
   hpToRPMCurve:
     serializedVersion: 2
@@ -17813,16 +17824,24 @@ PrefabInstance:
       value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: groundDrag
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: steerAngle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: maxFwdSpeed
-      value: 100
+      value: 280
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: deceleration
-      value: 10
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: baseAcceleration
-      value: 30
+      value: 70
       objectReference: {fileID: 0}
     - target: {fileID: 934150667547119252, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_Radius
@@ -18015,6 +18034,10 @@ PrefabInstance:
     - target: {fileID: 3070808753470286461, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_ConstrainProportionsScale
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3251324209142693365, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_Mass
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 4225869267095115244, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_LocalScale.x
@@ -18214,7 +18237,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8768679496103357335, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8885578870710292867, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_LocalScale.x
@@ -19773,7 +19796,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 5573773878268463212}
   maxSpeed: 0
-  car: {fileID: 688534278}
+  car: {fileID: 0}
   speedLabel: {fileID: 2743300171901878051}
   rpmLabel: {fileID: 5690677561990694953}
   gearLabel: {fileID: 8106248826134935549}
