@@ -222,40 +222,40 @@ public class CarController2 : MonoBehaviour
                 }
             }
 
-            float targetTurnSpeed = defaultTurnSpeed;
+            //float targetTurnSpeed = defaultTurnSpeed;
 
-            if (currentSpeed > lowTurnRadiusAt)
-            {
-                targetTurnSpeed = lowTurnSpeed;
-            }
-            else if (currentSpeed < highTurnRadiusAt)
-            {
-                targetTurnSpeed = highTurnSpeed;
-            }
+            //if (currentSpeed > lowTurnRadiusAt)
+            //{
+            //    targetTurnSpeed = lowTurnSpeed;
+            //}
+            //else if (currentSpeed < highTurnRadiusAt)
+            //{
+            //    targetTurnSpeed = highTurnSpeed;
+            //}
 
-            turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
+            //turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
 
-            if (turnInput != 0)
-            {
-                currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
-                currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
-                currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
-                currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
-                currentSpeed -= currentSpeed * 0.2f * Time.deltaTime;
-            }
-            else
-            {
-                if (currentTurnSpeed > 0)
-                {
-                    currentTurnSpeed -= turnDeceleration * Time.deltaTime;
-                    if (currentTurnSpeed < 0) currentTurnSpeed = 0;
-                }
-                else if (currentTurnSpeed < 0)
-                {
-                    currentTurnSpeed += turnDeceleration * Time.deltaTime;
-                    if (currentTurnSpeed > 0) currentTurnSpeed = 0;
-                }
-            }
+            //if (turnInput != 0)
+            //{
+            //    currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
+            //    currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
+            //    currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
+            //    currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
+            //    currentSpeed -= currentSpeed * 0.2f * Time.deltaTime;
+            //}
+            //else
+            //{
+            //    if (currentTurnSpeed > 0)
+            //    {
+            //        currentTurnSpeed -= turnDeceleration * Time.deltaTime;
+            //        if (currentTurnSpeed < 0) currentTurnSpeed = 0;
+            //    }
+            //    else if (currentTurnSpeed < 0)
+            //    {
+            //        currentTurnSpeed += turnDeceleration * Time.deltaTime;
+            //        if (currentTurnSpeed > 0) currentTurnSpeed = 0;
+            //    }
+            //}
 
             if (isCarGrounded)
             {
@@ -323,7 +323,7 @@ public class CarController2 : MonoBehaviour
         {
             if (Time.time - enhancedTurnStartTime < 2f)
             {
-                turnSpeed *= 1.2f;
+                //turnSpeed *= 1.2f;
                 currentAcceleration *= 1.2f;
             }
             else
@@ -398,17 +398,95 @@ public class CarController2 : MonoBehaviour
         frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x, steerAngle, 0);
         frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, steerAngle, 0);
     }
-    private void HandleTurning()
+    //private void HandleTurning()
+    //{
+    //    // Calculate the steer angle based on input
+    //    steerAngle = maxSteerAngle * turnInput;
+
+    //    // Adjust the rotation of the car based on the front wheel's steer angle
+    //    float turnRadius = 1 / Mathf.Sin(Mathf.Deg2Rad * steerAngle);
+    //    float turnSpeed = (currentSpeed / turnRadius) * Time.deltaTime;
+
+    //    // Apply rotation to the car based on the calculated turn speed
+    //    //transform.Rotate(0, turnSpeed, 0, Space.World);
+
+    //    turnSpeed = Mathf.Clamp(turnSpeed, -turnSpeed, turnSpeed);
+    //    if (turnInput != 0)
+    //    {
+    //        transform.Rotate(0, turnSpeed, 0, Space.World);
+    //    }
+    //    else
+    //    {
+    //        if (turnSpeed > 0)
+    //        {
+    //            turnSpeed -= turnDeceleration * Time.deltaTime;
+    //            if (turnSpeed < 0) turnSpeed = 0;
+    //        }
+    //        else if (turnSpeed < 0)
+    //        {
+    //            turnSpeed += turnDeceleration * Time.deltaTime;
+    //            if (turnSpeed > 0) turnSpeed = 0;
+    //        }
+    //    }
+    //}
+
+    void HandleTurning()
     {
-        // Calculate the steer angle based on input
-        steerAngle = maxSteerAngle * turnInput;
+                    float targetTurnSpeed = defaultTurnSpeed;
 
-        // Adjust the rotation of the car based on the front wheel's steer angle
-        float turnRadius = 1 / Mathf.Sin(Mathf.Deg2Rad * steerAngle);
-        float turnSpeed = (currentSpeed / turnRadius) * Time.deltaTime;
+            if (currentSpeed > lowTurnRadiusAt)
+            {
+                targetTurnSpeed = lowTurnSpeed;
+            }
+            else if (currentSpeed < highTurnRadiusAt)
+            {
+                targetTurnSpeed = highTurnSpeed;
+            }
 
-        // Apply rotation to the car based on the calculated turn speed
-        transform.Rotate(0, turnSpeed, 0, Space.World);
+        // Smoothly adjust turn speed
+        turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
+
+        if (turnInput != 0)
+        {
+            // Adjust RPM based on turn input
+            currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
+            currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
+
+            // Adjust the current turn speed based on input
+            currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
+            currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
+
+            // Simulate speed reduction due to turning
+            currentSpeed -= currentSpeed * 0.2f * Time.deltaTime;
+
+            // Calculate the steer angle for the wheels
+            float steerAngle = maxSteerAngle * (currentTurnSpeed / turnSpeed);
+
+            // Apply the steer angle to the front wheel colliders
+            frontLeftWheelCollider.steerAngle = steerAngle;
+            frontRightWheelCollider.steerAngle = steerAngle;
+        }
+        else
+        {
+            // Decelerate the turn when no input is given
+            if (currentTurnSpeed > 0)
+            {
+                currentTurnSpeed -= turnDeceleration * Time.deltaTime;
+                if (currentTurnSpeed < 0) currentTurnSpeed = 0;
+            }
+            else if (currentTurnSpeed < 0)
+            {
+                currentTurnSpeed += turnDeceleration * Time.deltaTime;
+                if (currentTurnSpeed > 0) currentTurnSpeed = 0;
+            }
+
+            // Calculate the steer angle based on the adjusted turn speed
+            float steerAngle = maxSteerAngle * (currentTurnSpeed / turnSpeed);
+
+            // Apply the steer angle to the front wheel colliders
+            frontLeftWheelCollider.steerAngle = steerAngle;
+            frontRightWheelCollider.steerAngle = steerAngle;
+        }
     }
     private void AdjustAcceleration()
     {
@@ -467,6 +545,7 @@ public class CarController2 : MonoBehaviour
             SetLateralFriction(driftLateralFriction);
             // Increase the steering angle for a drift effect
             steerAngle = driftSteerAngle;
+            Debug.Log("Drift");
         }
         else
         {

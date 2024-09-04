@@ -20251,7 +20251,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: maxSteerAngle
-      value: 30
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: baseAcceleration
@@ -20263,7 +20263,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: turnDeceleration
-      value: 2000
+      value: 900
       objectReference: {fileID: 0}
     - target: {fileID: 625837967480143392, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: gearRatios.Array.data[0]
@@ -20287,7 +20287,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 934150667547119252, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.damper
-      value: 20000
+      value: 30000
       objectReference: {fileID: 0}
     - target: {fileID: 934150667547119252, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.spring
@@ -20363,7 +20363,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2138660572169812849, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.damper
-      value: 20000
+      value: 30000
       objectReference: {fileID: 0}
     - target: {fileID: 2138660572169812849, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.spring
@@ -20509,6 +20509,14 @@ PrefabInstance:
       propertyPath: m_Mass
       value: 1500
       objectReference: {fileID: 0}
+    - target: {fileID: 3251324209142693365, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_Interpolate
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3736736612896394568, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4225869267095115244, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_LocalScale.x
       value: 24.969997
@@ -20551,7 +20559,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5725978049149778208, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.damper
-      value: 20000
+      value: 30000
       objectReference: {fileID: 0}
     - target: {fileID: 5725978049149778208, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.spring
@@ -20639,7 +20647,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6547559048276263017, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.damper
-      value: 20000
+      value: 30000
       objectReference: {fileID: 0}
     - target: {fileID: 6547559048276263017, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       propertyPath: m_SuspensionSpring.spring
