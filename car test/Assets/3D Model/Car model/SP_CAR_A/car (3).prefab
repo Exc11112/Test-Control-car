@@ -1793,99 +1793,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &3689038026177735440
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6519272338067830174}
-  - component: {fileID: 235769713968547805}
-  - component: {fileID: 6004002456500925277}
-  m_Layer: 0
-  m_Name: Main Camera
-  m_TagString: MainCamera
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6519272338067830174
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3689038026177735440}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.7, z: -5.8800054}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 8895353893050836116}
-  m_Father: {fileID: 5966836349343408246}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!20 &235769713968547805
-Camera:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3689038026177735440}
-  m_Enabled: 1
-  serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 1
-  m_GateFitMode: 2
-  m_FOVAxisMode: 0
-  m_Iso: 200
-  m_ShutterSpeed: 0.005
-  m_Aperture: 16
-  m_FocusDistance: 10
-  m_FocalLength: 50
-  m_BladeCount: 5
-  m_Curvature: {x: 2, y: 11}
-  m_BarrelClipping: 0.25
-  m_Anamorphism: 0
-  m_SensorSize: {x: 36, y: 24}
-  m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
-  near clip plane: 0.3
-  far clip plane: 1000
-  field of view: 60
-  orthographic: 0
-  orthographic size: 5
-  m_Depth: -1
-  m_CullingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RenderingPath: -1
-  m_TargetTexture: {fileID: 0}
-  m_TargetDisplay: 0
-  m_TargetEye: 3
-  m_HDR: 1
-  m_AllowMSAA: 1
-  m_AllowDynamicResolution: 0
-  m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
-  m_StereoConvergence: 10
-  m_StereoSeparation: 0.022
---- !u!81 &6004002456500925277
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3689038026177735440}
-  m_Enabled: 1
 --- !u!1 &3789903779699793609
 GameObject:
   m_ObjectHideFlags: 0
@@ -2633,7 +2540,7 @@ RectTransform:
   - {fileID: 5482666951473204153}
   - {fileID: 1660217696677704791}
   - {fileID: 7666291263855192768}
-  m_Father: {fileID: 8895353893050836116}
+  m_Father: {fileID: 5966836349343408246}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2650,7 +2557,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
-  m_Camera: {fileID: 235769713968547805}
+  m_Camera: {fileID: 0}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -2946,13 +2853,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6728146626896200492}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.7, z: -5.8800054}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2624699504936551446}
-  m_Father: {fileID: 6519272338067830174}
+  m_Children: []
+  m_Father: {fileID: 5966836349343408246}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6745484408461364817
 GameObject:
@@ -3692,7 +3598,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6519272338067830174}
+  - {fileID: 2624699504936551446}
+  - {fileID: 8895353893050836116}
   m_Father: {fileID: 2597297106340636670}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8768679496103357335
@@ -3750,7 +3657,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   airDrag: 0.3
   groundDrag: 0
-  driftDrag: 1.5
   driftLateralFriction: 0.5
   normalLateralFriction: 1
   oversteerMultiplier: 1.2
@@ -3758,6 +3664,7 @@ MonoBehaviour:
   maxSteerAngle: 30
   driftSteerAngle: 45
   steerAngle: 0
+  driftSteerAngleMultiplier: 0
   maxFwdSpeed: 100
   maxRevSpeed: 100
   baseAcceleration: 30
@@ -3802,9 +3709,6 @@ MonoBehaviour:
   isTimerRunning: 0
   checkpointLayer: checkpoint
   fpointLayer: fpoint
-  suspensionStrength: 0
-  suspensionDamping: 0
-  suspensionLength: 0
   frontLeftWheelCollider: {fileID: 2138660572169812849}
   frontRightWheelCollider: {fileID: 6547559048276263017}
   rearLeftWheelCollider: {fileID: 934150667547119252}
