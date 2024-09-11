@@ -373,9 +373,12 @@ public class CarController2 : MonoBehaviour
         {
             carRigidbody.AddForce(transform.up * dForce);
         }
+
         if (isDrifting && isCarGrounded)
         {
-            Vector3 driftForce = -transform.right * (currentSpeed * 0.5f);
+            float driftDirection = Input.GetAxis("Horizontal");
+
+            Vector3 driftForce = -transform.right * (driftDirection * currentSpeed * 0.1f);
             carRigidbody.AddForce(driftForce, ForceMode.Acceleration);
         }
     }
