@@ -218,40 +218,6 @@ public class CarController2 : MonoBehaviour
                 }
             }
 
-            //float targetTurnSpeed = defaultTurnSpeed;
-
-            //if (currentSpeed > lowTurnRadiusAt)
-            //{
-            //    targetTurnSpeed = lowTurnSpeed;
-            //}
-            //else if (currentSpeed < highTurnRadiusAt)
-            //{
-            //    targetTurnSpeed = highTurnSpeed;
-            //}
-
-            //turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
-
-            //if (turnInput != 0)
-            //{
-            //    currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
-            //    currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
-            //    currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
-            //    currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
-            //    currentSpeed -= currentSpeed * 0.2f * Time.deltaTime;
-            //}
-            //else
-            //{
-            //    if (currentTurnSpeed > 0)
-            //    {
-            //        currentTurnSpeed -= turnDeceleration * Time.deltaTime;
-            //        if (currentTurnSpeed < 0) currentTurnSpeed = 0;
-            //    }
-            //    else if (currentTurnSpeed < 0)
-            //    {
-            //        currentTurnSpeed += turnDeceleration * Time.deltaTime;
-            //        if (currentTurnSpeed > 0) currentTurnSpeed = 0;
-            //    }
-            //}
 
             if (isCarGrounded)
             {
@@ -402,50 +368,10 @@ public class CarController2 : MonoBehaviour
         frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x, steerAngle, 0);
         frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, steerAngle, 0);
     }
-    //private void HandleTurning()
-    //{
-    //    // Calculate the steer angle based on input
-    //    steerAngle = maxSteerAngle * turnInput;
-
-    //    // Adjust the rotation of the car based on the front wheel's steer angle
-    //    float turnRadius = 1 / Mathf.Sin(Mathf.Deg2Rad * steerAngle);
-    //    float turnSpeed = (currentSpeed / turnRadius) * Time.deltaTime;
-
-    //    // Apply rotation to the car based on the calculated turn speed
-    //    //transform.Rotate(0, turnSpeed, 0, Space.World);
-
-    //    turnSpeed = Mathf.Clamp(turnSpeed, -turnSpeed, turnSpeed);
-    //    if (turnInput != 0)
-    //    {
-    //        transform.Rotate(0, turnSpeed, 0, Space.World);
-    //    }
-    //    else
-    //    {
-    //        if (turnSpeed > 0)
-    //        {
-    //            turnSpeed -= turnDeceleration * Time.deltaTime;
-    //            if (turnSpeed < 0) turnSpeed = 0;
-    //        }
-    //        else if (turnSpeed < 0)
-    //        {
-    //            turnSpeed += turnDeceleration * Time.deltaTime;
-    //            if (turnSpeed > 0) turnSpeed = 0;
-    //        }
-    //    }
-    //}
 
     void HandleTurning()
     {
-                    float targetTurnSpeed = defaultTurnSpeed;
-
-            //if (currentSpeed > lowTurnRadiusAt)
-            //{
-            //    targetTurnSpeed = lowTurnSpeed;
-            //}
-            //else if (currentSpeed < highTurnRadiusAt)
-            //{
-            //    targetTurnSpeed = highTurnSpeed;
-            //}
+        float targetTurnSpeed = defaultTurnSpeed;
 
         // Smoothly adjust turn speed
         turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
@@ -475,12 +401,12 @@ public class CarController2 : MonoBehaviour
             // Decelerate the turn when no input is given
             if (currentTurnSpeed > 0)
             {
-                currentTurnSpeed -= turnDeceleration * Time.deltaTime;
+                currentTurnSpeed -= turnDeceleration;
                 if (currentTurnSpeed < 0) currentTurnSpeed = 0;
             }
             else if (currentTurnSpeed < 0)
             {
-                currentTurnSpeed += turnDeceleration * Time.deltaTime;
+                currentTurnSpeed += turnDeceleration;
                 if (currentTurnSpeed > 0) currentTurnSpeed = 0;
             }
 
@@ -564,7 +490,7 @@ public class CarController2 : MonoBehaviour
         rearRightWheelCollider.sidewaysFriction = normalFriction;
 
         // Reset the steering angle based on input
-        steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 2f);
+        steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
     }
 
     // Apply the adjusted steer angle to the front wheels
