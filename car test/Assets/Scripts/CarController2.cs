@@ -285,24 +285,26 @@ public class CarController2 : MonoBehaviour
         {
             if (Time.time - enhancedTurnStartTime < 2f)
             {
+                isDrifting = true;
                 //turnSpeed *= 1.2f;
-                currentAcceleration *= 1.2f;
+                //currentAcceleration *= 1.2f;
             }
             else
             {
+                isDrifting = false;
                 isEnhancedTurning = false;
                 AdjustAcceleration();
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && currentSpeed > driftThresholdSpeed)
-        {
-            isDrifting = true;
-        }
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            isDrifting = false;
-        }
+        //if (Input.GetKeyDown(KeyCode.Space) && currentSpeed > driftThresholdSpeed)
+        //{
+        //    isDrifting = true;
+        //}
+        //if (Input.GetKeyUp(KeyCode.Space))
+        //{
+        //    isDrifting = false;
+        //}
 
         HandleDrifting();
         HandleOversteerUndersteer();
