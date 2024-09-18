@@ -104,6 +104,9 @@ public class CarController2 : MonoBehaviour
     public Transform rearLeftWheel;
     public Transform rearRightWheel;
 
+    public enum DriveMode { RearWheelDrive, FrontWheelDrive, FourWheelDrive }
+    public DriveMode driveMode; // Selectable in Inspector
+
 
     void Start()
     {
@@ -314,21 +317,33 @@ public class CarController2 : MonoBehaviour
     {
         if (isCarGrounded)
         {
-            // Rear-wheel drive: Apply motor torque to the rear wheels
-            rearLeftWheelCollider.motorTorque = moveInput * currentAcceleration;
-            rearRightWheelCollider.motorTorque = moveInput * currentAcceleration;
+            // Apply motor torque based on selected drive mode
+            switch (driveMode)
+            {
+                case DriveMode.RearWheelDrive:
+                    ApplyRearWheelDrive();
+                    break;
 
-            // Apply braking force to rear wheels
-            if (moveInput < 0)
-            {
-                rearLeftWheelCollider.brakeTorque = brakeForce;
-                rearRightWheelCollider.brakeTorque = brakeForce;
+                case DriveMode.FrontWheelDrive:
+                    ApplyFrontWheelDrive();
+                    break;
+
+                case DriveMode.FourWheelDrive:
+                    ApplyFourWheelDrive();
+                    break;
             }
-            else
-            {
-                rearLeftWheelCollider.brakeTorque = 0;
-                rearRightWheelCollider.brakeTorque = 0;
-            }
+
+            //// Apply braking force to rear wheels
+            //if (moveInput < 0)
+            //{
+            //    rearLeftWheelCollider.brakeTorque = brakeForce;
+            //    rearRightWheelCollider.brakeTorque = brakeForce;
+            //}
+            //else
+            //{
+            //    rearLeftWheelCollider.brakeTorque = 0;
+            //    rearRightWheelCollider.brakeTorque = 0;
+            //}
 
             // Apply the steer angle to the front wheels
             frontLeftWheelCollider.steerAngle = steerAngle;
@@ -493,10 +508,15 @@ public class CarController2 : MonoBehaviour
 
         // Reset the steering angle based on input
         steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
-    }
+            if (Mathf.Abs(steerAngle) < 1f)
+            {
+                steerAngle = 0f;
+            }
 
-    // Apply the adjusted steer angle to the front wheels
-    frontLeftWheelCollider.steerAngle = steerAngle;
+        }
+
+        // Apply the adjusted steer angle to the front wheels
+        frontLeftWheelCollider.steerAngle = steerAngle;
     frontRightWheelCollider.steerAngle = steerAngle;
     }
 
@@ -528,5 +548,30 @@ public class CarController2 : MonoBehaviour
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
         }
+    }
+    // Function for Rear-Wheel Drive (RWD)
+    private void ApplyRearWheelDrive()
+    {
+        rearLeftWheelCollider.motorTorque = moveInput * currentAcceleration;
+        rearRightWheelCollider.motorTorque = moveInput * currentAcceleration;
+    }
+
+    // Function for Front-Wheel Drive (FWD)
+    private void ApplyFrontWheelDrive()
+    {
+        frontLeftWheelCollider.motorTorque = moveInput * currentAcceleration;
+        frontRightWheelCollider.motorTorque = moveInput * currentAcceleration;
+    }
+
+    // Function for Four-Wheel Drive (AWD)
+    private void ApplyFourWheelDrive()
+    {
+        // Apply half of the torque to the front wheels
+        frontLeftWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
+        frontRightWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
+
+        // Apply half of the torque to the rear wheels
+        rearLeftWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
+        rearRightWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
     }
 }

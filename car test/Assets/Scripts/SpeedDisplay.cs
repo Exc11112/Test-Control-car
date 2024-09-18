@@ -21,7 +21,7 @@ public class SpeedDisplay : MonoBehaviour
         speed = target.velocity.magnitude * 3.6f;
 
         if (speedLabel != null)
-            speedLabel.text = Mathf.FloorToInt(speed) + " km/h";
+            speedLabel.text = Mathf.FloorToInt(speed*1.5f) + " km/h";
 
         if (rpmLabel != null && car != null)
             rpmLabel.text = Mathf.FloorToInt(car.currentRPM) + " RPM";
