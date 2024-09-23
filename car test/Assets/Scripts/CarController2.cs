@@ -21,7 +21,7 @@ public class CarController2 : MonoBehaviour
     public float understeerMultiplier = 0.8f; // Multiplier for understeer effect
     public float maxSteerAngle = 30f; // Maximum steering angle for wheels
     public float driftSteerAngle = 45f; // Steering angle during drift
-    private bool isDrifting = false;
+    public bool isDrifting = false;
     public float steerAngle;
     public float driftSteerAngleMultiplier;
 
@@ -271,7 +271,7 @@ public class CarController2 : MonoBehaviour
             AdjustAcceleration();
         }
 
-        if (!isEnhancedTurning && currentSpeed > 100f && Input.GetKeyDown(KeyCode.S))
+        if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.S))
         {
             isSKeyPressed = true;
             sKeyPressTime = Time.time;
