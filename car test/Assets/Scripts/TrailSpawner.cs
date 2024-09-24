@@ -8,18 +8,31 @@ public class TrailSpawner : MonoBehaviour
 
     private bool trailsActive = false;
 
+    private void Start()
+    {
+        StopTrails();
+    }
+
     void Update()
     {
-        // Activate trails when drifting starts
-        if (car.isDrifting && !trailsActive)
+        float turnInputThreshold = 0.1f;  // Small tolerance for turn input
+        float speedThreshold = car.driftThresholdSpeed;
+
+        // Check if car is drifting or turning at a high speed
+        bool isTurningAtSpeed = car.currentSpeed > speedThreshold && Mathf.Abs(car.turnInput) > turnInputThreshold;
+
+        // Activate trails when drifting or when turning at a certain speed
+        if (!trailsActive && (car.isDrifting || isTurningAtSpeed))
         {
+            Debug.Log("on");
             StartTrails();
             trailsActive = true;
         }
 
-        // Deactivate trails when drifting stops
-        if (!car.isDrifting && trailsActive)
+        // Deactivate trails when no longer drifting or turning at high speed
+        else if (trailsActive && (!car.isDrifting && !isTurningAtSpeed))
         {
+            Debug.Log("off");
             StopTrails();
             trailsActive = false;
         }
