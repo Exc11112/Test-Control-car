@@ -5,9 +5,9 @@ using UnityEngine;
 public class CarController2 : MonoBehaviour
 {
     private float moveInput;
-    public float turnInput;
+    private float turnInput;
     private bool isCarGrounded;
-    public float currentSpeed;
+    private float currentSpeed;
     private float currentTurnSpeed;
     public int currentGear { get; private set; }
     public float currentRPM { get; private set; }
