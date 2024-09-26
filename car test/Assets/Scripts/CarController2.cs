@@ -5,9 +5,9 @@ using UnityEngine;
 public class CarController2 : MonoBehaviour
 {
     private float moveInput;
-    private float turnInput;
+    public float turnInput;
     private bool isCarGrounded;
-    private float currentSpeed;
+    public float currentSpeed;
     private float currentTurnSpeed;
     public int currentGear { get; private set; }
     public float currentRPM { get; private set; }
@@ -17,8 +17,8 @@ public class CarController2 : MonoBehaviour
 
     public float driftLateralFriction = 0.5f; // Friction when drifting
     public float normalLateralFriction = 1.0f; // Normal friction for tires
-    public float oversteerMultiplier = 1.2f; // Multiplier for oversteer effect
-    public float understeerMultiplier = 0.8f; // Multiplier for understeer effect
+    //public float oversteerMultiplier = 1.2f; // Multiplier for oversteer effect
+    //public float understeerMultiplier = 0.8f; // Multiplier for understeer effect
     public float maxSteerAngle = 30f; // Maximum steering angle for wheels
     public float driftSteerAngle = 45f; // Steering angle during drift
     public bool isDrifting = false;
@@ -34,10 +34,10 @@ public class CarController2 : MonoBehaviour
 
     public float turnSpeed;
     public float defaultTurnSpeed;
-    public float highTurnSpeed;
-    public float lowTurnSpeed;
-    public float highTurnRadiusAt;
-    public float lowTurnRadiusAt;
+    //public float highTurnSpeed;
+    //public float lowTurnSpeed;
+    //public float highTurnRadiusAt;
+    //public float lowTurnRadiusAt;
     public float driftThresholdSpeed;
 
     public float turnAcceleration;
@@ -61,7 +61,7 @@ public class CarController2 : MonoBehaviour
     private float shiftDelay = 1f;
     private float lastShiftTime;
 
-    public float maxRPMRateIncrease;
+    //public float maxRPMRateIncrease;
 
     private bool isManual = false;
     private bool isNeutral = true;
@@ -300,15 +300,6 @@ public class CarController2 : MonoBehaviour
             }
         }
 
-        //if (Input.GetKeyDown(KeyCode.Space) && currentSpeed > driftThresholdSpeed)
-        //{
-        //    isDrifting = true;
-        //}
-        //if (Input.GetKeyUp(KeyCode.Space))
-        //{
-        //    isDrifting = false;
-        //}
-
         HandleDrifting();
         HandleOversteerUndersteer();
     }
@@ -332,18 +323,6 @@ public class CarController2 : MonoBehaviour
                     ApplyFourWheelDrive();
                     break;
             }
-
-            //// Apply braking force to rear wheels
-            //if (moveInput < 0)
-            //{
-            //    rearLeftWheelCollider.brakeTorque = brakeForce;
-            //    rearRightWheelCollider.brakeTorque = brakeForce;
-            //}
-            //else
-            //{
-            //    rearLeftWheelCollider.brakeTorque = 0;
-            //    rearRightWheelCollider.brakeTorque = 0;
-            //}
 
             // Apply the steer angle to the front wheels
             frontLeftWheelCollider.steerAngle = steerAngle;
@@ -520,23 +499,13 @@ public class CarController2 : MonoBehaviour
     frontRightWheelCollider.steerAngle = steerAngle;
     }
 
-
-    private void SetLateralFriction(float frictionValue)
-    {
-        WheelFrictionCurve sidewaysFriction = frontLeftWheelCollider.sidewaysFriction;
-        sidewaysFriction.stiffness = frictionValue;
-        frontLeftWheelCollider.sidewaysFriction = sidewaysFriction;
-        frontRightWheelCollider.sidewaysFriction = sidewaysFriction;
-        rearLeftWheelCollider.sidewaysFriction = sidewaysFriction;
-        rearRightWheelCollider.sidewaysFriction = sidewaysFriction;
-    }
     private void HandleOversteerUndersteer()
     {
         if (isDrifting)
         {
             // Oversteer: Reduce rear tire friction
             WheelFrictionCurve rearFriction = rearLeftWheelCollider.sidewaysFriction;
-            rearFriction.stiffness *= oversteerMultiplier;
+            rearFriction.stiffness *= driftLateralFriction;
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
         }
