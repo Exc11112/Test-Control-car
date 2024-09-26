@@ -436,7 +436,10 @@ public class CarController2 : MonoBehaviour
         if (collision.gameObject.CompareTag("wall"))
         {
             isCollidingWithWall = true;
-            baseAcceleration = 5f;
+            //baseAcceleration = 5f;
+            //currentSpeed = -10f;
+            //currentRPM = 1000f;
+            //currentGear = 1;
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
         {
