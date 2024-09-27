@@ -365,6 +365,7 @@ public class CarController2 : MonoBehaviour
         frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x, steerAngle, 0);
     }
 
+
     void HandleTurning()
     {
         float targetTurnSpeed = defaultTurnSpeed;
@@ -414,6 +415,7 @@ public class CarController2 : MonoBehaviour
             frontRightWheelCollider.steerAngle = SteerAngle;
         }
     }
+
     private void AdjustAcceleration()
     {
         currentAcceleration = baseAcceleration * gearRatios[currentGear];
@@ -436,10 +438,10 @@ public class CarController2 : MonoBehaviour
         if (collision.gameObject.CompareTag("wall"))
         {
             isCollidingWithWall = true;
-            //baseAcceleration = 5f;
-            //currentSpeed = -10f;
-            //currentRPM = 1000f;
-            //currentGear = 1;
+            baseAcceleration = 5f;
+            currentSpeed = -10f;
+            currentRPM = 1000f;
+            currentGear = 1;
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
         {
@@ -468,28 +470,28 @@ public class CarController2 : MonoBehaviour
     }
     void HandleDrifting()
     {
-    if (isDrifting)
-    {
-        // Reduce lateral friction when drifting
-        WheelFrictionCurve driftFriction = rearLeftWheelCollider.sidewaysFriction;
-        driftFriction.stiffness = driftLateralFriction;
-        rearLeftWheelCollider.sidewaysFriction = driftFriction;
-        rearRightWheelCollider.sidewaysFriction = driftFriction;
+        if (isDrifting)
+        {
+            // Reduce lateral friction when drifting
+            WheelFrictionCurve driftFriction = rearLeftWheelCollider.sidewaysFriction;
+            driftFriction.stiffness = normalLateralFriction = 0f;
+            rearLeftWheelCollider.sidewaysFriction = driftFriction;
+            rearRightWheelCollider.sidewaysFriction = driftFriction;
 
-        // Adjust the steering angle based on the current input
-        float targetSteerAngle = maxSteerAngle * turnInput; // steerInput is between -1 and 1
-        steerAngle = Mathf.Lerp(steerAngle, targetSteerAngle * driftSteerAngleMultiplier, Time.deltaTime * 2f);
-    }
-    else
-    {
-        // Restore normal friction when not drifting
-        WheelFrictionCurve normalFriction = rearLeftWheelCollider.sidewaysFriction;
-        normalFriction.stiffness = normalLateralFriction;
-        rearLeftWheelCollider.sidewaysFriction = normalFriction;
-        rearRightWheelCollider.sidewaysFriction = normalFriction;
+            // Adjust the steering angle based on the current input
+            float targetSteerAngle = maxSteerAngle * turnInput; // steerInput is between -1 and 1
+            steerAngle = Mathf.Lerp(steerAngle, targetSteerAngle * driftSteerAngleMultiplier, Time.deltaTime * 2f);
+        }
+        else
+        {
+            // Restore normal friction when not drifting
+            WheelFrictionCurve normalFriction = rearLeftWheelCollider.sidewaysFriction;
+            normalFriction.stiffness = normalLateralFriction = 2f;
+            rearLeftWheelCollider.sidewaysFriction = normalFriction;
+            rearRightWheelCollider.sidewaysFriction = normalFriction;
 
-        // Reset the steering angle based on input
-        steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
+            // Reset the steering angle based on input
+            steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
             if (Mathf.Abs(steerAngle) < 1f)
             {
                 steerAngle = 0f;
@@ -499,8 +501,9 @@ public class CarController2 : MonoBehaviour
 
         // Apply the adjusted steer angle to the front wheels
         frontLeftWheelCollider.steerAngle = steerAngle;
-    frontRightWheelCollider.steerAngle = steerAngle;
+        frontRightWheelCollider.steerAngle = steerAngle;
     }
+
 
     private void HandleOversteerUndersteer()
     {
@@ -508,7 +511,7 @@ public class CarController2 : MonoBehaviour
         {
             // Oversteer: Reduce rear tire friction
             WheelFrictionCurve rearFriction = rearLeftWheelCollider.sidewaysFriction;
-            rearFriction.stiffness *= driftLateralFriction;
+            rearFriction.stiffness = normalLateralFriction = 0f;
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
         }
@@ -516,9 +519,14 @@ public class CarController2 : MonoBehaviour
         {
             // Reset friction when not drifting
             WheelFrictionCurve rearFriction = rearLeftWheelCollider.sidewaysFriction;
-            rearFriction.stiffness = normalLateralFriction;
+            rearFriction.stiffness = normalLateralFriction = 2f;
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
+            steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
+            if (Mathf.Abs(steerAngle) < 1f)
+            {
+                steerAngle = 0f;
+            }
         }
     }
     // Function for Rear-Wheel Drive (RWD)
