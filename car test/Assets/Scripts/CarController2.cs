@@ -474,7 +474,7 @@ public class CarController2 : MonoBehaviour
         {
             // Reduce lateral friction when drifting
             WheelFrictionCurve driftFriction = rearLeftWheelCollider.sidewaysFriction;
-            driftFriction.stiffness = normalLateralFriction = 0f;
+            driftFriction.stiffness = normalLateralFriction = 0.5f;
             rearLeftWheelCollider.sidewaysFriction = driftFriction;
             rearRightWheelCollider.sidewaysFriction = driftFriction;
 
@@ -514,21 +514,34 @@ public class CarController2 : MonoBehaviour
             rearFriction.stiffness = normalLateralFriction = 0f;
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
+
+            //// Apply force to maintain drift
+            //carRigidbody.AddForce(transform.right * driftForce);
         }
         else
         {
-            // Reset friction when not drifting
+            // Gradually restore rear friction when not drifting
             WheelFrictionCurve rearFriction = rearLeftWheelCollider.sidewaysFriction;
-            rearFriction.stiffness = normalLateralFriction = 2f;
+            rearFriction.stiffness = Mathf.Lerp(rearFriction.stiffness, 2f, Time.deltaTime * 5f);
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
+
+            // Gradually reset steering angle
             steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
+
+            // Dampen the angular velocity and sideways velocity after drifting
+            carRigidbody.angularVelocity = Vector3.Lerp(carRigidbody.angularVelocity, Vector3.zero, Time.deltaTime * 2f);
+            Vector3 sidewaysVelocity = Vector3.Dot(carRigidbody.velocity, transform.right) * transform.right;
+            carRigidbody.velocity -= sidewaysVelocity * Time.deltaTime * 2f;
+
+            // Snap steering back to zero if near center
             if (Mathf.Abs(steerAngle) < 1f)
             {
                 steerAngle = 0f;
             }
         }
     }
+
     // Function for Rear-Wheel Drive (RWD)
     private void ApplyRearWheelDrive()
     {
