@@ -39,6 +39,8 @@ public class CarController2 : MonoBehaviour
     //public float highTurnRadiusAt;
     //public float lowTurnRadiusAt;
     public float driftThresholdSpeed;
+    private float lastTurnInputTime;
+    private float turnResetDelay = 0.5f;
 
     public float turnAcceleration;
     public float turnDeceleration;
@@ -88,7 +90,7 @@ public class CarController2 : MonoBehaviour
     private bool hasStartedTimer = false;
 
     private bool isEnhancedTurning = false;
-    private float enhancedTurnStartTime;
+
     private bool isSKeyPressed = false;
     private float sKeyPressTime;
     private float maxTimeBetweenSAndW = 1.0f;
@@ -277,26 +279,29 @@ public class CarController2 : MonoBehaviour
             sKeyPressTime = Time.time;
         }
 
-        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
+        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W))
         {
             isEnhancedTurning = true;
-            enhancedTurnStartTime = Time.time;
             isSKeyPressed = false;
         }
 
         if (isEnhancedTurning)
         {
-            if (Time.time - enhancedTurnStartTime < 2f)
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
             {
                 isDrifting = true;
+                lastTurnInputTime = Time.time;
                 //turnSpeed *= 1.2f;
                 //currentAcceleration *= 1.2f;
             }
             else
             {
-                isDrifting = false;
-                isEnhancedTurning = false;
-                AdjustAcceleration();
+                if (Time.time - lastTurnInputTime >= turnResetDelay)
+                {
+                    isDrifting = false;
+                    isEnhancedTurning = false;
+                    AdjustAcceleration();
+                }
             }
         }
 
@@ -514,9 +519,6 @@ public class CarController2 : MonoBehaviour
             rearFriction.stiffness = normalLateralFriction = 0f;
             rearLeftWheelCollider.sidewaysFriction = rearFriction;
             rearRightWheelCollider.sidewaysFriction = rearFriction;
-
-            //// Apply force to maintain drift
-            //carRigidbody.AddForce(transform.right * driftForce);
         }
         else
         {
