@@ -279,7 +279,7 @@ public class CarController2 : MonoBehaviour
             sKeyPressTime = Time.time;
         }
 
-        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W))
+        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
         {
             isEnhancedTurning = true;
             isSKeyPressed = false;

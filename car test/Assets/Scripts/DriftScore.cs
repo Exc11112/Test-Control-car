@@ -10,12 +10,15 @@ public class DriftScore : MonoBehaviour
     public CarController2 car;
 
     public Text driftScoreText;  // UI text to display the score
+    public Text countdownText;   // UI text to display the countdown
 
     public string driftstart = "driftstart";
     public string driftend = "driftend";
+    public string wall = "wall";
 
     private bool driftEndDeactivated = false;  // To track if driftend has been deactivated
     private Coroutine driftEndCoroutine = null;  // Coroutine to handle delayed drift end
+    private Coroutine countdownCoroutine = null; // Coroutine for the countdown timer
 
     void Update()
     {
@@ -37,11 +40,15 @@ public class DriftScore : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collision)
     {
         if (collision.gameObject.layer == LayerMask.NameToLayer(driftstart))
         {
-            StartDrifting();
+            // Start a countdown when hitting the driftstart trigger
+            if (countdownCoroutine == null)
+            {
+                countdownCoroutine = StartCoroutine(StartDriftCountdown(3f));  // 3 seconds countdown
+            }
             DeactivateObjectsInLayer(driftstart);
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer(driftend))
@@ -53,15 +60,65 @@ public class DriftScore : MonoBehaviour
         }
     }
 
-    void StartDrifting()
+    void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.layer == LayerMask.NameToLayer(wall))
+        {
+            EndDrifting();
+            DeactivateObjectsInLayer(driftend);
+            driftEndDeactivated = true;  // Mark as deactivated since collision occurred
+            StopDelayedEndDrift();  // Stop the delay if the car collides with driftend
+        }
+    }
+
+    // Coroutine to handle the countdown before drifting begins
+    private IEnumerator StartDriftCountdown(float countdownTime)
+    {
+        float remainingTime = countdownTime;
+
+        while (remainingTime > 0)
+        {
+            countdownText.text = "Drift! (" + Mathf.Ceil(remainingTime).ToString() + ")";
+
+            // If car starts drifting during the countdown, stop the countdown and start drifting
+            if (car.isDrifting)
+            {
+                StartDrifting();
+                yield break;  // Exit the countdown coroutine early
+            }
+
+            yield return new WaitForSeconds(1f);
+            remainingTime--;
+        }
+
+        // Countdown is over, check if car is drifting
         if (car.isDrifting)
         {
-            isDrifting = true;
-            driftStartTime = Time.time;
-            driftEndDeactivated = false;  // Reset the driftend deactivation flag
-            driftEndCoroutine = null;  // Reset the coroutine when drifting starts
+            StartDrifting();
         }
+        else
+        {
+            countdownText.text = "Failed to Drift!";
+            EndDrifting();  // End drift if no drift detected after countdown
+        }
+
+        countdownCoroutine = null;  // Reset the countdown coroutine
+    }
+
+    void StartDrifting()
+    {
+        // Stop the countdown if it's still running
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+        }
+
+        isDrifting = true;
+        driftStartTime = Time.time;
+        driftEndDeactivated = false;  // Reset the driftend deactivation flag
+        driftEndCoroutine = null;  // Reset the coroutine when drifting starts
+        countdownText.text = "";  // Clear countdown text when drifting starts
     }
 
     void EndDrifting()
