@@ -74,7 +74,7 @@ public class CarController2 : MonoBehaviour
     private float gear1Acceleration;
     private float gear1Deceleration;
 
-    private bool isCollidingWithWall = false;
+    //private bool isCollidingWithWall = false;
     private float originalBaseAcceleration;
 
     public int maxCheckpoints = 5;
@@ -442,9 +442,8 @@ public class CarController2 : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("wall"))
         {
-            isCollidingWithWall = true;
-            baseAcceleration = 5f;
-            currentSpeed = -10f;
+            //isCollidingWithWall = true;
+            baseAcceleration = 10f;
             currentRPM = 1000f;
             currentGear = 1;
         }
@@ -469,8 +468,27 @@ public class CarController2 : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("wall"))
         {
-            isCollidingWithWall = false;
+            /*isCollidingWithWall = false*/;
             baseAcceleration = originalBaseAcceleration;
+        }
+    }
+
+    void OnTriggerStay(Collider collision)
+    {
+        // Check if the object collided with has the layer 'wall'
+        if (collision.gameObject.layer == LayerMask.NameToLayer("wall"))
+        {
+            Debug.Log("hit2");
+            // Check if this object's layer is 'ramcheck'
+            if (gameObject.layer == LayerMask.NameToLayer("ramcheck"))
+            {
+                // Apply speed adjustment
+                baseAcceleration = 10f;
+                currentRPM = 1000f;
+                currentGear = 1;
+                currentSpeed = Mathf.Clamp(currentSpeed, 0, maxFwdSpeed) * (-0.2f * Time.deltaTime);
+                Debug.Log("hit");
+            }
         }
     }
     void HandleDrifting()

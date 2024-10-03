@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7764245156710768634}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Road barrier with legs_new2
-  m_TagString: Untagged
+  m_TagString: wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -24,7 +24,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 537916349873508662}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.9157416, z: -0, w: 0.4017679}
+  m_LocalRotation: {x: 0, y: 0.91574323, z: 0, w: 0.401764}
   m_LocalPosition: {x: 713.62, y: -1.05, z: -75.21}
   m_LocalScale: {x: 109.96731, y: 109.96731, z: 109.96731}
   m_ConstrainProportionsScale: 0
@@ -46,6 +46,7 @@ GameObject:
   - component: {fileID: 1449116548203205543}
   - component: {fileID: 3385604043417386347}
   - component: {fileID: 6967199064166549240}
+  - component: {fileID: 8809508767913189949}
   m_Layer: 13
   m_Name: Road_barrier11
   m_TagString: wall
@@ -137,8 +138,35 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.009101934, y: 0.002198976, z: 0.010000003}
-  m_Center: {x: 0.00044903575, y: 0.00109901, z: 9.313225e-10}
+  m_Size: {x: 0.009101934, y: 0.0024069345, z: 0.010000003}
+  m_Center: {x: 0.00044903587, y: 0.0012029569, z: 8.1910134e-10}
+--- !u!54 &8809508767913189949
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3076864482078598411}
+  serializedVersion: 4
+  m_Mass: 0.0000001
+  m_Drag: 0
+  m_AngularDrag: 0
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 126
+  m_CollisionDetection: 0
 --- !u!1 &4692636034567142598
 GameObject:
   m_ObjectHideFlags: 0
@@ -150,7 +178,7 @@ GameObject:
   - component: {fileID: 7096322600536796787}
   - component: {fileID: 1552808982437402033}
   - component: {fileID: 7055214799364498370}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: pCylinder2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -233,7 +261,7 @@ GameObject:
   - component: {fileID: 5799819221119281184}
   - component: {fileID: 3235725734115287818}
   - component: {fileID: 7244985073042416144}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: pCylinder1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
