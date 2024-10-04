@@ -40,7 +40,7 @@ public class CarController2 : MonoBehaviour
     //public float lowTurnRadiusAt;
     public float driftThresholdSpeed;
     private float lastTurnInputTime;
-    private float turnResetDelay = 0.5f;
+    private float turnResetDelay = 0.2f;
 
     public float turnAcceleration;
     public float turnDeceleration;
@@ -373,34 +373,22 @@ public class CarController2 : MonoBehaviour
 
     void HandleTurning()
     {
-        float targetTurnSpeed = defaultTurnSpeed;
+        float targetTurnSpeed = isDrifting ? defaultTurnSpeed * driftSteerAngleMultiplier : defaultTurnSpeed;
 
         // Smoothly adjust turn speed
         turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
 
         if (turnInput != 0)
         {
-            // Adjust RPM based on turn input
-            currentRPM -= rpmDeceleration[0] * Time.deltaTime * 10000f;
-            currentRPM = Mathf.Clamp(currentRPM, 0, maxRPM);
-
-            // Adjust the current turn speed based on input
             currentTurnSpeed += turnInput * turnAcceleration * Time.deltaTime;
             currentTurnSpeed = Mathf.Clamp(currentTurnSpeed, -turnSpeed, turnSpeed);
 
-            // Simulate speed reduction due to turning
-            currentSpeed -= currentSpeed * 0.2f * Time.deltaTime;
-
-            // Calculate the steer angle for the wheels
             float SteerAngle = steerAngle * currentTurnSpeed / turnSpeed;
-
-            // Apply the steer angle to the front wheel colliders
             frontLeftWheelCollider.steerAngle = SteerAngle;
             frontRightWheelCollider.steerAngle = SteerAngle;
         }
         else
         {
-            // Decelerate the turn when no input is given
             if (currentTurnSpeed > 0)
             {
                 currentTurnSpeed -= turnDeceleration;
@@ -412,14 +400,12 @@ public class CarController2 : MonoBehaviour
                 if (currentTurnSpeed > 0) currentTurnSpeed = 0;
             }
 
-            // Calculate the steer angle based on the adjusted turn speed
             float SteerAngle = steerAngle * currentTurnSpeed / turnSpeed;
-
-            // Apply the steer angle to the front wheel colliders
             frontLeftWheelCollider.steerAngle = SteerAngle;
             frontRightWheelCollider.steerAngle = SteerAngle;
         }
     }
+
 
     private void AdjustAcceleration()
     {
