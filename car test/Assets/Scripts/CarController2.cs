@@ -129,6 +129,7 @@ public class CarController2 : MonoBehaviour
         neutralStartTime = Time.time;
 
         checkpointTimes = new float[maxCheckpoints];
+        currentAcceleration = baseAcceleration * gearRatios[currentGear];
     }
 
     void Update()
@@ -307,6 +308,7 @@ public class CarController2 : MonoBehaviour
 
         HandleDrifting();
         HandleOversteerUndersteer();
+        AdjustAcceleration();
     }
 
     private void FixedUpdate()
@@ -409,74 +411,78 @@ public class CarController2 : MonoBehaviour
 
     private void AdjustAcceleration()
     {
-        currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        currentAcceleration = baseAcceleration * gearRatios[currentGear] * rpmDeceleration[currentGear];
     }
 
     private void ShiftUp()
     {
         currentGear++;
         lastShiftTime = Time.time;
+        AdjustAcceleration();
+        currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
     }
 
     private void ShiftDown()
     {
         currentGear--;
         lastShiftTime = Time.time;
+        AdjustAcceleration();
+        currentRPM = Mathf.Clamp(currentRPM * gearRatios[currentGear], minRPM, maxRPM);
     }
 
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("wall"))
-        {
-            //isCollidingWithWall = true;
-            baseAcceleration = 10f;
-            currentRPM = 1000f;
-            currentGear = 1;
-        }
-        else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
-        {
-            float timeAtCheckpoint = timer;
-            checkpointTimes[checkpointIndex] = timeAtCheckpoint;
-            totalSpeedAtCheckpoints += currentSpeed;
-            checkpointIndex = (checkpointIndex + 1) % maxCheckpoints;
-        }
-        else if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer) && isTimerRunning)
-        {
-            finishPointTime = timer;
-            isTimerRunning = false;
-            float grandTotalSpeed = totalSpeedAtCheckpoints;
-            Debug.Log("Grand total speed at checkpoints: " + grandTotalSpeed);
-            Debug.Log("Total time to reach finish point: " + finishPointTime);
-        }
-    }
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.CompareTag("wall"))
+    //    {
+    //        //isCollidingWithWall = true;
+    //        baseAcceleration = 10f;
+    //        currentRPM = 1000f;
+    //        currentGear = 1;
+    //    }
+    //    //else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
+    //    //{
+    //    //    float timeAtCheckpoint = timer;
+    //    //    checkpointTimes[checkpointIndex] = timeAtCheckpoint;
+    //    //    totalSpeedAtCheckpoints += currentSpeed;
+    //    //    checkpointIndex = (checkpointIndex + 1) % maxCheckpoints;
+    //    //}
+    //    //else if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer) && isTimerRunning)
+    //    //{
+    //    //    finishPointTime = timer;
+    //    //    isTimerRunning = false;
+    //    //    float grandTotalSpeed = totalSpeedAtCheckpoints;
+    //    //    Debug.Log("Grand total speed at checkpoints: " + grandTotalSpeed);
+    //    //    Debug.Log("Total time to reach finish point: " + finishPointTime);
+    //    //}
+    //}
 
-    void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("wall"))
-        {
-            /*isCollidingWithWall = false*/;
-            baseAcceleration = originalBaseAcceleration;
-        }
-    }
+    //void OnCollisionExit(Collision collision)
+    //{
+    //    if (collision.gameObject.CompareTag("wall"))
+    //    {
+    //        /*isCollidingWithWall = false*/;
+    //        baseAcceleration = originalBaseAcceleration;
+    //    }
+    //}
 
-    void OnTriggerStay(Collider collision)
-    {
-        // Check if the object collided with has the layer 'wall'
-        if (collision.gameObject.layer == LayerMask.NameToLayer("wall"))
-        {
-            Debug.Log("hit2");
-            // Check if this object's layer is 'ramcheck'
-            if (gameObject.layer == LayerMask.NameToLayer("ramcheck"))
-            {
-                // Apply speed adjustment
-                baseAcceleration = 10f;
-                currentRPM = 1000f;
-                currentGear = 1;
-                currentSpeed = Mathf.Clamp(currentSpeed, 0, maxFwdSpeed) * (-0.2f * Time.deltaTime);
-                Debug.Log("hit");
-            }
-        }
-    }
+    //void OnTriggerStay(Collider collision)
+    //{
+    //    // Check if the object collided with has the layer 'wall'
+    //    if (collision.gameObject.layer == LayerMask.NameToLayer("wall"))
+    //    {
+    //        Debug.Log("hit2");
+    //        // Check if this object's layer is 'ramcheck'
+    //        if (gameObject.layer == LayerMask.NameToLayer("ramcheck"))
+    //        {
+    //            // Apply speed adjustment
+    //            baseAcceleration = 10f;
+    //            currentRPM = 1000f;
+    //            currentGear = 1;
+    //            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxFwdSpeed) * (-0.2f * Time.deltaTime);
+    //            Debug.Log("hit");
+    //        }
+    //    }
+    //}
     void HandleDrifting()
     {
         if (isDrifting)

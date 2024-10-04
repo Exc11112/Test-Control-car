@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SwitchParth : MonoBehaviour
 {
-    public string carLayer = "car";
+    public string carLayer = "Car";
     public string switch1Layer = "switch1";
     public string switch2Layer = "switch2";
     public string swap1Layer = "swap1";
