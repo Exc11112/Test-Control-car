@@ -1,5 +1,5 @@
+using UnityEngine.SceneManagement;
 using UnityEngine;
-using UnityEngine.SceneManagement; // For resetting the scene
 
 public class CheckpointSystem : MonoBehaviour
 {
@@ -11,9 +11,12 @@ public class CheckpointSystem : MonoBehaviour
     private float totalSpeedAtCheckpoints = 0f;
     private float timer = 0f;
     private int checkpointIndex = 0;
+    private int currentLap = 1;
     private bool isTimerRunning = false;
     private bool hasReachedCheckpoint = false;
     public CarController2 cars;
+    public SwitchParth sp1;
+    public SwitchParth sp2;
 
     private void Start()
     {
@@ -22,7 +25,6 @@ public class CheckpointSystem : MonoBehaviour
 
     private void Update()
     {
-        // Start the timer if car is moving (optional condition)
         if (isTimerRunning)
         {
             timer += Time.deltaTime;
@@ -31,52 +33,71 @@ public class CheckpointSystem : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // Check if the car hits any checkpoint
         if (checkpointIndex < checkpointLayers.Length && other.gameObject.layer == LayerMask.NameToLayer(checkpointLayers[checkpointIndex]))
         {
-            Debug.Log("Car hit checkpoint: " + checkpointLayers[checkpointIndex]);
-
-            // Collect the car's speed at this checkpoint
-            float currentSpeed = cars.currentSpeed; // Assuming speed is in km/h
+            float currentSpeed = cars.currentSpeed;
             checkpointSpeeds[checkpointIndex] = currentSpeed;
             totalSpeedAtCheckpoints += currentSpeed;
 
             Debug.Log("Checkpoint " + (checkpointIndex + 1) + " speed: " + currentSpeed + " km/h");
             Debug.Log("Total speed so far: " + totalSpeedAtCheckpoints);
 
-            // Deactivate the checkpoint after collecting speed
             other.gameObject.SetActive(false);
-
-            // Move to the next checkpoint
             checkpointIndex++;
             hasReachedCheckpoint = true;
 
-            // Start the timer if it's the first checkpoint
             if (!isTimerRunning)
             {
                 isTimerRunning = true;
             }
         }
-        // Check if the car reaches the finish point (fpoint)
         else if (other.gameObject.layer == LayerMask.NameToLayer(fpointLayer))
         {
-            Debug.Log("Car reached finish point.");
-
             if (hasReachedCheckpoint)
             {
-                // Stop the timer
                 isTimerRunning = false;
 
-                // Display total speed and time
-                Debug.Log("Grand total speed at checkpoints: " + totalSpeedAtCheckpoints);
-                Debug.Log("Total time to reach finish point: " + timer + " seconds");
+                if (currentLap == 1)
+                {
+                    // Prepare for Lap 2
+                    ReactivateAllSwitchParthLayers();
+                    ReactivateCheckpoints();
+                    currentLap++;
+                    checkpointIndex = 0;
+                    hasReachedCheckpoint = false;
+                    isTimerRunning = true;
+                    Debug.Log("Starting Lap 2");
+                }
+                else
+                {
+                    // Final lap complete, display total score and time
+                    Debug.Log("Grand total speed at checkpoints: " + totalSpeedAtCheckpoints);
+                    Debug.Log("Total time to reach finish point: " + timer + " seconds");
+                }
             }
             else
             {
-                // Reset the scene if no checkpoints were hit
-                Debug.Log("No checkpoints reached. Resetting scene.");
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             }
         }
+    }
+
+    private void ReactivateCheckpoints()
+    {
+        foreach (string checkpointLayer in checkpointLayers)
+        {
+            GameObject[] checkpoints = GameObject.FindGameObjectsWithTag(checkpointLayer);
+
+            foreach (GameObject checkpoint in checkpoints)
+            {
+                checkpoint.SetActive(true);
+            }
+        }
+    }
+
+    private void ReactivateAllSwitchParthLayers()
+    {
+        sp1.ReactivateDeactivatedLayers();
+        sp2.ReactivateDeactivatedLayers();
     }
 }

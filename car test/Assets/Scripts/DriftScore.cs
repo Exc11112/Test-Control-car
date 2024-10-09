@@ -7,6 +7,7 @@ public class DriftScore : MonoBehaviour
     private bool isDrifting = false;
     private float driftStartTime;
     private float driftScore = 0f;
+    private bool hasPassedDriftStart = false;
     public CarController2 car;
 
     public Text driftScoreText;  // UI text to display the score
@@ -49,6 +50,7 @@ public class DriftScore : MonoBehaviour
             {
                 countdownCoroutine = StartCoroutine(StartDriftCountdown(3f));  // 3 seconds countdown
             }
+            hasPassedDriftStart = true;
             DeactivateObjectsInLayer(driftstart);
         }
         else if (collision.gameObject.layer == LayerMask.NameToLayer(driftend))
@@ -62,14 +64,23 @@ public class DriftScore : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer(wall))
+        if (collision.gameObject.layer == LayerMask.NameToLayer(wall) && hasPassedDriftStart)
         {
-            EndDrifting();
+            // Stop the countdown if it is still running
+            if (countdownCoroutine != null)
+            {
+                StopCoroutine(countdownCoroutine);
+                countdownCoroutine = null;
+                countdownText.text = "";  // Clear the countdown display
+            }
+
+            EndDrifting();  // Immediately end drifting
             DeactivateObjectsInLayer(driftend);
-            driftEndDeactivated = true;  // Mark as deactivated since collision occurred
-            StopDelayedEndDrift();  // Stop the delay if the car collides with driftend
+            driftEndDeactivated = true;
+            StopDelayedEndDrift();  // Stop any delayed drift end coroutine if running
         }
     }
+
 
     // Coroutine to handle the countdown before drifting begins
     private IEnumerator StartDriftCountdown(float countdownTime)
@@ -124,6 +135,7 @@ public class DriftScore : MonoBehaviour
     void EndDrifting()
     {
         isDrifting = false;
+        hasPassedDriftStart = false;
         driftScoreText.text = "Final Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
     }
 
