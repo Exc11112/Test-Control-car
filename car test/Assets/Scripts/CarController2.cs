@@ -109,6 +109,8 @@ public class CarController2 : MonoBehaviour
     public enum DriveMode { RearWheelDrive, FrontWheelDrive, FourWheelDrive }
     public DriveMode driveMode; // Selectable in Inspector
 
+    public Transform frontRayOrigin;
+    public Transform backRayOrigin;
 
     void Start()
     {
@@ -304,6 +306,29 @@ public class CarController2 : MonoBehaviour
                     AdjustAcceleration();
                 }
             }
+        }
+
+        float raycastDistance = 0.5f;
+        LayerMask wallLayer = LayerMask.GetMask("wall");
+
+        Vector3 frontRayDirection = frontRayOrigin.forward;
+        Debug.DrawRay(frontRayOrigin.position, frontRayDirection * raycastDistance, Color.red);
+
+        // Front raycast (forward direction)
+        if (Physics.Raycast(frontRayOrigin.position, frontRayOrigin.forward, out RaycastHit frontHit, raycastDistance, wallLayer))
+        {
+            Debug.Log("Front is hitting a wall!");
+            // Your logic when the front hits a wall
+            baseAcceleration = 10f;
+            currentRPM = 1000f;
+            currentGear = 1;
+        }
+
+        // Back raycast (backward direction)
+        if (Physics.Raycast(backRayOrigin.position, -backRayOrigin.forward, out RaycastHit backHit, raycastDistance, wallLayer))
+        {
+            Debug.Log("Back is hitting a wall!");
+            // Your logic when the back hits a wall
         }
 
         HandleDrifting();
