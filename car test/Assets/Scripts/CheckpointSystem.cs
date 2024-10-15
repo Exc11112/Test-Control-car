@@ -1,5 +1,6 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class CheckpointSystem : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class CheckpointSystem : MonoBehaviour
     public CarController2 cars;
     public SwitchParth sp1;
     public SwitchParth sp2;
-
+    public List<GameObject> checkpoints; // Add this at the top
     private void Start()
     {
         checkpointSpeeds = new float[checkpointLayers.Length];
@@ -84,16 +85,12 @@ public class CheckpointSystem : MonoBehaviour
 
     private void ReactivateCheckpoints()
     {
-        foreach (string checkpointLayer in checkpointLayers)
+        foreach (GameObject checkpoint in checkpoints)
         {
-            GameObject[] checkpoints = GameObject.FindGameObjectsWithTag(checkpointLayer);
-
-            foreach (GameObject checkpoint in checkpoints)
-            {
-                checkpoint.SetActive(true);
-            }
+            checkpoint.SetActive(true);
         }
     }
+
 
     private void ReactivateAllSwitchParthLayers()
     {
