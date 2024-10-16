@@ -13,6 +13,10 @@ public class SpeedDisplay : MonoBehaviour
     public Text gearLabel;  // The label that displays the current gear
     public Text timers;
     public Text tstart;
+    public RectTransform arrow; // The arrow in the speedometer
+
+    public float minSpeedArrowAngle;
+    public float maxSpeedArrowAngle;
 
     private float speed = 0.0f;
     private float tStartnew;
@@ -37,16 +41,20 @@ public class SpeedDisplay : MonoBehaviour
         speed = target.velocity.magnitude * 3.6f;
 
         if (speedLabel != null)
-            speedLabel.text = Mathf.FloorToInt(speed * 1.5f) + " km/h";
+            speedLabel.text = Mathf.FloorToInt(speed * 1.5f) + "";
 
         if (rpmLabel != null && car != null)
-            rpmLabel.text = Mathf.FloorToInt(car.currentRPM) + " RPM";
+            rpmLabel.text = Mathf.FloorToInt(car.currentRPM) + "";
 
         if (gearLabel != null && car != null)
-            gearLabel.text = "Gear: " + (car.currentGear + 1); // Display gears starting from 1
+            gearLabel.text = "" + (car.currentGear + 1); // Display gears starting from 1
 
         if (timers != null)
             timers.text = Mathf.FloorToInt(car.timer) + " sec";
+
+        if (arrow != null)
+            arrow.localEulerAngles =
+                new Vector3(0, 0, Mathf.Lerp(minSpeedArrowAngle, maxSpeedArrowAngle, car.currentRPM / car.maxRPM));
 
         // Update the countdown or display "GO!" text
         if (tstart != null)
