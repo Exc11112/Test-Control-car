@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;  // Required for Coroutines
+using System.Collections;
+using System.Collections.Generic;
 
 public class DriftScore : MonoBehaviour
 {
@@ -13,13 +14,22 @@ public class DriftScore : MonoBehaviour
     public Text driftScoreText;  // UI text to display the score
     public Text countdownText;   // UI text to display the countdown
 
-    public string driftstart = "driftstart";
-    public string driftend = "driftend";
     public string wall = "wall";
 
-    private bool driftEndDeactivated = false;  // To track if driftend has been deactivated
     private Coroutine driftEndCoroutine = null;  // Coroutine to handle delayed drift end
     private Coroutine countdownCoroutine = null; // Coroutine for the countdown timer
+
+    // Class to store drift start and end pairs
+    [System.Serializable]
+    public class DriftPair
+    {
+        public GameObject driftStart;  // The driftstart GameObject
+        public GameObject driftEnd;    // The driftend GameObject
+    }
+
+    public List<DriftPair> driftPairs = new List<DriftPair>(); // List to hold pairs of driftstart and driftend
+
+    private int currentPairIndex = 0;  // Track which pair is active
 
     void Update()
     {
@@ -43,24 +53,40 @@ public class DriftScore : MonoBehaviour
 
     void OnTriggerEnter(Collider collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer(driftstart))
+        // Ensure currentPairIndex is initialized properly and within bounds
+        if (currentPairIndex >= 0 && currentPairIndex < driftPairs.Count)
         {
-            // Start a countdown when hitting the driftstart trigger
-            if (countdownCoroutine == null)
+            GameObject currentDriftStart = driftPairs[currentPairIndex].driftStart;
+            GameObject currentDriftEnd = driftPairs[currentPairIndex].driftEnd;
+
+            // Check if the car hits the current driftstart trigger
+            if (collision.gameObject == currentDriftStart)
             {
-                countdownCoroutine = StartCoroutine(StartDriftCountdown(3f));  // 3 seconds countdown
+                // Start a countdown when hitting the driftstart trigger
+                if (countdownCoroutine == null)
+                {
+                    countdownCoroutine = StartCoroutine(StartDriftCountdown(3f));  // 3 seconds countdown
+                }
+                hasPassedDriftStart = true;
+                currentDriftStart.SetActive(false);  // Deactivate the current drift start
             }
-            hasPassedDriftStart = true;
-            DeactivateObjectsInLayer(driftstart);
-        }
-        else if (collision.gameObject.layer == LayerMask.NameToLayer(driftend))
-        {
-            EndDrifting();
-            DeactivateObjectsInLayer(driftend);
-            driftEndDeactivated = true;  // Mark as deactivated since collision occurred
-            StopDelayedEndDrift();  // Stop the delay if the car collides with driftend
+            // Check if the car hits the current driftend trigger
+            else if (collision.gameObject == currentDriftEnd)
+            {
+                EndDrifting();
+                currentDriftEnd.SetActive(false);  // Deactivate the current drift end
+                StopDelayedEndDrift();  // Stop the delay if the car collides with driftend
+                currentPairIndex++;  // Move to the next drift pair
+
+                // Make sure currentPairIndex doesn't go out of bounds
+                if (currentPairIndex >= driftPairs.Count)
+                {
+                    currentPairIndex = driftPairs.Count - 1; // Prevent out-of-range errors
+                }
+            }
         }
     }
+
 
     void OnCollisionEnter(Collision collision)
     {
@@ -75,12 +101,13 @@ public class DriftScore : MonoBehaviour
             }
 
             EndDrifting();  // Immediately end drifting
-            DeactivateObjectsInLayer(driftend);
-            driftEndDeactivated = true;
+            if (currentPairIndex >= 0 && currentPairIndex < driftPairs.Count)
+            {
+                driftPairs[currentPairIndex].driftEnd.SetActive(false);  // Deactivate the current drift end
+            }
             StopDelayedEndDrift();  // Stop any delayed drift end coroutine if running
         }
     }
-
 
     // Coroutine to handle the countdown before drifting begins
     private IEnumerator StartDriftCountdown(float countdownTime)
@@ -111,6 +138,12 @@ public class DriftScore : MonoBehaviour
         {
             countdownText.text = "Failed to Drift!";
             EndDrifting();  // End drift if no drift detected after countdown
+
+            // Deactivate driftEnd if the car didn't start drifting
+            if (currentPairIndex >= 0 && currentPairIndex < driftPairs.Count)
+            {
+                driftPairs[currentPairIndex].driftEnd.SetActive(false);  // Deactivate the current drift end
+            }
         }
 
         countdownCoroutine = null;  // Reset the countdown coroutine
@@ -127,8 +160,6 @@ public class DriftScore : MonoBehaviour
 
         isDrifting = true;
         driftStartTime = Time.time;
-        driftEndDeactivated = false;  // Reset the driftend deactivation flag
-        driftEndCoroutine = null;  // Reset the coroutine when drifting starts
         countdownText.text = "";  // Clear countdown text when drifting starts
     }
 
@@ -137,20 +168,6 @@ public class DriftScore : MonoBehaviour
         isDrifting = false;
         hasPassedDriftStart = false;
         driftScoreText.text = "Final Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
-    }
-
-    private void DeactivateObjectsInLayer(string layerName)
-    {
-        int layer = LayerMask.NameToLayer(layerName);
-        GameObject[] objectsInLayer = FindObjectsOfType<GameObject>();
-
-        foreach (GameObject obj in objectsInLayer)
-        {
-            if (obj.layer == layer)
-            {
-                obj.SetActive(false);
-            }
-        }
     }
 
     // Coroutine to delay ending the drift
@@ -162,10 +179,9 @@ public class DriftScore : MonoBehaviour
         if (!car.isDrifting)
         {
             EndDrifting();
-            if (!driftEndDeactivated)
+            if (currentPairIndex >= 0 && currentPairIndex < driftPairs.Count)
             {
-                DeactivateObjectsInLayer(driftend);
-                driftEndDeactivated = true;  // Ensure deactivation happens only once
+                driftPairs[currentPairIndex].driftEnd.SetActive(false);  // Ensure deactivation happens only once
             }
         }
 
