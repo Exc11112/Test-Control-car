@@ -319,7 +319,7 @@ public class CarController2 : MonoBehaviour
         {
             Debug.Log("Front is hitting a wall!");
             // Your logic when the front hits a wall
-            baseAcceleration = 10f;
+            //baseAcceleration = 15f;
             currentRPM = 1000f;
             currentGear = 1;
         }
@@ -329,7 +329,7 @@ public class CarController2 : MonoBehaviour
         {
             Debug.Log("Back is hitting a wall!");
             // Your logic when the back hits a wall
-            //baseAcceleration = 10f;
+            //baseAcceleration = 15f;
             //currentRPM = 1000f;
             //currentGear = 1;
         }
