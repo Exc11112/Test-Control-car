@@ -46,7 +46,7 @@ public class WaypointFollower : MonoBehaviour
 
         // Rotate smoothly towards the waypoint
         Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * speed);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, (Time.deltaTime * 0.5f) * speed);
     }
 
     void ReachWaypoint()
