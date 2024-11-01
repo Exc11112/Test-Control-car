@@ -3,69 +3,92 @@ using System.Collections.Generic;
 
 public class AIPathFollower : MonoBehaviour
 {
-    public List<Transform> waypoints;      // Waypoints for path-following
-    public float waypointReachThreshold = 5f; // Distance at which to consider the waypoint reached
-    public float steeringSensitivity = 0.5f; // Sensitivity for turning toward waypoints
-    public float maxSpeed = 150f;           // Max speed the AI can reach
+    public List<Transform> waypoints;
+    public float waypointReachThreshold = 5f;
+    public float steeringSensitivity = 0.5f;
+    public float maxSpeed = 150f;
 
-    public CarController2 carController;   // Reference to CarController2
+    public WheelCollider frontLeftWheel;
+    public WheelCollider frontRightWheel;
+    public WheelCollider rearLeftWheel;
+    public WheelCollider rearRightWheel;
+
     private int currentWaypointIndex = 0;
-
-    private void Start()
-    {
-        // Reference CarController2
-        carController = GetComponent<CarController2>();
-    }
+    public float currentSpeed;
 
     private void Update()
     {
         if (waypoints.Count == 0) return;
 
-        // Get the current waypoint and calculate distance and direction
         Transform targetWaypoint = waypoints[currentWaypointIndex];
         Vector3 directionToWaypoint = (targetWaypoint.position - transform.position).normalized;
         float distanceToWaypoint = Vector3.Distance(transform.position, targetWaypoint.position);
 
-        //// Steer toward the waypoint
-        //SteerTowardsWaypoint(directionToWaypoint);
+        SteerTowardsWaypoint(directionToWaypoint);
+        ControlSpeed(distanceToWaypoint);
 
-        //// Control speed based on distance to waypoint
-        //ControlSpeed(distanceToWaypoint);
-
-        // Check if the waypoint is reached
         if (distanceToWaypoint < waypointReachThreshold)
         {
-            // Move to the next waypoint
             currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Count;
         }
     }
 
-    //    private void SteerTowardsWaypoint(Vector3 directionToWaypoint)
-    //    {
-    //        // Calculate the angle to the waypoint
-    //        float angle = Vector3.SignedAngle(transform.forward, directionToWaypoint, Vector3.up);
+    private void SteerTowardsWaypoint(Vector3 directionToWaypoint)
+    {
+        float angle = Vector3.SignedAngle(transform.forward, directionToWaypoint, Vector3.up);
+        float steeringInput = Mathf.Clamp(angle * steeringSensitivity, -1f, 1f);
 
-    //        // Apply steering based on the angle
-    //        float steeringInput = Mathf.Clamp(angle * steeringSensitivity, -1f, 1f);
-    //        carController.Steer(steeringInput); // Call CarController2’s steering method
-    //    }
+        // Apply steering to front wheels only
+        frontLeftWheel.steerAngle = steeringInput * 30f;
+        frontRightWheel.steerAngle = steeringInput * 30f;
+    }
 
-    //    private void ControlSpeed(float distanceToWaypoint)
-    //    {
-    //        // Set speed control based on distance
-    //        if (distanceToWaypoint < waypointReachThreshold * 1.5f) // Slow down near waypoint
-    //        {
-    //            carController.Accelerate(0.5f); // Adjust to half-throttle near waypoints
-    //        }
-    //        else
-    //        {
-    //            carController.Accelerate(1f); // Full throttle when farther from waypoints
-    //        }
+    private void ControlSpeed(float distanceToWaypoint)
+    {
+        currentSpeed = CalculateCurrentSpeed();
 
-    //        // Ensure max speed limit
-    //        if (carController.CurrentSpeed > maxSpeed)
-    //        {
-    //            carController.Brake(1f); // Apply brakes if speed exceeds limit
-    //        }
-    //    }
+        if (distanceToWaypoint < waypointReachThreshold * 1.5f)
+        {
+            SetMotorTorque(0.5f);
+        }
+        else
+        {
+            SetMotorTorque(1f);
+        }
+
+        if (currentSpeed > maxSpeed)
+        {
+            ApplyBrakes(1f);
+        }
+        else
+        {
+            ApplyBrakes(0f);
+        }
+    }
+
+    private void SetMotorTorque(float input)
+    {
+        float motorTorque = input * 1000f;
+
+        rearLeftWheel.motorTorque = motorTorque;
+        rearRightWheel.motorTorque = motorTorque;
+    }
+
+    private void ApplyBrakes(float brakeForce)
+    {
+        float brakeTorque = brakeForce * 3000f;
+
+        rearLeftWheel.brakeTorque = brakeTorque;
+        rearRightWheel.brakeTorque = brakeTorque;
+        frontLeftWheel.brakeTorque = brakeTorque;
+        frontRightWheel.brakeTorque = brakeTorque;
+    }
+
+    private float CalculateCurrentSpeed()
+    {
+        // Calculate current speed based on rear wheel rotation
+        float leftSpeed = rearLeftWheel.rpm * (rearLeftWheel.radius * 2 * Mathf.PI) / 60;
+        float rightSpeed = rearRightWheel.rpm * (rearRightWheel.radius * 2 * Mathf.PI) / 60;
+        return (leftSpeed + rightSpeed) / 2f;
+    }
 }

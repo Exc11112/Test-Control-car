@@ -6015,7 +6015,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 162337004}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 43af43a4ccad624479c3f10b0d24a134, type: 3}
   m_Name: 
@@ -6028,6 +6028,31 @@ MonoBehaviour:
   speed: 5
   loopPath: 1
   waypointReachThreshold: 0.2
+--- !u!114 &162337006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 162337004}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cdcd356b03993048a9e79d4c9472a01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waypoints:
+  - {fileID: 2134323110}
+  - {fileID: 519857895}
+  - {fileID: 986510680}
+  - {fileID: 1186970224}
+  waypointReachThreshold: 1
+  steeringSensitivity: 100
+  maxSpeed: 100
+  frontLeftWheel: {fileID: 1032938246}
+  frontRightWheel: {fileID: 1991623957}
+  rearLeftWheel: {fileID: 2121186826}
+  rearRightWheel: {fileID: 702012882}
+  currentSpeed: 0
 --- !u!1 &164111194
 GameObject:
   m_ObjectHideFlags: 0
@@ -19805,6 +19830,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8768679496103357335, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
       insertIndex: -1
       addedObject: {fileID: 162337005}
+    - targetCorrespondingSourceObject: {fileID: 8768679496103357335, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 162337006}
   m_SourcePrefab: {fileID: 100100000, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
 --- !u!1 &538668174
 GameObject:
@@ -25791,6 +25819,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 87.447, z: 0}
+--- !u!146 &702012882 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 5725978049149778208, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+  m_PrefabInstance: {fileID: 536490346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &702138689
 GameObject:
   m_ObjectHideFlags: 0
@@ -37940,6 +37973,11 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7206635619496915201, guid: 8152aa90a7b3a714c811b4d49c506830, type: 3}
+--- !u!146 &1032938246 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 2138660572169812849, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+  m_PrefabInstance: {fileID: 536490346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1033532875
 GameObject:
   m_ObjectHideFlags: 0
@@ -74417,6 +74455,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!146 &1991623957 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 6547559048276263017, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+  m_PrefabInstance: {fileID: 536490346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1993692485
 GameObject:
   m_ObjectHideFlags: 0
@@ -78652,6 +78695,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+--- !u!146 &2121186826 stripped
+WheelCollider:
+  m_CorrespondingSourceObject: {fileID: 934150667547119252, guid: 3f80b37f4a23a224b9d33145a43b8838, type: 3}
+  m_PrefabInstance: {fileID: 536490346}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2129125079
 GameObject:
   m_ObjectHideFlags: 0
