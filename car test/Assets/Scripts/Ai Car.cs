@@ -104,7 +104,7 @@ public class AiCar : MonoBehaviour
         // Apply avoidance steering angle if avoiding
         if (avoiding)
         {
-            targetSteerAngle = maxSteerAngle * avoidMultiplier * Time.deltaTime;
+            targetSteerAngle = maxSteerAngle * avoidMultiplier /** Time.deltaTime*/;
             if(currentSpeed > 15) 
             {
                 isBraking = true; // Optionally apply braking when avoiding
