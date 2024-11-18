@@ -30,8 +30,16 @@ public class AiCar : MonoBehaviour
     private bool avoiding = false;
     private float targetSteerAngle = 0;
 
+    public bool isReversing = false;
+    private float reverseTimer = 0f;
+    private float reverseDuration = 2f; // Time to reverse
+    private float stuckSpeedThreshold = 10f; // Speed threshold to detect being stuck
+    private float stuckTimeThreshold = 1.5f; // Time before triggering reverse
+    private float stuckTimer = 0f;
+
     private void Start()
     {
+        isReversing = true;
         GetComponent<Rigidbody>().centerOfMass = centerOfMass;
 
         Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
@@ -49,11 +57,14 @@ public class AiCar : MonoBehaviour
     private void FixedUpdate()
     {
         Sensor();
+        CheckIfStuck();
         ApplySteer();
         Drive();
         CheckWaypointDistance();
         Braking();
         LerpToSteerAngle();
+        Debug.Log("Reversing: " + isReversing + ", Reverse Timer: " + reverseTimer);
+
     }
 
     private void Sensor()
@@ -104,7 +115,7 @@ public class AiCar : MonoBehaviour
         // Apply avoidance steering angle if avoiding
         if (avoiding)
         {
-            targetSteerAngle = maxSteerAngle * avoidMultiplier /** Time.deltaTime*/;
+            targetSteerAngle = maxSteerAngle * avoidMultiplier * (Time.deltaTime * 30f);
             if(currentSpeed > 15) 
             {
                 isBraking = true; // Optionally apply braking when avoiding
@@ -117,7 +128,6 @@ public class AiCar : MonoBehaviour
         }
     }
 
-
     private void ApplySteer()
     {
         if (!avoiding) // Only steer toward the next node if we're not avoiding
@@ -128,18 +138,55 @@ public class AiCar : MonoBehaviour
         }
     }
 
+    private void CheckIfStuck()
+    {
+        if (avoiding && currentSpeed < stuckSpeedThreshold)
+        {
+            // Increment stuck timer if avoiding and speed is low
+            stuckTimer += Time.deltaTime;
+
+            if (stuckTimer > stuckTimeThreshold)
+            {
+                // Trigger reverse
+                isReversing = true;
+                reverseTimer = 0f; // Reset reverse timer
+            }
+        }
+        else
+        {
+            // Reset stuck timer if moving normally
+            stuckTimer = 0f;
+            isReversing = false;
+        }
+    }
 
     private void Drive()
     {
         currentSpeed = 2 * Mathf.PI * wheelFL.radius * wheelFL.rpm * 60 / 1000;
 
-        if (currentSpeed < maxSpeed)
+        if (isReversing)
         {
+            // Apply reverse torque
+            wheelFL.motorTorque = -maxMotorTorque;
+            wheelFR.motorTorque = -maxMotorTorque;
+            reverseTimer += Time.deltaTime;
+
+            // Stop reversing after the duration
+            if (reverseTimer > reverseDuration)
+            {
+                isReversing = false;
+                stuckTimer = 0f; // Reset stuck state
+            }
+        }
+        else if (currentSpeed < maxSpeed)
+        {
+            // Normal driving
             wheelFL.motorTorque = maxMotorTorque;
             wheelFR.motorTorque = maxMotorTorque;
         }
         else
         {
+            // Stop applying torque if at max speed
             wheelFL.motorTorque = 0;
             wheelFR.motorTorque = 0;
         }
@@ -162,17 +209,25 @@ public class AiCar : MonoBehaviour
 
     private void Braking()
     {
-        if (isBraking)
+        if (isReversing)
+        {
+            // Disable braking when reversing
+            wheelRL.brakeTorque = 0;
+            wheelRR.brakeTorque = 0;
+            isBraking = false; // Ensure braking is off
+        }
+        else if (isBraking)
         {
             wheelRL.brakeTorque = maxBrakeTorque;
             wheelRR.brakeTorque = maxBrakeTorque;
         }
-        else 
+        else
         {
             wheelRL.brakeTorque = 0;
             wheelRR.brakeTorque = 0;
         }
     }
+
 
     private void LerpToSteerAngle()
     {
