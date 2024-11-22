@@ -1,11 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static Path;
 
 public class Path : MonoBehaviour
 {
     public Color lineColor;
 
+    [System.Serializable]
+    public class PathNode
+    {
+        public Transform nodeTransform;
+        public List<Transform> nextNodes = new List<Transform>(); // Supports branching paths
+    }
+    public List<PathNode> pathNodes = new List<PathNode>();
     private List<Transform> nodes = new List<Transform>();
 
     void OnDrawGizmos()
@@ -39,6 +47,21 @@ public class Path : MonoBehaviour
 
             Gizmos.DrawLine(previousNode, currentNode);
             Gizmos.DrawWireSphere(currentNode, 0.3f);
+        }
+
+        foreach (var pathNode in pathNodes)
+        {
+            if (pathNode.nodeTransform == null) continue;
+
+            foreach (var nextNode in pathNode.nextNodes)
+            {
+                if (nextNode != null)
+                {
+                    Gizmos.DrawLine(pathNode.nodeTransform.position, nextNode.position);
+                }
+            }
+
+            Gizmos.DrawWireSphere(pathNode.nodeTransform.position, 0.3f);
         }
     }
 }

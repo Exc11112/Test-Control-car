@@ -25,8 +25,8 @@ public class AiCar : MonoBehaviour
     public float frontSideSensorPosition = 0.2f;
     public float frontSensorAngle = 30f;
 
-    private List<Transform> nodes;
-    private int currentNode = 0;
+    private List<Path.PathNode> nodes;
+    private int currentNodeIndex = 0;
     private bool avoiding = false;
     private float targetSteerAngle = 0;
 
@@ -42,16 +42,8 @@ public class AiCar : MonoBehaviour
         isReversing = true;
         GetComponent<Rigidbody>().centerOfMass = centerOfMass;
 
-        Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
-        nodes = new List<Transform>();
-
-        for (int i = 0; i < pathTransforms.Length; i++)
-        {
-            if (pathTransforms[i] != transform)
-            {
-                nodes.Add(pathTransforms[i]);
-            }
-        }
+        Path pathScript = path.GetComponent<Path>();
+        nodes = pathScript.pathNodes; // Load path nodes from the Path script
     }
 
     private void FixedUpdate()
@@ -64,7 +56,6 @@ public class AiCar : MonoBehaviour
         Braking();
         LerpToSteerAngle();
         Debug.Log("Reversing: " + isReversing + ", Reverse Timer: " + reverseTimer);
-
     }
 
     private void Sensor()
@@ -75,20 +66,16 @@ public class AiCar : MonoBehaviour
         avoiding = false;
         LayerMask avoidLayers = LayerMask.GetMask("groundLayer", "checkpoint1", "checkpoint2", "fpoint", "driftend", "driftstart", "switch1", "switch2");
 
-        // Front center sensor
         if (Physics.Raycast(sensorStartPos, transform.forward, out hit, sensorLength))
         {
             if ((avoidLayers.value & (1 << hit.collider.gameObject.layer)) == 0)
             {
                 Debug.DrawLine(sensorStartPos, hit.point);
                 avoiding = true;
-
-                // Decide steer direction based on hit normal
                 avoidMultiplier = hit.normal.x < 0 ? 1.5f : -1.5f;
             }
         }
 
-        // Front right sensor
         Vector3 rightSensorPos = sensorStartPos + transform.right * frontSideSensorPosition;
         if (Physics.Raycast(rightSensorPos, Quaternion.AngleAxis(frontSensorAngle, transform.up) * transform.forward, out hit, sensorLength))
         {
@@ -96,11 +83,10 @@ public class AiCar : MonoBehaviour
             {
                 Debug.DrawLine(rightSensorPos, hit.point);
                 avoiding = true;
-                avoidMultiplier = -1.5f; // steer left if obstacle on the right
+                avoidMultiplier = -1.5f;
             }
         }
 
-        // Front left sensor
         Vector3 leftSensorPos = sensorStartPos - transform.right * frontSideSensorPosition;
         if (Physics.Raycast(leftSensorPos, Quaternion.AngleAxis(-frontSensorAngle, transform.up) * transform.forward, out hit, sensorLength))
         {
@@ -108,19 +94,17 @@ public class AiCar : MonoBehaviour
             {
                 Debug.DrawLine(leftSensorPos, hit.point);
                 avoiding = true;
-                avoidMultiplier = 1.5f; // steer right if obstacle on the left
+                avoidMultiplier = 1.5f;
             }
         }
 
-        // Apply avoidance steering angle if avoiding
         if (avoiding)
         {
             targetSteerAngle = maxSteerAngle * avoidMultiplier * (Time.deltaTime * 30f);
-            if(currentSpeed > 15) 
+            if (currentSpeed > 15)
             {
-                isBraking = true; // Optionally apply braking when avoiding
+                isBraking = true;
             }
-
         }
         else
         {
@@ -130,9 +114,9 @@ public class AiCar : MonoBehaviour
 
     private void ApplySteer()
     {
-        if (!avoiding) // Only steer toward the next node if we're not avoiding
+        if (!avoiding)
         {
-            Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNode].position);
+            Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNodeIndex].nodeTransform.position);
             float newSteer = (relativeVector.x / relativeVector.magnitude) * maxSteerAngle;
             targetSteerAngle = newSteer;
         }
@@ -142,19 +126,15 @@ public class AiCar : MonoBehaviour
     {
         if (avoiding && currentSpeed < stuckSpeedThreshold)
         {
-            // Increment stuck timer if avoiding and speed is low
             stuckTimer += Time.deltaTime;
-
             if (stuckTimer > stuckTimeThreshold)
             {
-                // Trigger reverse
                 isReversing = true;
-                reverseTimer = 0f; // Reset reverse timer
+                reverseTimer = 0f;
             }
         }
         else
         {
-            // Reset stuck timer if moving normally
             stuckTimer = 0f;
             isReversing = false;
         }
@@ -166,27 +146,22 @@ public class AiCar : MonoBehaviour
 
         if (isReversing)
         {
-            // Apply reverse torque
             wheelFL.motorTorque = -maxMotorTorque;
             wheelFR.motorTorque = -maxMotorTorque;
             reverseTimer += Time.deltaTime;
-
-            // Stop reversing after the duration
             if (reverseTimer > reverseDuration)
             {
                 isReversing = false;
-                stuckTimer = 0f; // Reset stuck state
+                stuckTimer = 0f;
             }
         }
         else if (currentSpeed < maxSpeed)
         {
-            // Normal driving
             wheelFL.motorTorque = maxMotorTorque;
             wheelFR.motorTorque = maxMotorTorque;
         }
         else
         {
-            // Stop applying torque if at max speed
             wheelFL.motorTorque = 0;
             wheelFR.motorTorque = 0;
         }
@@ -194,27 +169,40 @@ public class AiCar : MonoBehaviour
 
     private void CheckWaypointDistance()
     {
-        if(Vector3.Distance(transform.position, nodes[currentNode].position) < waypointReachThreshold)
+        if (Vector3.Distance(transform.position, nodes[currentNodeIndex].nodeTransform.position) < waypointReachThreshold)
         {
-            if(currentNode == nodes.Count- 1)
+            Path.PathNode currentNode = nodes[currentNodeIndex];
+            if (currentNode.nextNodes.Count > 0)
             {
-                currentNode = 0;
+                // Pick a random Transform from nextNodes
+                Transform nextTransform = currentNode.nextNodes[Random.Range(0, currentNode.nextNodes.Count)];
+
+                // Find the corresponding PathNode in the nodes list
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    if (nodes[i].nodeTransform == nextTransform)
+                    {
+                        currentNodeIndex = i;
+                        break;
+                    }
+                }
             }
             else
             {
-                currentNode++;
+                // Move to the next node in a sequential manner if no branching
+                currentNodeIndex = (currentNodeIndex + 1) % nodes.Count;
             }
         }
     }
+
 
     private void Braking()
     {
         if (isReversing)
         {
-            // Disable braking when reversing
             wheelRL.brakeTorque = 0;
             wheelRR.brakeTorque = 0;
-            isBraking = false; // Ensure braking is off
+            isBraking = false;
         }
         else if (isBraking)
         {
@@ -227,7 +215,6 @@ public class AiCar : MonoBehaviour
             wheelRR.brakeTorque = 0;
         }
     }
-
 
     private void LerpToSteerAngle()
     {
