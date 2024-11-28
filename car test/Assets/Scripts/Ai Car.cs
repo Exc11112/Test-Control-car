@@ -36,6 +36,7 @@ public class AiCar : MonoBehaviour
     private float stuckSpeedThreshold = 10f; // Speed threshold to detect being stuck
     private float stuckTimeThreshold = 1.5f; // Time before triggering reverse
     private float stuckTimer = 0f;
+    private Path.PathNode nextPathNode = null;
 
     private void Start()
     {
@@ -167,30 +168,42 @@ public class AiCar : MonoBehaviour
         }
     }
 
+
     private void CheckWaypointDistance()
     {
         if (Vector3.Distance(transform.position, nodes[currentNodeIndex].nodeTransform.position) < waypointReachThreshold)
         {
             Path.PathNode currentNode = nodes[currentNodeIndex];
-            if (currentNode.nextNodes.Count > 0)
-            {
-                // Pick a random Transform from nextNodes
-                Transform nextTransform = currentNode.nextNodes[Random.Range(0, currentNode.nextNodes.Count)];
 
-                // Find the corresponding PathNode in the nodes list
-                for (int i = 0; i < nodes.Count; i++)
+            if (nextPathNode == null) // No path chosen yet for this branch
+            {
+                if (currentNode.nextNodes.Count > 0)
                 {
-                    if (nodes[i].nodeTransform == nextTransform)
+                    // Select a specific next node only once
+                    int specificIndex = 21; // Example: Change this to select a specific path index
+                    Transform nextTransform = currentNode.nextNodes[specificIndex];
+
+                    // Find the corresponding PathNode in the nodes list
+                    for (int i = 0; i < nodes.Count; i++)
                     {
-                        currentNodeIndex = i;
-                        break;
+                        if (nodes[i].nodeTransform == nextTransform)
+                        {
+                            nextPathNode = nodes[i];
+                            currentNodeIndex = i;
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    // If no branching nodes, move to the next node sequentially
+                    currentNodeIndex = (currentNodeIndex + 1) % nodes.Count;
                 }
             }
             else
             {
-                // Move to the next node in a sequential manner if no branching
-                currentNodeIndex = (currentNodeIndex + 1) % nodes.Count;
+                // Continue following the already chosen branch
+                currentNodeIndex = nodes.IndexOf(nextPathNode);
             }
         }
     }
