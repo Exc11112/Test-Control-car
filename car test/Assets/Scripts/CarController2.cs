@@ -458,31 +458,31 @@ public class CarController2 : MonoBehaviour
         currentRPM = Mathf.Clamp(currentRPM * gearRatios[currentGear], minRPM, maxRPM);
     }
 
-    //void OnCollisionEnter(Collision collision)
-    //{
-    //    if (collision.gameObject.CompareTag("wall"))
-    //    {
-    //        //isCollidingWithWall = true;
-    //        baseAcceleration = 10f;
-    //        currentRPM = 1000f;
-    //        currentGear = 1;
-    //    }
-    //    //else if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
-    //    //{
-    //    //    float timeAtCheckpoint = timer;
-    //    //    checkpointTimes[checkpointIndex] = timeAtCheckpoint;
-    //    //    totalSpeedAtCheckpoints += currentSpeed;
-    //    //    checkpointIndex = (checkpointIndex + 1) % maxCheckpoints;
-    //    //}
-    //    //else if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer) && isTimerRunning)
-    //    //{
-    //    //    finishPointTime = timer;
-    //    //    isTimerRunning = false;
-    //    //    float grandTotalSpeed = totalSpeedAtCheckpoints;
-    //    //    Debug.Log("Grand total speed at checkpoints: " + grandTotalSpeed);
-    //    //    Debug.Log("Total time to reach finish point: " + finishPointTime);
-    //    //}
-    //}
+    void OnCollisionEnter(Collision collision)
+    {
+        //if (collision.gameObject.CompareTag("wall"))
+        //{
+        //    //isCollidingWithWall = true;
+        //    baseAcceleration = 10f;
+        //    currentRPM = 1000f;
+        //    currentGear = 1;
+        //}
+        if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
+        {
+            float timeAtCheckpoint = timer;
+            checkpointTimes[checkpointIndex] = timeAtCheckpoint;
+            totalSpeedAtCheckpoints += currentSpeed;
+            checkpointIndex = (checkpointIndex + 1) % maxCheckpoints;
+        }
+        else if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer) && isTimerRunning)
+        {
+            finishPointTime = timer;
+            isTimerRunning = false;
+            float grandTotalSpeed = totalSpeedAtCheckpoints;
+            Debug.Log("Grand total speed at checkpoints: " + grandTotalSpeed);
+            Debug.Log("Total time to reach finish point: " + finishPointTime);
+        }
+    }
 
     //void OnCollisionExit(Collision collision)
     //{
