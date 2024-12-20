@@ -84,6 +84,8 @@ public class CarController2 : MonoBehaviour
     public float timer = 0f;
     public bool isTimerRunning = false;
     private float finishPointTime;
+    private float countdownTime = 300f; // 5 minutes in seconds
+    private bool gameEnded = false;
 
     public string checkpointLayer = "checkpoint";
     public string fpointLayer = "fpoint";
@@ -147,17 +149,6 @@ public class CarController2 : MonoBehaviour
 
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
-
-        if (!isNeutral && !isTimerRunning && !hasStartedTimer && Time.time - neutralStartTime > tStart)
-        {
-            isTimerRunning = true;
-            timer = 0f;
-            hasStartedTimer = true;
-        }
-        if (isTimerRunning)
-        {
-            timer += Time.deltaTime;
-        }
 
         if (isNeutral)
         {
