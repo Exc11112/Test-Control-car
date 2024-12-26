@@ -23,7 +23,7 @@ public class SpeedDisplay : MonoBehaviour
     private float goDuration = 2.0f;  // Duration to show "GO!" in seconds
     private float goTimer = 0f;       // Timer to track "GO!" display time
 
-    private float countdownTime = 300f; // Countdown timer starting at 5 minutes
+    public float countdownTime = 300f; // Countdown timer starting at 5 minutes
     private bool isTimerRunning = false;
     private bool gameEnded = false;
     private bool isNeutral = false; // Update this value based on your game logic
