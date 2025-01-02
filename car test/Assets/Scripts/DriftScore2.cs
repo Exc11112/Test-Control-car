@@ -88,8 +88,8 @@ public class DriftScore2 : MonoBehaviour
                 }
 
                 // Optionally, reduce progress of the bars
-                bar1.value = Mathf.Max(0, bar1.value - scorePenalty / 10f);
-                progressBar2To4 = Mathf.Max(0, progressBar2To4 - scorePenalty / 10f);
+                bar1.value = Mathf.Max(0, bar1.value - scorePenalty);
+                progressBar2To4 = Mathf.Max(0, progressBar2To4 - scorePenalty);
             }
         }
     }
