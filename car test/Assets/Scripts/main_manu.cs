@@ -26,4 +26,9 @@ public class MainMenu : MonoBehaviour
     {
         SceneManager.LoadScene("Select");
     }
+
+    public void BlackToMenu()
+    {
+        SceneManager.LoadScene("start_manu");
+    }
 }
