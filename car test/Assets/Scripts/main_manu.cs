@@ -6,7 +6,7 @@ public class MainMenu : MonoBehaviour
     public void StartGame()
     {
         // Load Scene ชื่อ "GameScene"
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Level1");
     }
 
     public void OpenOptions()
@@ -20,5 +20,10 @@ public class MainMenu : MonoBehaviour
         // ปิดโปรแกรม
         Debug.Log("Game Exited");
         Application.Quit();
+    }
+
+    public void SelectScene()
+    {
+        SceneManager.LoadScene("Select");
     }
 }
