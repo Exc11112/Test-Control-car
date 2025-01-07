@@ -11,6 +11,9 @@ public class CameraSwitcherUI : MonoBehaviour
     private int currentFocusIndex = 0; // Current focus point index
     private Transform targetFocus; // Target focus point
 
+    // Public getter for currentFocusIndex to allow external access
+    public int CurrentFocusIndex => currentFocusIndex;
+
     void Start()
     {
         if (focusPoints.Length == 0)
@@ -27,12 +30,12 @@ public class CameraSwitcherUI : MonoBehaviour
     {
         if (focusPoints.Length == 0) return;
 
-        // Check for the X key press
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            Debug.Log("SwitchFocus triggered with direction: 1");
-            SwitchFocus(1); // Move to the next point
-        }
+        //// Check for the X key press
+        //if (Input.GetKeyDown(KeyCode.X))
+        //{
+        //    Debug.Log("SwitchFocus triggered with direction: 1");
+        //    SwitchFocus(1); // Move to the next point
+        //}
 
         // Smoothly move the camera towards the target focus
         SmoothTransition();
