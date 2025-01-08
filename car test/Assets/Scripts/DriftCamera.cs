@@ -1,72 +1,104 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DriftCamera : MonoBehaviour
 {
-    [Serializable]
-    public class AdvancedOptions
-    {
-        public bool updateCameraInUpdate;
-        public bool updateCameraInFixedUpdate = true;
-        public bool updateCameraInLateUpdate;
-        public KeyCode switchViewKey = KeyCode.V;  // Press V to switch views
-    }
-
-    public float smoothing = 20f;
     public Transform lookAtTarget;
     public Transform positionTarget;
-    public Camera mainCamera;  // The camera that moves and looks at the target
-    public Camera secondCamera;  // Another camera that doesn't move dynamically
-    public Camera thirdCamera;  // Another static camera
-    public AdvancedOptions advancedOptions;
+    public float smoothing = 20f;
+    public KeyCode switchViewKey = KeyCode.V;
 
-    private int currentCameraIndex;
+    public Camera mainCamera;
+    public Camera secondCamera;
+    public Camera thirdCamera;
+
+    private int currentCameraIndex = 0;
 
     private void Start()
     {
-        // Ensure that only the main camera is enabled at the start
-        SetActiveCamera(0);
+        // Delay the setup to allow Level1Setup to finish activating objects
+        StartCoroutine(DelayedSetup());
     }
 
-    private void FixedUpdate()
+    private IEnumerator DelayedSetup()
     {
-        if (advancedOptions.updateCameraInFixedUpdate)
-            UpdateCamera();
+        // Wait for one frame
+        yield return null;
+
+        // Update the active car after Level1Setup
+        UpdateActiveCar();
+
+        // Ensure the default camera is active
+        SetActiveCamera(0);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(advancedOptions.switchViewKey))
+        if (Input.GetKeyDown(switchViewKey))
         {
-            currentCameraIndex = (currentCameraIndex + 1) % 3;  // Cycle between 0, 1, and 2
+            currentCameraIndex = (currentCameraIndex + 1) % 3; // Cycle through cameras
             SetActiveCamera(currentCameraIndex);
         }
-
-        if (advancedOptions.updateCameraInUpdate)
-            UpdateCamera();
     }
 
-    private void LateUpdate()
+    public void UpdateActiveCar()
     {
-        if (advancedOptions.updateCameraInLateUpdate)
-            UpdateCamera();
+        // Find the active car in the scene
+        GameObject activeCar = null;
+        foreach (GameObject car in FindObjectsOfType<GameObject>())
+        {
+            if (car.activeSelf && car.CompareTag("car"))
+            {
+                activeCar = car;
+                break;
+            }
+        }
+
+        if (activeCar == null)
+        {
+            Debug.LogError("No active car found!");
+            return;
+        }
+
+        // Debug: Log the hierarchy of the active car
+        Debug.Log("Active car found: " + activeCar.name);
+        foreach (Transform child in activeCar.transform)
+        {
+            Debug.Log("Child object: " + child.name);
+        }
+
+        // Set camera targets
+        lookAtTarget = activeCar.transform.Find("LookAtTarget");
+        positionTarget = activeCar.transform.Find("PositionTarget");
+
+        if (lookAtTarget == null || positionTarget == null)
+        {
+            Debug.LogError("LookAtTarget or PositionTarget is missing on the active car!");
+        }
+        else
+        {
+            Debug.Log("Camera targets successfully set for " + activeCar.name);
+        }
     }
+
 
     private void UpdateCamera()
     {
-        // Only update the main camera's position and rotation
-        if (currentCameraIndex == 0)
+        if (currentCameraIndex == 0 && lookAtTarget != null && positionTarget != null)
         {
+            // Smoothly move and rotate the main camera
             mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, positionTarget.position, Time.deltaTime * smoothing);
             mainCamera.transform.LookAt(lookAtTarget);
         }
     }
 
+    private void FixedUpdate()
+    {
+        UpdateCamera();
+    }
+
     private void SetActiveCamera(int index)
     {
-        // Enable only the selected camera
         mainCamera.enabled = (index == 0);
         secondCamera.enabled = (index == 1);
         thirdCamera.enabled = (index == 2);
