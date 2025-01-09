@@ -1,106 +1,121 @@
-using System.Collections;
+using System;
 using UnityEngine;
+using static DriftCamera;
 
 public class DriftCamera : MonoBehaviour
 {
-    public Transform lookAtTarget;
-    public Transform positionTarget;
     public float smoothing = 20f;
-    public KeyCode switchViewKey = KeyCode.V;
+    public Transform lookAtTarget; // Target the camera looks at
+    public Transform positionTarget; // Position the camera follows
+    public Camera mainCamera; // The main camera, independent of cars
+    private Camera secondCamera;
+    private Camera thirdCamera;
 
-    public Camera mainCamera;
-    public Camera secondCamera;
-    public Camera thirdCamera;
+    public AdvancedOptions advancedOptions;
 
     private int currentCameraIndex = 0;
-
-    private void Start()
+    public KeyCode switchViewKey = KeyCode.V;
+    [Serializable]
+    public class AdvancedOptions
     {
-        // Delay the setup to allow Level1Setup to finish activating objects
-        StartCoroutine(DelayedSetup());
+        public bool updateCameraInUpdate;
+        public bool updateCameraInFixedUpdate = true;
+        public bool updateCameraInLateUpdate;
     }
 
-    private IEnumerator DelayedSetup()
+        private void Start()
     {
-        // Wait for one frame
-        yield return null;
-
-        // Update the active car after Level1Setup
-        UpdateActiveCar();
-
-        // Ensure the default camera is active
-        SetActiveCamera(0);
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(switchViewKey))
-        {
-            currentCameraIndex = (currentCameraIndex + 1) % 3; // Cycle through cameras
-            SetActiveCamera(currentCameraIndex);
-        }
-    }
-
-    public void UpdateActiveCar()
-    {
-        // Find the active car in the scene
-        GameObject activeCar = null;
-        foreach (GameObject car in FindObjectsOfType<GameObject>())
-        {
-            if (car.activeSelf && car.CompareTag("car"))
-            {
-                activeCar = car;
-                break;
-            }
-        }
-
-        if (activeCar == null)
-        {
-            Debug.LogError("No active car found!");
-            return;
-        }
-
-        // Debug: Log the hierarchy of the active car
-        Debug.Log("Active car found: " + activeCar.name);
-        foreach (Transform child in activeCar.transform)
-        {
-            Debug.Log("Child object: " + child.name);
-        }
-
-        // Set camera targets
-        lookAtTarget = activeCar.transform.Find("LookAtTarget");
-        positionTarget = activeCar.transform.Find("PositionTarget");
-
-        if (lookAtTarget == null || positionTarget == null)
-        {
-            Debug.LogError("LookAtTarget or PositionTarget is missing on the active car!");
-        }
-        else
-        {
-            Debug.Log("Camera targets successfully set for " + activeCar.name);
-        }
-    }
-
-
-    private void UpdateCamera()
-    {
-        if (currentCameraIndex == 0 && lookAtTarget != null && positionTarget != null)
-        {
-            // Smoothly move and rotate the main camera
-            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, positionTarget.position, Time.deltaTime * smoothing);
-            mainCamera.transform.LookAt(lookAtTarget);
-        }
+        UpdateActiveCar(); // Initialize camera setup
     }
 
     private void FixedUpdate()
     {
-        UpdateCamera();
+        if (advancedOptions.updateCameraInFixedUpdate)
+        {
+            if (currentCameraIndex == 0 && mainCamera != null && positionTarget != null && lookAtTarget != null)
+            {
+                FollowCar();
+            }
+        }
+    }
+
+    private void Update()
+    {
+        // Switch camera when the key is pressed
+        if (Input.GetKeyDown(switchViewKey))
+        {
+            CycleCamera();
+        }
+
+        // Make the main camera follow the car if it is active
+
+    }
+
+    private void FollowCar()
+    {
+        //// Smoothly move the camera to the position target
+        //Vector3 targetPosition = positionTarget.position;
+        //mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, targetPosition, smoothing * Time.deltaTime);
+
+        //// Smoothly rotate the camera to look at the lookAtTarget
+        //Quaternion targetRotation = Quaternion.LookRotation(lookAtTarget.position - mainCamera.transform.position);
+        //mainCamera.transform.rotation = Quaternion.Lerp(mainCamera.transform.rotation, targetRotation, smoothing * Time.deltaTime);
+        //// Only update the main camera's position and rotation
+
+            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, positionTarget.position, Time.deltaTime * smoothing);
+            mainCamera.transform.LookAt(lookAtTarget);
+        
+    }
+
+    public void UpdateActiveCar()
+    {
+        // Ensure main camera is always assigned
+        if (mainCamera == null)
+        {
+            Debug.LogError("Main Camera is missing!");
+            return;
+        }
+
+        // Locate second and third cameras dynamically based on the active car
+        if (lookAtTarget != null && positionTarget != null)
+        {
+            secondCamera = lookAtTarget.GetComponentInChildren<Camera>();
+            thirdCamera = positionTarget.GetComponentInChildren<Camera>();
+        }
+
+        if (secondCamera == null || thirdCamera == null)
+        {
+            Debug.LogError("Second or Third Camera is missing on the active car!");
+        }
+
+        SetActiveCamera(0); // Start with the main camera
+    }
+
+    private void CycleCamera()
+    {
+        currentCameraIndex = (currentCameraIndex + 1) % 3; // Cycle between 0, 1, 2
+        SetActiveCamera(currentCameraIndex);
     }
 
     private void SetActiveCamera(int index)
     {
-        mainCamera.enabled = (index == 0);
-        secondCamera.enabled = (index == 1);
-        thirdCamera.enabled = (index == 2);
+        // Disable all cameras first
+        if (mainCamera != null) mainCamera.enabled = false;
+        if (secondCamera != null) secondCamera.enabled = false;
+        if (thirdCamera != null) thirdCamera.enabled = false;
+
+        // Enable the correct camera based on the index
+        switch (index)
+        {
+            case 0:
+                mainCamera.enabled = true;
+                break;
+            case 1:
+                if (secondCamera != null) secondCamera.enabled = true;
+                break;
+            case 2:
+                if (thirdCamera != null) thirdCamera.enabled = true;
+                break;
+        }
     }
 }
