@@ -30,23 +30,37 @@ public class SpeedDisplay : MonoBehaviour
     private bool hasStartedTimer = false;
     private float localTStart;      // Local copy of car.tStart for countdown handling
 
-    private void Start()
+    public void Start()
     {
-        // Initialize localTStart with car.tStart
-        if (car != null)
+        // Assign target and car based on data from the selection scene
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        if (gameManager != null)
         {
-            localTStart = car.tStart;
+            target = gameManager.selectedCarRigidbody;
+            car = gameManager.selectedCarController;
+
+            if (car != null)
+            {
+                localTStart = car.tStart;
+            }
+            else
+            {
+                Debug.LogError("CarController2 reference is missing. Please ensure data is passed correctly.");
+            }
         }
         else
         {
-            Debug.LogError("CarController2 reference is missing. Please assign it in the Inspector.");
+            Debug.LogError("GameManager not found. Please ensure it's present in the scene and handles data passing.");
         }
     }
 
     private void Update()
     {
         // Display speed in km/h
-        speed = target.velocity.magnitude * 3.6f;
+        if (target != null)
+        {
+            speed = target.velocity.magnitude * 3.6f;
+        }
 
         if (speedLabel != null)
             speedLabel.text = Mathf.FloorToInt(speed * 1.5f) + "";
@@ -57,7 +71,7 @@ public class SpeedDisplay : MonoBehaviour
         if (gearLabel != null && car != null)
             gearLabel.text = "" + (car.currentGear + 1); // Display gears starting from 1
 
-        if (arrow != null)
+        if (arrow != null && car != null)
             arrow.localEulerAngles =
                 new Vector3(0, 0, Mathf.Lerp(minSpeedArrowAngle, maxSpeedArrowAngle, car.currentRPM / car.maxRPM));
 
