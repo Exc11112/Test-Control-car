@@ -6,7 +6,7 @@ public class CheckpointSystem : MonoBehaviour
 {
     public string[] checkpointLayers = { "checkpoint1", "checkpoint2" };
     public string fpointLayer = "fpoint";
-    public string car = "Car";
+    public string car = "car";
 
     private float[] checkpointSpeeds;
     private float totalSpeedAtCheckpoints = 0f;
