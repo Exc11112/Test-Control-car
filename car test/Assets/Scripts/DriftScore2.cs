@@ -8,7 +8,7 @@ public class DriftScore2 : MonoBehaviour
     private float driftScore = 0f;
     public CarController2 car;
 
-    public Text driftScoreText;  // UI text to display the score
+    public Text driftScoreText; // UI text to display the score
     public Text multiplierText; // UI text to display the multiplier
 
     public string fpointLayer = "fpoint"; // Name of the layer for the final point
@@ -19,8 +19,8 @@ public class DriftScore2 : MonoBehaviour
     public Slider bar3; // Slider for the third bar
     public Slider bar4; // Slider for the fourth bar
 
-    public float maxBar1 = 100f;  // Max points for bar1
-    public float maxBar2 = 500f;  // Max points for bar2
+    public float maxBar1 = 100f; // Max points for bar1
+    public float maxBar2 = 500f; // Max points for bar2
     public float maxBar3 = 1000f; // Max points for bar3
     public float maxBar4 = 2500f; // Max points for bar4
 
@@ -30,19 +30,19 @@ public class DriftScore2 : MonoBehaviour
     public float EnergyIncreaseRate = 10f;
     public float HeartIncreaseRate = 50f;
 
-    public float timePenalty = 5f;  // Time reduction when hitting a wall
+    public float timePenalty = 5f; // Time reduction when hitting a wall
     public float scorePenalty = 50f; // Drift score reduction when hitting a wall
     public float wallCooldown = 5f; // Cooldown time between penalties
 
-    public float timePlusIncrement = 10f;  // Amount to increase bar1 for TimePlus
+    public float timePlusIncrement = 10f; // Amount to increase bar1 for TimePlus
     public float heartPlusIncrement = 50f; // Amount to increase bar2-bar4 for HeartPlus
 
     private float lastWallHitTime = -Mathf.Infinity; // Track the last wall collision time
-
+    private float driftMultiplier = 1f; // Current score multiplier
+    private float driftTime = 0f; // Total drift duration
+    private float multiplierIncreaseInterval = 2f; // Time required to increase multiplier
     private int currentMultiplier = 1; // Current score multiplier
-    private float driftTimer = 0f; // Timer to track drifting duration
     private const int maxMultiplier = 5; // Maximum multiplier
-    private const float multiplierIncreaseInterval = 2f; // Time in seconds to increase multiplier
 
     private void Start()
     {
@@ -56,8 +56,6 @@ public class DriftScore2 : MonoBehaviour
         bar2.value = 0f;
         bar3.value = 0f;
         bar4.value = 0f;
-
-        UpdateMultiplierText();
     }
 
     void Update()
@@ -65,20 +63,20 @@ public class DriftScore2 : MonoBehaviour
         if (car.isDrifting)
         {
             float speed = GetComponent<Rigidbody>().velocity.magnitude; // Assume car has CurrentSpeed property
-            driftScore += Time.deltaTime * speed * currentMultiplier;
+            driftScore += Time.deltaTime * speed * driftMultiplier;
             driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
 
-            driftTimer += Time.deltaTime;
-            if (driftTimer >= multiplierIncreaseInterval && currentMultiplier < maxMultiplier)
+            // Update drift time and multiplier
+            driftTime += Time.deltaTime;
+            if (driftTime >= multiplierIncreaseInterval && driftMultiplier < 5f)
             {
-                driftTimer = 0f;
-                currentMultiplier++;
-                UpdateMultiplierText();
+                driftMultiplier++;
+                driftTime = 0f;
             }
         }
         else
         {
-            driftTimer = 0f; // Reset timer when not drifting
+            driftTime = 0f; // Reset drift time when not drifting
         }
 
         UpdateBar1();
@@ -100,8 +98,9 @@ public class DriftScore2 : MonoBehaviour
             {
                 lastWallHitTime = Time.time;
 
-                // Reduce drift score
+                // Reduce drift score and reset multiplier
                 driftScore = Mathf.Max(0, driftScore - scorePenalty);
+                driftMultiplier = 1f;
                 driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
 
                 if (speedDisplay != null)
@@ -111,20 +110,75 @@ public class DriftScore2 : MonoBehaviour
 
                 bar1.value = Mathf.Max(0, bar1.value - scorePenalty);
                 progressBar2To4 = Mathf.Max(0, progressBar2To4 - scorePenalty);
-
-                // Reset multiplier
-                currentMultiplier = 1;
-                driftTimer = 0f;
-                UpdateMultiplierText();
             }
         }
+
+        // Handle collisions with TimePlus and HeartPlus objects (same as before)
+        if (collision.gameObject.CompareTag("TimePlus"))
+        {
+            bar1.value = Mathf.Min(bar1.value + timePlusIncrement, maxBar1);
+
+            if (bar1.value >= maxBar1)
+            {
+                bar1.value = 0f;
+
+                if (speedDisplay != null)
+                {
+                    speedDisplay.countdownTime += Plustime;
+                }
+            }
+
+            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            collision.gameObject.SetActive(false);
+        }
+
+        if (collision.gameObject.CompareTag("HeartPlus"))
+        {
+            progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
+
+            if (progressBar2To4 <= maxBar2)
+            {
+                bar2.value = progressBar2To4;
+            }
+            else if (progressBar2To4 <= maxBar2 + maxBar3)
+            {
+                bar2.value = maxBar2;
+                bar3.value = progressBar2To4 - maxBar2;
+            }
+            else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
+            {
+                bar2.value = maxBar2;
+                bar3.value = maxBar3;
+                bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
+            }
+            else
+            {
+                bar2.value = maxBar2;
+                bar3.value = maxBar3;
+                bar4.value = maxBar4;
+            }
+
+            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            collision.gameObject.SetActive(false);
+        }
+        // Reset multiplier
+        currentMultiplier = 1;
+        driftTime = 0f;
+        UpdateMultiplierText();
+    }
+
+    // Coroutine to reactivate the game object
+    private IEnumerator ReactivateGameObject(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        obj.SetActive(true);
     }
 
     private void UpdateBar1()
     {
         if (!car.isDrifting) return;
 
-        float increment = Time.deltaTime * EnergyIncreaseRate * currentMultiplier;
+        float increment = Time.deltaTime * EnergyIncreaseRate; // Fixed increment rate for bar1
         bar1.value += increment;
 
         if (bar1.value >= maxBar1)
@@ -142,7 +196,7 @@ public class DriftScore2 : MonoBehaviour
     {
         if (!car.isDrifting) return;
 
-        float increment = Time.deltaTime * HeartIncreaseRate * currentMultiplier;
+        float increment = Time.deltaTime * HeartIncreaseRate; // Fixed increment rate for bars 2 to 4
         progressBar2To4 = Mathf.Min(progressBar2To4 + increment, maxBar2 + maxBar3 + maxBar4);
 
         if (progressBar2To4 <= maxBar2)
@@ -167,7 +221,6 @@ public class DriftScore2 : MonoBehaviour
             bar4.value = maxBar4;
         }
     }
-
     private void UpdateMultiplierText()
     {
         multiplierText.text = "x" + currentMultiplier;
