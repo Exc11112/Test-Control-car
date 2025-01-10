@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +32,10 @@ public class DriftScore2 : MonoBehaviour
     public float timePenalty = 5f;  // Time reduction when hitting a wall
     public float scorePenalty = 50f; // Drift score reduction when hitting a wall
     public float wallCooldown = 5f; // Cooldown time between penalties
+
+    public float timePlusIncrement = 10f;  // Amount to increase bar1 for TimePlus
+    public float heartPlusIncrement = 50f; // Amount to increase bar2-bar4 for HeartPlus
+
 
     private float lastWallHitTime = -Mathf.Infinity; // Track the last wall collision time
 
@@ -72,26 +77,80 @@ public class DriftScore2 : MonoBehaviour
         // Check if the car hits a wall
         if (collision.gameObject.CompareTag(wallTag))
         {
-            // Check cooldown
             if (Time.time >= lastWallHitTime + wallCooldown)
             {
-                lastWallHitTime = Time.time; // Update the last wall hit time
+                lastWallHitTime = Time.time;
 
                 // Reduce drift score
                 driftScore = Mathf.Max(0, driftScore - scorePenalty);
                 driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
 
-                // Reduce countdown time in SpeedDisplay
                 if (speedDisplay != null)
                 {
                     speedDisplay.countdownTime = Mathf.Max(0, speedDisplay.countdownTime - timePenalty);
                 }
 
-                // Optionally, reduce progress of the bars
                 bar1.value = Mathf.Max(0, bar1.value - scorePenalty);
                 progressBar2To4 = Mathf.Max(0, progressBar2To4 - scorePenalty);
             }
         }
+
+        // Check if the car hits an object tagged 'TimePlus'
+        if (collision.gameObject.CompareTag("TimePlus"))
+        {
+            bar1.value = Mathf.Min(bar1.value + timePlusIncrement, maxBar1);
+
+            if (bar1.value >= maxBar1)
+            {
+                bar1.value = 0f;
+
+                if (speedDisplay != null)
+                {
+                    speedDisplay.countdownTime += Plustime;
+                }
+            }
+
+            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            collision.gameObject.SetActive(false);
+        }
+
+        // Check if the car hits an object tagged 'HeartPlus'
+        if (collision.gameObject.CompareTag("HeartPlus"))
+        {
+            progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
+
+            if (progressBar2To4 <= maxBar2)
+            {
+                bar2.value = progressBar2To4;
+            }
+            else if (progressBar2To4 <= maxBar2 + maxBar3)
+            {
+                bar2.value = maxBar2;
+                bar3.value = progressBar2To4 - maxBar2;
+            }
+            else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
+            {
+                bar2.value = maxBar2;
+                bar3.value = maxBar3;
+                bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
+            }
+            else
+            {
+                bar2.value = maxBar2;
+                bar3.value = maxBar3;
+                bar4.value = maxBar4;
+            }
+
+            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            collision.gameObject.SetActive(false);
+        }
+    }
+
+    // Coroutine to reactivate the game object
+    private IEnumerator ReactivateGameObject(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        obj.SetActive(true);
     }
 
     private void UpdateBar1()

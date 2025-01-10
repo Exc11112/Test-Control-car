@@ -913,7 +913,7 @@ Transform:
   m_GameObject: {fileID: 1789710496752692090}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.58, y: 0.062000036, z: 1.1179979}
+  m_LocalPosition: {x: 0.648, y: 0.062000036, z: 1.1179979}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1219,7 +1219,7 @@ Transform:
   m_GameObject: {fileID: 2176255731389019994}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.602, y: 0.062000036, z: -0.983}
+  m_LocalPosition: {x: -0.64899707, y: 0.062000036, z: -0.983}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1368,6 +1368,7 @@ GameObject:
   - component: {fileID: 840629277733389117}
   - component: {fileID: 3003832622421615957}
   - component: {fileID: 777217421932100897}
+  - component: {fileID: 503441382857521880}
   m_Layer: 14
   m_Name: car (4)
   m_TagString: car
@@ -1565,6 +1566,8 @@ MonoBehaviour:
   timePenalty: 5
   scorePenalty: 50
   wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
 --- !u!114 &4866691241322346758
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1581,7 +1584,7 @@ MonoBehaviour:
   - checkpoint1
   - checkpoint2
   fpointLayer: fpoint
-  car: Car
+  car: car
   cars: {fileID: 5275315619788235138}
   sp1: {fileID: 0}
   sp2: {fileID: 0}
@@ -1644,6 +1647,27 @@ MonoBehaviour:
   minSpeedArrowAngle: 0
   maxSpeedArrowAngle: -201.151
   countdownTime: 300
+--- !u!114 &503441382857521880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2901270565608805491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2428d6ee708fe7e43ad218435ca3b37b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smoothing: 20
+  lookAtTarget: {fileID: 3469074826234408666}
+  positionTarget: {fileID: 1980019794452765559}
+  mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
+  switchViewKey: 118
 --- !u!1 &3034528039556775272
 GameObject:
   m_ObjectHideFlags: 0
@@ -3041,7 +3065,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2959467708922500008, guid: d3620eb2b54f8d746ab5873e68f38501, type: 3}
 --- !u!1 &5151946118155020986
@@ -3153,7 +3177,7 @@ Transform:
   m_GameObject: {fileID: 5211825053696768916}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.58, y: 0.062, z: 1.118}
+  m_LocalPosition: {x: -0.628, y: 0.062, z: 1.118}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3634,7 +3658,7 @@ Transform:
   m_GameObject: {fileID: 6042001755596604986}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.602, y: 0.062000036, z: -0.9759973}
+  m_LocalPosition: {x: 0.648, y: 0.062000036, z: -0.9759973}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4642,6 +4666,10 @@ MonoBehaviour:
   lookAtTarget: {fileID: 3245045976856279086}
   positionTarget: {fileID: 1980019794452765559}
   mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
   switchViewKey: 118
 --- !u!1 &8186798720390153792
 GameObject:
@@ -4880,6 +4908,10 @@ MonoBehaviour:
   lookAtTarget: {fileID: 3245045976856279086}
   positionTarget: {fileID: 1980019794452765559}
   mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
   switchViewKey: 118
 --- !u!1 &8793503943685510077
 GameObject:

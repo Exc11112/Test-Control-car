@@ -1204,6 +1204,10 @@ MonoBehaviour:
   lookAtTarget: {fileID: 2597297106340636670}
   positionTarget: {fileID: 8350756801840708693}
   mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
   switchViewKey: 118
 --- !u!1 &2696535325667859479
 GameObject:
@@ -2998,6 +3002,10 @@ MonoBehaviour:
   lookAtTarget: {fileID: 2597297106340636670}
   positionTarget: {fileID: 8350756801840708693}
   mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
   switchViewKey: 118
 --- !u!1 &6687371736953752009
 GameObject:
@@ -3763,6 +3771,7 @@ GameObject:
   - component: {fileID: 2198193596693446133}
   - component: {fileID: 5705783018920599340}
   - component: {fileID: 1108757071397020806}
+  - component: {fileID: 2819545656077327867}
   m_Layer: 14
   m_Name: car (3)
   m_TagString: car
@@ -3956,6 +3965,8 @@ MonoBehaviour:
   timePenalty: 5
   scorePenalty: 50
   wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
 --- !u!114 &8240133656199249421
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3972,7 +3983,7 @@ MonoBehaviour:
   - checkpoint1
   - checkpoint2
   fpointLayer: fpoint
-  car: Car
+  car: car
   cars: {fileID: 625837967480143392}
   sp1: {fileID: 0}
   sp2: {fileID: 0}
@@ -4035,6 +4046,27 @@ MonoBehaviour:
   minSpeedArrowAngle: 0
   maxSpeedArrowAngle: -201.151
   countdownTime: 300
+--- !u!114 &2819545656077327867
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8768679496103357335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2428d6ee708fe7e43ad218435ca3b37b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  smoothing: 20
+  lookAtTarget: {fileID: 2971262774711783010}
+  positionTarget: {fileID: 8350756801840708693}
+  mainCamera: {fileID: 0}
+  advancedOptions:
+    updateCameraInUpdate: 0
+    updateCameraInFixedUpdate: 1
+    updateCameraInLateUpdate: 0
+  switchViewKey: 118
 --- !u!1 &8828434204416973034
 GameObject:
   m_ObjectHideFlags: 0
