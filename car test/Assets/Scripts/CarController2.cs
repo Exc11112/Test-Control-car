@@ -217,22 +217,6 @@ public class CarController2 : MonoBehaviour
                 }
             }
 
-
-            if (isCarGrounded)
-            {
-                float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
-                transform.Rotate(0, newRotation, 0, Space.World);
-            }
-
-            RaycastHit hit;
-            isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
-
-            if (isCarGrounded)
-            {
-                Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
-                transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, alignToGroundTime * Time.deltaTime);
-            }
-
             carRigidbody.drag = isCarGrounded ? groundDrag : airDrag;
 
             if (!isManual)
@@ -368,6 +352,21 @@ public class CarController2 : MonoBehaviour
 
             Vector3 driftForce = -transform.right * (driftDirection * currentSpeed * 0.1f);
             carRigidbody.AddForce(driftForce, ForceMode.Acceleration);
+        }
+
+        if (isCarGrounded)
+        {
+            float newRotation = currentTurnSpeed * Time.deltaTime * (currentSpeed / maxFwdSpeed);
+            transform.Rotate(0, newRotation, 0, Space.World);
+        }
+
+        RaycastHit hit;
+        isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
+
+        if (isCarGrounded)
+        {
+            Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
+            transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, alignToGroundTime * Time.deltaTime);
         }
     }
 
