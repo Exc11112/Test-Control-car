@@ -56,6 +56,22 @@ public class DriftScore2 : MonoBehaviour
         bar2.value = 0f;
         bar3.value = 0f;
         bar4.value = 0f;
+
+        // Dynamically find car and SpeedDisplay if not set
+        if (car == null)
+        {
+            car = FindObjectOfType<CarController2>();
+        }
+
+        if (speedDisplay == null)
+        {
+            speedDisplay = FindObjectOfType<SpeedDisplay>();
+        }
+
+        if (car == null || speedDisplay == null)
+        {
+            Debug.LogError("Car or SpeedDisplay references are missing in DriftScore2.");
+        }
     }
 
     void Update()

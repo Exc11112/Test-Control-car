@@ -32,7 +32,12 @@ public class SpeedDisplay : MonoBehaviour
 
     private void Start()
     {
-        // Initialize localTStart with car.tStart
+        // Find the car dynamically if not set
+        if (car == null)
+        {
+            car = FindObjectOfType<CarController2>();
+        }
+
         if (car != null)
         {
             localTStart = car.tStart;
@@ -41,7 +46,19 @@ public class SpeedDisplay : MonoBehaviour
         {
             Debug.LogError("CarController2 reference is missing. Please assign it in the Inspector.");
         }
+
+        // Find the target Rigidbody dynamically if not set
+        if (target == null)
+        {
+            target = car?.GetComponent<Rigidbody>();
+        }
+
+        if (speedLabel == null || rpmLabel == null || gearLabel == null || tstart == null || timers == null)
+        {
+            Debug.LogError("One or more UI elements are not assigned in the SpeedDisplay script.");
+        }
     }
+
 
     private void Update()
     {
