@@ -1444,7 +1444,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &5259742648964456979
 Transform:
   m_ObjectHideFlags: 0
@@ -1658,7 +1658,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2384520278375635936
 Transform:
   m_ObjectHideFlags: 0
@@ -3297,7 +3297,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4142148858746656457
 Transform:
   m_ObjectHideFlags: 0
@@ -3768,7 +3768,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 3
+  m_SortingOrder: 14
   m_Sprite: {fileID: 8213158645392670333, guid: cc7ee591339ec774fbf9fd8c88a1ff1a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -4271,7 +4271,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 2
+  m_SortingOrder: 13
   m_Sprite: {fileID: 2896447469520866079, guid: cc7ee591339ec774fbf9fd8c88a1ff1a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -4769,7 +4769,7 @@ Transform:
   m_Children:
   - {fileID: 2735503458517800861}
   m_Father: {fileID: 3942350735050614973}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 30.304}
 --- !u!1 &7861611732035045829
 GameObject:
   m_ObjectHideFlags: 0
@@ -4886,6 +4886,9 @@ GameObject:
   m_Component:
   - component: {fileID: 8337433237662023949}
   - component: {fileID: 8415631681497638061}
+  - component: {fileID: 8106499219901204939}
+  - component: {fileID: 5489485408593309555}
+  - component: {fileID: 1695999829279950121}
   m_Layer: 0
   m_Name: l2d_lvyV.4
   m_TagString: Untagged
@@ -4982,6 +4985,97 @@ MonoBehaviour:
     showGizmo: 1
   - color: {r: 0, g: 1, b: 0, a: 1}
     showGizmo: 1
+--- !u!95 &8106499219901204939
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8112329902029117164}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c098ce508783b214cad25de6d6ab0261, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5489485408593309555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8112329902029117164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speedDisplay: {fileID: 0}
+  car: {fileID: 0}
+  carRigidbody: {fileID: 0}
+  driftScoreText: {fileID: 0}
+  multiplierText: {fileID: 0}
+  fpointLayer: fpoint
+  wallTag: wall
+  bar1: {fileID: 0}
+  bar2: {fileID: 0}
+  bar3: {fileID: 0}
+  bar4: {fileID: 0}
+  maxBar1: 100
+  maxBar2: 500
+  maxBar3: 1000
+  maxBar4: 1500
+  Plustime: 10
+  EnergyIncreaseRate: 5
+  HeartIncreaseRate: 15
+  timePenalty: 5
+  scorePenalty: 50
+  wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
+--- !u!114 &1695999829279950121
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8112329902029117164}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speedDisplay: {fileID: 0}
+  car: {fileID: 0}
+  carRigidbody: {fileID: 0}
+  driftScoreText: {fileID: 0}
+  multiplierText: {fileID: 0}
+  fpointLayer: fpoint
+  wallTag: wall
+  bar1: {fileID: 0}
+  bar2: {fileID: 0}
+  bar3: {fileID: 0}
+  bar4: {fileID: 0}
+  maxBar1: 100
+  maxBar2: 500
+  maxBar3: 1000
+  maxBar4: 1500
+  Plustime: 10
+  EnergyIncreaseRate: 5
+  HeartIncreaseRate: 15
+  timePenalty: 5
+  scorePenalty: 50
+  wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
 --- !u!1 &8131129869973759347
 GameObject:
   m_ObjectHideFlags: 0
@@ -5350,7 +5444,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8057555091234393185
 Transform:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ public class CarController2 : MonoBehaviour
     public float airDrag;
     public float groundDrag;
 
-    public float driftLateralFriction = 0.5f; // Friction when drifting
+    //public float driftLateralFriction = 0.5f; // Friction when drifting
     public float normalLateralFriction = 1.0f; // Normal friction for tires
     //public float oversteerMultiplier = 1.2f; // Multiplier for oversteer effect
     //public float understeerMultiplier = 0.8f; // Multiplier for understeer effect
@@ -89,7 +89,7 @@ public class CarController2 : MonoBehaviour
 
     public string checkpointLayer = "checkpoint";
     public string fpointLayer = "fpoint";
-    private bool hasStartedTimer = false;
+    //private bool hasStartedTimer = false;
 
     private bool isEnhancedTurning = false;
 

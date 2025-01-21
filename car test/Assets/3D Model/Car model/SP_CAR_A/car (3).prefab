@@ -3766,7 +3766,6 @@ GameObject:
   - component: {fileID: 6807497371991402625}
   - component: {fileID: 3251324209142693365}
   - component: {fileID: 5518169761538342261}
-  - component: {fileID: 8714320094113581583}
   - component: {fileID: 8240133656199249421}
   - component: {fileID: 2198193596693446133}
   - component: {fileID: 5705783018920599340}
@@ -3815,7 +3814,6 @@ MonoBehaviour:
   currentSpeed: 0
   airDrag: 0.3
   groundDrag: 3
-  driftLateralFriction: 2
   normalLateralFriction: 2
   maxSteerAngle: 25
   driftSteerAngle: 50
@@ -3934,40 +3932,6 @@ MonoBehaviour:
   - {fileID: 2221564263401054558}
   - {fileID: 7587244956413034645}
   car: {fileID: 625837967480143392}
---- !u!114 &8714320094113581583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8768679496103357335}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speedDisplay: {fileID: 0}
-  car: {fileID: 625837967480143392}
-  driftScoreText: {fileID: 0}
-  multiplierText: {fileID: 0}
-  fpointLayer: fpoint
-  wallTag: wall
-  bar1: {fileID: 0}
-  bar2: {fileID: 0}
-  bar3: {fileID: 0}
-  bar4: {fileID: 0}
-  maxBar1: 100
-  maxBar2: 500
-  maxBar3: 1000
-  maxBar4: 2500
-  Plustime: 10
-  EnergyIncreaseRate: 5
-  HeartIncreaseRate: 15
-  timePenalty: 5
-  scorePenalty: 50
-  wallCooldown: 5
-  timePlusIncrement: 10
-  heartPlusIncrement: 50
 --- !u!114 &8240133656199249421
 MonoBehaviour:
   m_ObjectHideFlags: 0

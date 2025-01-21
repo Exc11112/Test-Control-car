@@ -7,6 +7,7 @@ public class DriftScore2 : MonoBehaviour
     public SpeedDisplay speedDisplay; // Reference to SpeedDisplay script
     private float driftScore = 0f;
     public CarController2 car;
+    public Rigidbody carRigidbody;
 
     public Text driftScoreText; // UI text to display the score
     public Text multiplierText; // UI text to display the multiplier
@@ -78,7 +79,7 @@ public class DriftScore2 : MonoBehaviour
     {
         if (car.isDrifting)
         {
-            float speed = GetComponent<Rigidbody>().velocity.magnitude; // Assume car has CurrentSpeed property
+            float speed = carRigidbody.velocity.magnitude; // Assume car has CurrentSpeed property
             driftScore += Time.deltaTime * speed * driftMultiplier;
             driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
 
@@ -99,7 +100,7 @@ public class DriftScore2 : MonoBehaviour
         UpdateBar2To4();
     }
 
-    void OnCollisionEnter(Collision collision)
+    public void HandleCarCollision(Collision collision)
     {
         // Check if the car hits the final point layer
         if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer))
@@ -129,7 +130,7 @@ public class DriftScore2 : MonoBehaviour
             }
         }
 
-        // Handle collisions with TimePlus and HeartPlus objects (same as before)
+        // Handle collisions with TimePlus and HeartPlus objects
         if (collision.gameObject.CompareTag("TimePlus"))
         {
             bar1.value = Mathf.Min(bar1.value + timePlusIncrement, maxBar1);
@@ -177,11 +178,14 @@ public class DriftScore2 : MonoBehaviour
             StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
             collision.gameObject.SetActive(false);
         }
+
         // Reset multiplier
         currentMultiplier = 1;
         driftTime = 0f;
         UpdateMultiplierText();
     }
+
+
 
     // Coroutine to reactivate the game object
     private IEnumerator ReactivateGameObject(GameObject obj, float delay)
