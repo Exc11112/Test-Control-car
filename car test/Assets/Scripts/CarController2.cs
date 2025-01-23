@@ -111,7 +111,7 @@ public class CarController2 : MonoBehaviour
     public enum DriveMode { RearWheelDrive, FrontWheelDrive, FourWheelDrive }
     public DriveMode driveMode; // Selectable in Inspector
 
-    public Transform frontRayOrigin;
+    public Transform[] frontRayOrigins;
     public Transform backRayOrigin;
 
     void Start()
@@ -283,30 +283,39 @@ public class CarController2 : MonoBehaviour
             }
         }
 
-        float raycastDistance = 0.5f;
+        float raycastDistance = 0.3f;
         LayerMask wallLayer = LayerMask.GetMask("wall");
 
-        Vector3 frontRayDirection = frontRayOrigin.forward;
-        Debug.DrawRay(frontRayOrigin.position, frontRayDirection * raycastDistance, Color.red);
+        //Vector3 frontRayDirection = frontRayOrigin.forward;
+        //Debug.DrawRay(frontRayOrigin.position, frontRayDirection * raycastDistance, Color.red);
 
-        // Front raycast (forward direction)
-        if (Physics.Raycast(frontRayOrigin.position, frontRayOrigin.forward, out RaycastHit frontHit, raycastDistance, wallLayer))
+        // Front raycasts (three positions)
+        foreach (Transform frontRay in frontRayOrigins)
         {
-            Debug.Log("Front is hitting a wall!");
-            // Your logic when the front hits a wall
-            //baseAcceleration = 15f;
-            currentRPM = 1000f;
-            currentGear = 1;
+            Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.red);
+
+            if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit frontHit, raycastDistance, wallLayer))
+            {
+                Debug.Log("Front is hitting a wall!");
+
+                Vector3 collisionNormal = frontHit.normal;
+                Vector3 incomingVelocity = carRigidbody.velocity;
+
+                if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
+                {
+                    Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
+                    carRigidbody.velocity = reflectedVelocity;
+                    carRigidbody.AddForce(collisionNormal * 2f, ForceMode.Impulse);
+                }
+
+                break;
+            }
         }
 
-        // Back raycast (backward direction)
+        // Back raycast (original logic)
         if (Physics.Raycast(backRayOrigin.position, -backRayOrigin.forward, out RaycastHit backHit, raycastDistance, wallLayer))
         {
             Debug.Log("Back is hitting a wall!");
-            // Your logic when the back hits a wall
-            //baseAcceleration = 15f;
-            //currentRPM = 1000f;
-            //currentGear = 1;
         }
 
         HandleDrifting();
