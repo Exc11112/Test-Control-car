@@ -112,7 +112,7 @@ public class CarController2 : MonoBehaviour
     public DriveMode driveMode; // Selectable in Inspector
 
     public Transform[] frontRayOrigins;
-    public Transform backRayOrigin;
+    public Transform[] backRayOrigins;
 
     void Start()
     {
@@ -289,33 +289,43 @@ public class CarController2 : MonoBehaviour
         //Vector3 frontRayDirection = frontRayOrigin.forward;
         //Debug.DrawRay(frontRayOrigin.position, frontRayDirection * raycastDistance, Color.red);
 
-        // Front raycasts (three positions)
         foreach (Transform frontRay in frontRayOrigins)
         {
             Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.red);
 
             if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit frontHit, raycastDistance, wallLayer))
             {
-                Debug.Log("Front is hitting a wall!");
-
-                Vector3 collisionNormal = frontHit.normal;
-                Vector3 incomingVelocity = carRigidbody.velocity;
-
-                if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
-                {
-                    Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
-                    carRigidbody.velocity = reflectedVelocity;
-                    carRigidbody.AddForce(collisionNormal * 2f, ForceMode.Impulse);
-                }
-
+                HandleWallCollision(frontHit.normal);
                 break;
             }
         }
 
-        // Back raycast (original logic)
-        if (Physics.Raycast(backRayOrigin.position, -backRayOrigin.forward, out RaycastHit backHit, raycastDistance, wallLayer))
+        // Rear collision detection (3 rays)
+        foreach (Transform backRay in backRayOrigins)
         {
-            Debug.Log("Back is hitting a wall!");
+            Debug.DrawRay(backRay.position, -backRay.forward * raycastDistance, Color.blue);
+
+            if (Physics.Raycast(backRay.position, -backRay.forward, out RaycastHit backHit, raycastDistance, wallLayer))
+            {
+                HandleWallCollision(backHit.normal);
+                break;
+            }
+        }
+
+        void HandleWallCollision(Vector3 collisionNormal)
+        {
+            Vector3 incomingVelocity = carRigidbody.velocity;
+
+            // Perfect mirror reflection with velocity preservation
+            if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
+            {
+                Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
+                carRigidbody.velocity = reflectedVelocity;
+
+                // Add rotational force for more realistic bounce
+                Vector3 torque = Vector3.Cross(collisionNormal, incomingVelocity.normalized) * 50f;
+                carRigidbody.AddTorque(torque, ForceMode.Impulse);
+            }
         }
 
         HandleDrifting();
