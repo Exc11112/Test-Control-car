@@ -25,7 +25,7 @@ public class DriftScore2 : MonoBehaviour
     public float maxBar3 = 1000f; // Max points for bar3
     public float maxBar4 = 2500f; // Max points for bar4
 
-    private float progressBar2To4 = 0f; // Points used for bar2, bar3, and bar4
+    public float progressBar2To4 = 0f; // Points used for bar2, bar3, and bar4
 
     public float Plustime = 0f;
     public float EnergyIncreaseRate = 10f;
@@ -51,6 +51,10 @@ public class DriftScore2 : MonoBehaviour
     private float wallRaycastCooldown = 0.1f;
     private float lastWallRaycastTime;
 
+    [Header("Victory Configuration")]
+    public GameObject[] victoryUIObjects;
+    public GameObject[] victory3DObjects;
+    public bool activateAllVictoryObjects = true;
 
     private void Start()
     {

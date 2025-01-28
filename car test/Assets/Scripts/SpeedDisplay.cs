@@ -25,7 +25,7 @@ public class SpeedDisplay : MonoBehaviour
 
     public float countdownTime = 300f; // Countdown timer starting at 5 minutes
     private bool isTimerRunning = false;
-    private bool gameEnded = false;
+    [System.NonSerialized] public bool gameEnded = false;
     private bool isNeutral = false; // Update this value based on your game logic
     private bool hasStartedTimer = false;
     private float localTStart;      // Local copy of car.tStart for countdown handling
