@@ -15,12 +15,15 @@ public class GameManager : MonoBehaviour
     {
         if (gameEnded) return;
 
+        Debug.Log($"[GameManager] Active Victory Drifts Count: {activeVictoryDrifts.Count}");
+
         // 1. Activate 3D objects when bars are maxed (but don't end the game)
         foreach (DriftScore2 driftScore in driftScores)
         {
             float totalBarsMax = driftScore.maxBar2 + driftScore.maxBar3 + driftScore.maxBar4;
             if (driftScore.progressBar2To4 >= totalBarsMax && !activeVictoryDrifts.Contains(driftScore))
             {
+                Debug.Log($"Activating 3D objects for {driftScore.name}");
                 SetObjectsActive(driftScore.victory3DObjects, true); // Activate 3D objects
                 activeVictoryDrifts.Add(driftScore); // Track this driftScore for victory checks
             }
@@ -32,10 +35,17 @@ public class GameManager : MonoBehaviour
             CarController2 car = driftScore.car;
             if (car == null) continue;
 
-            if (carIn3DObjectTimes.TryGetValue(car, out float entryTime) && Time.time - entryTime >= 2f)
+            if (carIn3DObjectTimes.TryGetValue(car, out float entryTime))
             {
-                EndGame(true, driftScore);
-                return;
+                float timeInside = Time.time - entryTime;
+                Debug.Log($"[GameManager] Car {car.name} has been in 3D object for {timeInside} seconds.");
+
+                if (timeInside >= 2f)
+                {
+                    Debug.Log("[GameManager] VICTORY CONDITION MET! Ending game.");
+                    EndGame(true, driftScore);
+                    return;
+                }
             }
         }
 
@@ -52,20 +62,25 @@ public class GameManager : MonoBehaviour
 
     public void OnCarEnter3DObject(CarController2 car, DriftScore2 driftScore)
     {
-        // Only track if the driftScore is in the active victory list
         if (activeVictoryDrifts.Contains(driftScore) && !carIn3DObjectTimes.ContainsKey(car))
         {
             carIn3DObjectTimes[car] = Time.time;
+            Debug.Log($"[GameManager] Car {car.name} entered 3D object at {Time.time}");
+            Debug.Log($"[GameManager] Current carIn3DObjectTimes entries: {carIn3DObjectTimes.Count}");
         }
     }
+
 
     public void OnCarExit3DObject(CarController2 car, DriftScore2 driftScore)
     {
         if (carIn3DObjectTimes.ContainsKey(car))
         {
+            Debug.Log($"[GameManager] Car {car.name} exited 3D object at {Time.time}");
             carIn3DObjectTimes.Remove(car);
+            Debug.Log($"[GameManager] Remaining cars in 3D object: {carIn3DObjectTimes.Count}");
         }
     }
+
 
     void EndGame(bool isVictory, DriftScore2 winningDriftScore)
     {
@@ -75,13 +90,13 @@ public class GameManager : MonoBehaviour
 
         if (isVictory && winningDriftScore != null)
         {
-            // Activate victory UI and 3D objects
+            Debug.Log($"[GameManager] Activating victory UI for {winningDriftScore.name}");
             SetObjectsActive(winningDriftScore.victoryUIObjects, true);
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
         }
         else
         {
-            // Activate common defeat objects
+            Debug.Log("[GameManager] Activating defeat UI.");
             SetObjectsActive(gameOverObjects, true);
         }
 
