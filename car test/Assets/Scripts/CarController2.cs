@@ -15,10 +15,7 @@ public class CarController2 : MonoBehaviour
     public float airDrag;
     public float groundDrag;
 
-    //public float driftLateralFriction = 0.5f; // Friction when drifting
     public float normalLateralFriction = 1.0f; // Normal friction for tires
-    //public float oversteerMultiplier = 1.2f; // Multiplier for oversteer effect
-    //public float understeerMultiplier = 0.8f; // Multiplier for understeer effect
     public float maxSteerAngle = 30f; // Maximum steering angle for wheels
     public float driftSteerAngle = 45f; // Steering angle during drift
     public bool isDrifting = false;
@@ -34,10 +31,6 @@ public class CarController2 : MonoBehaviour
 
     public float turnSpeed;
     public float defaultTurnSpeed;
-    //public float highTurnSpeed;
-    //public float lowTurnSpeed;
-    //public float highTurnRadiusAt;
-    //public float lowTurnRadiusAt;
     public float driftThresholdSpeed;
     private float lastTurnInputTime;
     private float turnResetDelay = 0.2f;
@@ -63,8 +56,6 @@ public class CarController2 : MonoBehaviour
     private float shiftDelay = 1f;
     private float lastShiftTime;
 
-    //public float maxRPMRateIncrease;
-
     private bool isManual = false;
     private bool isNeutral = true;
     private float neutralStartTime;
@@ -74,7 +65,6 @@ public class CarController2 : MonoBehaviour
     private float gear1Acceleration;
     private float gear1Deceleration;
 
-    //private bool isCollidingWithWall = false;
     private float originalBaseAcceleration;
 
     public int maxCheckpoints = 5;
@@ -89,7 +79,6 @@ public class CarController2 : MonoBehaviour
 
     public string checkpointLayer = "checkpoint";
     public string fpointLayer = "fpoint";
-    //private bool hasStartedTimer = false;
 
     private bool isEnhancedTurning = false;
 
@@ -115,7 +104,7 @@ public class CarController2 : MonoBehaviour
     public Transform[] backRayOrigins;
     public Transform[] RightRayOrigins;
     public Transform[] LeftRayOrigins;
-    public Animator carAnimator;
+    public Animator[] carAnimators;
 
     private bool isPlayingRightAnim = false;
     private bool isPlayingLeftAnim = false;
@@ -276,8 +265,6 @@ public class CarController2 : MonoBehaviour
             {
                 isDrifting = true;
                 lastTurnInputTime = Time.time;
-                //turnSpeed *= 1.2f;
-                //currentAcceleration *= 1.2f;
             }
             else
             {
@@ -433,33 +420,30 @@ public class CarController2 : MonoBehaviour
 
     void HandleAnimation(bool rightHit, bool leftHit)
     {
-        if (rightHit)
+        foreach (Animator animator in carAnimators)
         {
-            Debug.Log("Setting Right Trigger");
-            //carAnimator.SetTrigger("Ivy Hit Right");
-            carAnimator.SetTrigger("Ivy Hit Right");
+            animator.ResetTrigger("Ivy Hit Right");
+            animator.ResetTrigger("Ivy Hit Left");
+            animator.ResetTrigger("Ivy Idle");
 
-            // Check if trigger is set correctly
-            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
-            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
-        }
-        else if (leftHit)
-        {
-            Debug.Log("Setting Left Trigger");
-            carAnimator.SetTrigger("Ivy Hit Left");
-
-            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
-            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
-        }
-        else
-        {
-            Debug.Log("Setting Idle Trigger");
-            carAnimator.SetTrigger("Ivy Idle");
-
-            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
-            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
+            if (rightHit)
+            {
+                Debug.Log("Setting Right Trigger");
+                animator.SetTrigger("Ivy Hit Right");
+            }
+            else if (leftHit)
+            {
+                Debug.Log("Setting Left Trigger");
+                animator.SetTrigger("Ivy Hit Left");
+            }
+            else
+            {
+                Debug.Log("Setting Idle Trigger");
+                animator.SetTrigger("Ivy Idle");
+            }
         }
     }
+
 
     private void UpdateWheelRotations()
     {

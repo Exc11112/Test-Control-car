@@ -55,6 +55,11 @@ public class DriftScore2 : MonoBehaviour
     public GameObject[] victoryUIObjects;
     public GameObject[] victory3DObjects;
     public bool activateAllVictoryObjects = true;
+    public Animator carAnimator;
+
+    private bool bar2Triggered = false;
+    private bool bar3Triggered = false;
+    private bool bar4Triggered = false;
 
     private void Start()
     {
@@ -231,12 +236,24 @@ public class DriftScore2 : MonoBehaviour
             bar2.value = maxBar2;
             bar3.value = progressBar2To4 - maxBar2;
             bar4.value = 0;
+
+            if (bar3.value >= maxBar3 && !bar3Triggered)
+            {
+                TriggerAnimation("Ivy Like 1");
+                bar3Triggered = true;
+            }
         }
         else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
         {
             bar2.value = maxBar2;
             bar3.value = maxBar3;
             bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
+
+            if (bar4.value >= maxBar4 && !bar4Triggered)
+            {
+                TriggerAnimation("Ivy Like 2");
+                bar4Triggered = true;
+            }
         }
         else
         {
@@ -244,7 +261,26 @@ public class DriftScore2 : MonoBehaviour
             bar3.value = maxBar3;
             bar4.value = maxBar4;
         }
+
+        if (bar2.value >= maxBar2 && !bar2Triggered)
+        {
+            TriggerAnimation("Ivy Like");
+            bar2Triggered = true;
+        }
+
+        if (bar2.value < maxBar2) bar2Triggered = false;
+        if (bar3.value < maxBar3) bar3Triggered = false;
+        if (bar4.value < maxBar4) bar4Triggered = false;
     }
+
+    private void TriggerAnimation(string animTrigger)
+    {
+        if (carAnimator != null)
+        {
+            carAnimator.SetTrigger(animTrigger);
+        }
+    }
+
 
     private void UpdateMultiplierText()
     {
