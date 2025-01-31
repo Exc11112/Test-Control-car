@@ -113,6 +113,13 @@ public class CarController2 : MonoBehaviour
 
     public Transform[] frontRayOrigins;
     public Transform[] backRayOrigins;
+    public Transform[] RightRayOrigins;
+    public Transform[] LeftRayOrigins;
+    public Animator carAnimator;
+
+    private bool isPlayingRightAnim = false;
+    private bool isPlayingLeftAnim = false;
+
 
     void Start()
     {
@@ -286,9 +293,6 @@ public class CarController2 : MonoBehaviour
         float raycastDistance = 0.3f;
         LayerMask wallLayer = LayerMask.GetMask("wall");
 
-        //Vector3 frontRayDirection = frontRayOrigin.forward;
-        //Debug.DrawRay(frontRayOrigin.position, frontRayDirection * raycastDistance, Color.red);
-
         foreach (Transform frontRay in frontRayOrigins)
         {
             Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.red);
@@ -331,6 +335,7 @@ public class CarController2 : MonoBehaviour
         HandleDrifting();
         HandleOversteerUndersteer();
         AdjustAcceleration();
+        HandleRaycasts();
     }
 
     private void FixedUpdate()
@@ -386,6 +391,73 @@ public class CarController2 : MonoBehaviour
         {
             Quaternion toRotateTo = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
             transform.rotation = Quaternion.Slerp(transform.rotation, toRotateTo, alignToGroundTime * Time.deltaTime);
+        }
+    }
+
+    void HandleRaycasts()
+    {
+        float raycastDistance = 0.3f;
+        LayerMask wallLayer = LayerMask.GetMask("wall");
+        bool rightHit = false;
+        bool leftHit = false;
+        Debug.Log("Wall LayerMask value: " + wallLayer.value);
+
+        foreach (Transform rightRay in RightRayOrigins)
+        {
+            Vector3 direction = rightRay.forward;
+            Debug.DrawRay(rightRay.position, direction * raycastDistance, Color.green);
+
+            if (Physics.Raycast(rightRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            {
+                Debug.Log("hitr - Hit " + hit.collider.name);
+                rightHit = true;
+                break;
+            }
+        }
+
+        foreach (Transform leftRay in LeftRayOrigins)
+        {
+            Vector3 direction = leftRay.forward;
+            Debug.DrawRay(leftRay.position, direction * raycastDistance, Color.yellow);
+
+            if (Physics.Raycast(leftRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            {
+                Debug.Log("hitl - Hit " + hit.collider.name);
+                leftHit = true;
+                break;
+            }
+        }
+
+        HandleAnimation(rightHit, leftHit);
+    }
+
+    void HandleAnimation(bool rightHit, bool leftHit)
+    {
+        if (rightHit)
+        {
+            Debug.Log("Setting Right Trigger");
+            //carAnimator.SetTrigger("Ivy Hit Right");
+            carAnimator.SetTrigger("Ivy Hit Right");
+
+            // Check if trigger is set correctly
+            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
+            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
+        }
+        else if (leftHit)
+        {
+            Debug.Log("Setting Left Trigger");
+            carAnimator.SetTrigger("Ivy Hit Left");
+
+            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
+            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
+        }
+        else
+        {
+            Debug.Log("Setting Idle Trigger");
+            carAnimator.SetTrigger("Ivy Idle");
+
+            AnimatorStateInfo stateInfo = carAnimator.GetCurrentAnimatorStateInfo(0);
+            Debug.Log("Current Animator State: " + stateInfo.fullPathHash);
         }
     }
 
@@ -469,13 +541,6 @@ public class CarController2 : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        //if (collision.gameObject.CompareTag("wall"))
-        //{
-        //    //isCollidingWithWall = true;
-        //    baseAcceleration = 10f;
-        //    currentRPM = 1000f;
-        //    currentGear = 1;
-        //}
         if (collision.gameObject.layer == LayerMask.NameToLayer(checkpointLayer) && isTimerRunning)
         {
             float timeAtCheckpoint = timer;
@@ -493,33 +558,6 @@ public class CarController2 : MonoBehaviour
         }
     }
 
-    //void OnCollisionExit(Collision collision)
-    //{
-    //    if (collision.gameObject.CompareTag("wall"))
-    //    {
-    //        /*isCollidingWithWall = false*/;
-    //        baseAcceleration = originalBaseAcceleration;
-    //    }
-    //}
-
-    //void OnTriggerStay(Collider collision)
-    //{
-    //    // Check if the object collided with has the layer 'wall'
-    //    if (collision.gameObject.layer == LayerMask.NameToLayer("wall"))
-    //    {
-    //        Debug.Log("hit2");
-    //        // Check if this object's layer is 'ramcheck'
-    //        if (gameObject.layer == LayerMask.NameToLayer("ramcheck"))
-    //        {
-    //            // Apply speed adjustment
-    //            baseAcceleration = 10f;
-    //            currentRPM = 1000f;
-    //            currentGear = 1;
-    //            currentSpeed = Mathf.Clamp(currentSpeed, 0, maxFwdSpeed) * (-0.2f * Time.deltaTime);
-    //            Debug.Log("hit");
-    //        }
-    //    }
-    //}
     void HandleDrifting()
     {
         if (isDrifting)
