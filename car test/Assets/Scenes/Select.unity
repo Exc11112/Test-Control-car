@@ -263,7 +263,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 132399143}
-  - component: {fileID: 132399144}
   m_Layer: 14
   m_Name: WcFW_R
   m_TagString: Untagged
@@ -287,45 +286,6 @@ Transform:
   - {fileID: 949372645}
   m_Father: {fileID: 1664580281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!146 &132399144
-WheelCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 132399142}
-  serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.27
-  m_SuspensionSpring:
-    spring: 50000
-    damper: 20000
-    targetPosition: 0.5
-  m_SuspensionDistance: 0.4
-  m_ForceAppPointDistance: 0.57
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
-  m_ForwardFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_SidewaysFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_Enabled: 1
-  m_ProvidesContacts: 0
 --- !u!1 &191670894
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,7 +888,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 312303945}
-  - component: {fileID: 312303946}
   m_Layer: 14
   m_Name: WcBW_L
   m_TagString: Untagged
@@ -952,45 +911,6 @@ Transform:
   - {fileID: 1643044338}
   m_Father: {fileID: 1664580281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!146 &312303946
-WheelCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 312303944}
-  serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.27
-  m_SuspensionSpring:
-    spring: 50000
-    damper: 20000
-    targetPosition: 0.5
-  m_SuspensionDistance: 0.4
-  m_ForceAppPointDistance: 0.57
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
-  m_ForwardFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_SidewaysFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_Enabled: 1
-  m_ProvidesContacts: 0
 --- !u!1 &319646121
 GameObject:
   m_ObjectHideFlags: 0
@@ -4856,7 +4776,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1763487770}
-  - component: {fileID: 1763487771}
   m_Layer: 14
   m_Name: WcFW_L
   m_TagString: Untagged
@@ -4880,45 +4799,6 @@ Transform:
   - {fileID: 275911807}
   m_Father: {fileID: 1664580281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!146 &1763487771
-WheelCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1763487769}
-  serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.27
-  m_SuspensionSpring:
-    spring: 50000
-    damper: 20000
-    targetPosition: 0.5
-  m_SuspensionDistance: 0.4
-  m_ForceAppPointDistance: 0.57
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
-  m_ForwardFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_SidewaysFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_Enabled: 1
-  m_ProvidesContacts: 0
 --- !u!1 &1766488515
 GameObject:
   m_ObjectHideFlags: 0
@@ -5169,7 +5049,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1915333789}
-  - component: {fileID: 1915333790}
   m_Layer: 14
   m_Name: WcBW_R
   m_TagString: Untagged
@@ -5193,45 +5072,6 @@ Transform:
   - {fileID: 482794748}
   m_Father: {fileID: 1664580281}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!146 &1915333790
-WheelCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1915333788}
-  serializedVersion: 2
-  m_Center: {x: 0, y: 0, z: 0}
-  m_Radius: 0.27
-  m_SuspensionSpring:
-    spring: 50000
-    damper: 20000
-    targetPosition: 0.5
-  m_SuspensionDistance: 0.4
-  m_ForceAppPointDistance: 0.57
-  m_Mass: 20
-  m_WheelDampingRate: 0.25
-  m_ForwardFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_SidewaysFriction:
-    m_ExtremumSlip: 6
-    m_ExtremumValue: 1
-    m_AsymptoteSlip: 6
-    m_AsymptoteValue: 1
-    m_Stiffness: 1
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_Enabled: 1
-  m_ProvidesContacts: 0
 --- !u!1 &1925985027
 GameObject:
   m_ObjectHideFlags: 0

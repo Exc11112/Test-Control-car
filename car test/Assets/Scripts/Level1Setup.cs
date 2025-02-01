@@ -9,10 +9,12 @@ public class Level1Setup : MonoBehaviour
     public GameObject[] cars;
 
     [Header("Characters")]
-    public GameObject[] characters;
+    public GameObject[] characters1; // UI elements for character index 0
+    public GameObject[] characters2; // UI elements for character index 1
 
     [Header("Camera")]
     public DriftCamera driftCamera; // Reference to the DriftCamera in the scene
+
     void Start()
     {
         SetupScene();
@@ -63,14 +65,22 @@ public class Level1Setup : MonoBehaviour
 
     private void SetupScene()
     {
+        // Activate the correct car
         if (SelectionData.SelectedCarIndex >= 0 && SelectionData.SelectedCarIndex < cars.Length)
         {
             ActivateGameObject(cars, SelectionData.SelectedCarIndex);
         }
 
-        if (SelectionData.SelectedCharacterIndex >= 0 && SelectionData.SelectedCharacterIndex < characters.Length)
+        // Activate the correct UI based on SelectedCharacterIndex
+        if (SelectionData.SelectedCharacterIndex == 0)
         {
-            ActivateGameObject(characters, SelectionData.SelectedCharacterIndex);
+            ActivateAllGameObjects(characters1);
+            DeactivateAllGameObjects(characters2);
+        }
+        else if (SelectionData.SelectedCharacterIndex == 1)
+        {
+            ActivateAllGameObjects(characters2);
+            DeactivateAllGameObjects(characters1);
         }
     }
 
@@ -81,6 +91,28 @@ public class Level1Setup : MonoBehaviour
             if (objects[i] != null)
             {
                 objects[i].SetActive(i == activeIndex);
+            }
+        }
+    }
+
+    private void ActivateAllGameObjects(GameObject[] objects)
+    {
+        foreach (GameObject obj in objects)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(true);
+            }
+        }
+    }
+
+    private void DeactivateAllGameObjects(GameObject[] objects)
+    {
+        foreach (GameObject obj in objects)
+        {
+            if (obj != null)
+            {
+                obj.SetActive(false);
             }
         }
     }
