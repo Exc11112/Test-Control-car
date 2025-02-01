@@ -61,6 +61,9 @@ public class DriftScore2 : MonoBehaviour
     private bool bar3Triggered = false;
     private bool bar4Triggered = false;
 
+    private bool wasDrifting = false;
+    private bool wasAboveSpeedThreshold = false;
+
     private void Start()
     {
         // Initialize sliders
@@ -93,14 +96,31 @@ public class DriftScore2 : MonoBehaviour
 
     void Update()
     {
+        bool isCurrentlyDrifting = car.isDrifting;
+        bool isCurrentlyAboveSpeedThreshold = car.currentSpeed >= car.driftThresholdSpeed;
+
+        // If the car WAS drifting but now it's not, trigger an animation
+        if (wasDrifting && !isCurrentlyDrifting)
+        {
+            PlayBarAnimation();
+        }
+
+        // If the car WAS below the speed threshold but now it's above, trigger an animation
+        if (!wasAboveSpeedThreshold && isCurrentlyAboveSpeedThreshold)
+        {
+            PlayBarAnimation();
+        }
+
+        wasDrifting = isCurrentlyDrifting;
+        wasAboveSpeedThreshold = isCurrentlyAboveSpeedThreshold;
+
         if (car.isDrifting)
         {
-            float speed = carRigidbody.velocity.magnitude; // Assume car has CurrentSpeed property
+            float speed = carRigidbody.velocity.magnitude;
             driftScore += Time.deltaTime * speed * driftMultiplier;
             driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
-
-            // Update drift time and multiplier
             driftTime += Time.deltaTime;
+
             if (driftTime >= multiplierIncreaseInterval && driftMultiplier < 5f)
             {
                 driftMultiplier++;
@@ -109,7 +129,7 @@ public class DriftScore2 : MonoBehaviour
         }
         else
         {
-            driftTime = 0f; // Reset drift time when not drifting
+            driftTime = 0f;
         }
 
         UpdateBar1();
@@ -307,4 +327,20 @@ public class DriftScore2 : MonoBehaviour
             UpdateBarsVisual();
         }
     }
+    private void PlayBarAnimation()
+    {
+        if (bar4.value >= maxBar4)
+        {
+            TriggerAnimation("Ivy Like 2");
+        }
+        else if (bar3.value >= maxBar3)
+        {
+            TriggerAnimation("Ivy Like 1");
+        }
+        else if (bar2.value >= maxBar2)
+        {
+            TriggerAnimation("Ivy Like");
+        }
+    }
+
 }

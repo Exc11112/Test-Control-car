@@ -106,10 +106,6 @@ public class CarController2 : MonoBehaviour
     public Transform[] LeftRayOrigins;
     public Animator[] carAnimators;
 
-    private bool isPlayingRightAnim = false;
-    private bool isPlayingLeftAnim = false;
-
-
     void Start()
     {
         carRigidbody = GetComponent<Rigidbody>();
@@ -387,6 +383,7 @@ public class CarController2 : MonoBehaviour
         LayerMask wallLayer = LayerMask.GetMask("wall");
         bool rightHit = false;
         bool leftHit = false;
+        bool frontHit = false;
         Debug.Log("Wall LayerMask value: " + wallLayer.value);
 
         foreach (Transform rightRay in RightRayOrigins)
@@ -398,6 +395,19 @@ public class CarController2 : MonoBehaviour
             {
                 Debug.Log("hitr - Hit " + hit.collider.name);
                 rightHit = true;
+                break;
+            }
+        }
+
+        foreach (Transform frontRay in frontRayOrigins)
+        {
+            Vector3 direction = frontRay.forward;
+            Debug.DrawRay(frontRay.position, direction * raycastDistance, Color.blue);
+
+            if (Physics.Raycast(frontRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            {
+                Debug.Log("hitl - Hit " + hit.collider.name);
+                frontHit = true;
                 break;
             }
         }
@@ -415,16 +425,17 @@ public class CarController2 : MonoBehaviour
             }
         }
 
-        HandleAnimation(rightHit, leftHit);
+        HandleAnimation(rightHit, leftHit, frontHit);
     }
 
-    void HandleAnimation(bool rightHit, bool leftHit)
+    void HandleAnimation(bool rightHit, bool leftHit, bool frontHit)
     {
         foreach (Animator animator in carAnimators)
         {
             animator.ResetTrigger("Ivy Hit Right");
             animator.ResetTrigger("Ivy Hit Left");
             animator.ResetTrigger("Ivy Idle");
+            animator.ResetTrigger("Ivy Hit Front");
 
             if (rightHit)
             {
@@ -435,6 +446,10 @@ public class CarController2 : MonoBehaviour
             {
                 Debug.Log("Setting Left Trigger");
                 animator.SetTrigger("Ivy Hit Left");
+            }
+            else if (frontHit)
+            {
+                animator.SetTrigger("Ivy Hit Front");
             }
             else
             {
