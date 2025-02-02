@@ -1,15 +1,18 @@
-using UnityEngine;
 using System.Collections.Generic;
+using System;
+using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public DriftScore2[] driftScores;    // Array of drift score components
     public SpeedDisplay[] speedDisplays; // Array of speed display components
     public GameObject[] gameOverObjects; // Common defeat objects
+    public GameObject[] gameWinObjects;
 
     private bool gameEnded;
     private Dictionary<CarController2, float> carIn3DObjectTimes = new Dictionary<CarController2, float>();
     private List<DriftScore2> activeVictoryDrifts = new List<DriftScore2>(); // Tracks active victory conditions
+
 
     void Update()
     {
@@ -70,7 +73,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     public void OnCarExit3DObject(CarController2 car, DriftScore2 driftScore)
     {
         if (carIn3DObjectTimes.ContainsKey(car))
@@ -81,18 +83,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
     void EndGame(bool isVictory, DriftScore2 winningDriftScore)
     {
         gameEnded = true;
-        Time.timeScale = 0f; // Pause the game
+        Time.timeScale = 0.2f; // Pause the game
         Cursor.lockState = CursorLockMode.None;
 
         if (isVictory && winningDriftScore != null)
         {
-            Debug.Log($"[GameManager] Activating victory UI for {winningDriftScore.name}");
             SetObjectsActive(winningDriftScore.victoryUIObjects, true);
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
+            SetObjectsActive(winningDriftScore.gameWinObjects, true);
+
+            // Now call ReceiveVictoryIndex after the objects are activated
+            int victoryIndex = Array.IndexOf(driftScores, winningDriftScore); // Get the index of the winning DriftScore2
+            ReceiveVictoryIndex(victoryIndex);
+
+            Debug.Log($"[GameManager] Activating victory UI for {winningDriftScore.name}");
         }
         else
         {
@@ -118,4 +125,43 @@ public class GameManager : MonoBehaviour
             if (obj != null) obj.SetActive(state);
         }
     }
+
+    public void ReceiveVictoryIndex(int index)
+    {
+        // Check if the index is valid for the driftScores array
+        if (driftScores == null || driftScores.Length == 0)
+        {
+            Debug.LogWarning("[GameManager] No DriftScore2 objects available in driftScores array.");
+            return;
+        }
+
+        // Ensure the index is within bounds (1 to driftScores.Length)
+        if (index < 1 || index > driftScores.Length)
+        {
+            Debug.LogWarning($"[GameManager] Invalid victory index received: {index}. Valid range is 1 to {driftScores.Length}.");
+            return;
+        }
+
+        // Access the winning DriftScore2 object (now with valid index)
+        DriftScore2 winningDriftScore = driftScores[index - 1];
+
+        if (winningDriftScore != null && winningDriftScore.victoryUIObjects != null && winningDriftScore.victoryUIObjects.Length > 0)
+        {
+            // Deactivate all victory UI objects first (to ensure only the selected one is shown)
+            foreach (GameObject obj in winningDriftScore.victoryUIObjects)
+            {
+                obj.SetActive(false);
+            }
+
+            // Activate the correct UI object based on the adjusted index
+            winningDriftScore.victoryUIObjects[index - 1].SetActive(true);
+
+            Debug.Log($"[GameManager] Activated victory UI object at adjusted index {index - 1}. Received original index: {index}");
+        }
+        else
+        {
+            Debug.LogWarning($"[GameManager] DriftScore2 or victoryUIObjects not set correctly for {winningDriftScore.name}. Skipping.");
+        }
+    }
+
 }

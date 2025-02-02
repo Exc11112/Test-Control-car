@@ -53,7 +53,8 @@ public class DriftScore2 : MonoBehaviour
 
     [Header("Victory Configuration")]
     public GameObject[] victoryUIObjects;
-    public GameObject[] victory3DObjects;
+    public GameObject[] victory3DObjects; 
+    public GameObject[] gameWinObjects;
     public bool activateAllVictoryObjects = true;
     public Animator carAnimator;
 

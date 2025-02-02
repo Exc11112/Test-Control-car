@@ -10,14 +10,14 @@ public class Victory3DObject : MonoBehaviour
     {
         Debug.Log($"[Victory3DObject] Trigger Enter detected from: {other.name}");
 
-        // 1. Check layer first
+        // Ensure the collider is part of the car layer
         if (((1 << other.gameObject.layer) & carLayer) == 0)
         {
             Debug.Log($"[Victory3DObject] {other.name} is not in the car layer, ignoring.");
             return;
         }
 
-        // 2. Find the Rigidbody at the root level
+        // Retrieve the Rigidbody and CarController2 component
         Rigidbody rb = other.attachedRigidbody;
         if (rb == null)
         {
@@ -25,7 +25,6 @@ public class Victory3DObject : MonoBehaviour
             return;
         }
 
-        // 3. Get CarController2 from the Rigidbody's GameObject
         CarController2 car = rb.GetComponent<CarController2>();
         if (car == null)
         {
@@ -35,13 +34,43 @@ public class Victory3DObject : MonoBehaviour
 
         Debug.Log($"[Victory3DObject] Car {car.name} entered the victory zone.");
 
-        // 4. Ensure associatedDriftScore is not null or empty
+        // Check if associated drift scores are assigned
         if (associatedDriftScore == null || associatedDriftScore.Length == 0)
         {
             Debug.LogWarning("[Victory3DObject] associatedDriftScore is null or empty.");
             return;
         }
 
+        // Determine the victory index based on the object's name
+        int victoryIndex = 0;
+        switch (gameObject.name)
+        {
+            case "Finish Point1":
+                victoryIndex = 1;
+                break;
+            case "Finish Point2":
+                victoryIndex = 2;
+                break;
+            case "Finish Point3":
+                victoryIndex = 3;
+                break;
+            default:
+                Debug.LogWarning("[Victory3DObject] Unknown finish point name, ignoring.");
+                return;
+        }
+
+        // Send the victory index to GameManager
+        Debug.Log($"[Victory3DObject] Sending victory index {victoryIndex} to GameManager.");
+        if (gameManager != null)
+        {
+            gameManager.ReceiveVictoryIndex(victoryIndex);
+        }
+        else
+        {
+            Debug.LogError("[Victory3DObject] gameManager is not assigned! Cannot send victory index.");
+        }
+
+        // Notify the GameManager about the car entering the 3D object area
         bool carFound = false;
         foreach (DriftScore2 driftScore in associatedDriftScore)
         {
@@ -56,7 +85,7 @@ public class Victory3DObject : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogError("[Victory3DObject] gameManager is not assigned! Make sure it's set in the Inspector.");
+                    Debug.LogError("[Victory3DObject] gameManager is not assigned! Cannot notify enter event.");
                 }
             }
         }
@@ -71,14 +100,14 @@ public class Victory3DObject : MonoBehaviour
     {
         Debug.Log($"[Victory3DObject] Trigger Exit detected from: {other.name}");
 
-        // 1. Check layer first
+        // Ensure the collider is part of the car layer
         if (((1 << other.gameObject.layer) & carLayer) == 0)
         {
             Debug.Log($"[Victory3DObject] {other.name} is not in the car layer, ignoring.");
             return;
         }
 
-        // 2. Find the Rigidbody at the root level
+        // Retrieve the Rigidbody and CarController2 component
         Rigidbody rb = other.attachedRigidbody;
         if (rb == null)
         {
@@ -86,7 +115,6 @@ public class Victory3DObject : MonoBehaviour
             return;
         }
 
-        // 3. Get CarController2 from the Rigidbody's GameObject
         CarController2 car = rb.GetComponent<CarController2>();
         if (car == null)
         {
@@ -96,6 +124,7 @@ public class Victory3DObject : MonoBehaviour
 
         Debug.Log($"[Victory3DObject] Car {car.name} exited the victory zone.");
 
+        // Notify the GameManager about the car exiting the 3D object area
         foreach (DriftScore2 driftScore in associatedDriftScore)
         {
             if (driftScore != null && car == driftScore.car)
