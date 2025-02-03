@@ -248,9 +248,21 @@ public class DriftScore2 : MonoBehaviour
     {
         if (progressBar2To4 <= maxBar2)
         {
+            bool wasBar2Increasing = bar2.value < progressBar2To4; // Check if bar2 was increasing
             bar2.value = progressBar2To4;
             bar3.value = 0;
             bar4.value = 0;
+
+            if (wasBar2Increasing && !bar2Triggered)
+            {
+                TriggerAnimation("Ivy Like 0"); // Play while bar2 is collecting
+            }
+
+            if (bar2.value >= maxBar2 && !bar2Triggered)
+            {
+                TriggerAnimation("Ivy Like"); // Play when bar2 is FULL
+                bar2Triggered = true;
+            }
         }
         else if (progressBar2To4 <= maxBar2 + maxBar3)
         {
@@ -276,23 +288,8 @@ public class DriftScore2 : MonoBehaviour
                 bar4Triggered = true;
             }
         }
-        else
-        {
-            bar2.value = maxBar2;
-            bar3.value = maxBar3;
-            bar4.value = maxBar4;
-        }
-
-        if (bar2.value >= maxBar2 && !bar2Triggered)
-        {
-            TriggerAnimation("Ivy Like");
-            bar2Triggered = true;
-        }
-
-        if (bar2.value < maxBar2) bar2Triggered = false;
-        if (bar3.value < maxBar3) bar3Triggered = false;
-        if (bar4.value < maxBar4) bar4Triggered = false;
     }
+
 
     private void TriggerAnimation(string animTrigger)
     {
