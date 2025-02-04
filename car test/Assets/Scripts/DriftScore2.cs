@@ -253,9 +253,10 @@ public class DriftScore2 : MonoBehaviour
             bar3.value = 0;
             bar4.value = 0;
 
-            if (wasBar2Increasing && !bar2Triggered)
+            if (/*wasBar2Increasing*/bar2.value <= maxBar2 && !bar2Triggered)
             {
                 TriggerAnimation("Ivy Like 0"); // Play while bar2 is collecting
+                bar2Triggered = true;
             }
 
             if (bar2.value >= maxBar2 && !bar2Triggered)
@@ -338,6 +339,10 @@ public class DriftScore2 : MonoBehaviour
         else if (bar2.value >= maxBar2)
         {
             TriggerAnimation("Ivy Like");
+        }
+        else if (bar2.value <= maxBar2)
+        {
+            TriggerAnimation("Ivy Like 0");
         }
     }
 
