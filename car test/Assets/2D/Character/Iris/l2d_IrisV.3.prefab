@@ -7351,6 +7351,7 @@ GameObject:
   - component: {fileID: 7094309342880941816}
   - component: {fileID: 4479084127003196704}
   - component: {fileID: 5960531140192847890}
+  - component: {fileID: 7135133219785169344}
   m_Layer: 0
   m_Name: l2d_IrisV.3
   m_TagString: Untagged
@@ -7489,6 +7490,60 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7135133219785169344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8267506201280650907}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speedDisplay: {fileID: 0}
+  car: {fileID: 0}
+  carRigidbody: {fileID: 0}
+  driftScoreText: {fileID: 0}
+  multiplierText: {fileID: 0}
+  fpointLayer: fpoint
+  wallTag: wall
+  bar1: {fileID: 0}
+  bar2: {fileID: 0}
+  bar3: {fileID: 0}
+  bar4: {fileID: 0}
+  maxBar1: 100
+  maxBar2: 500
+  maxBar3: 1000
+  maxBar4: 1500
+  progressBar2To4: 0
+  Plustime: 10
+  EnergyIncreaseRate: 5
+  HeartIncreaseRate: 15
+  timePenalty: 5
+  scorePenalty: 50
+  wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
+  wallRaycastDistance: 0.3
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 8192
+  victoryUIObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  victory3DObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  gameWinObjects:
+  - {fileID: 0}
+  - {fileID: 0}
+  activateAllVictoryObjects: 1
+  carAnimator: {fileID: 5960531140192847890}
 --- !u!1 &8406601999117053774
 GameObject:
   m_ObjectHideFlags: 0

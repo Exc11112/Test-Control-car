@@ -198,7 +198,7 @@ public class DriftScore2 : MonoBehaviour
         {
             progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
             UpdateBarsVisual(); // Add this new method call
-            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
 
@@ -208,6 +208,14 @@ public class DriftScore2 : MonoBehaviour
         UpdateMultiplierText();
     }
 
+    private void StartReactivateCoroutine(GameObject obj, float delay)
+    {
+        // If none are active, fallback to running on this script (if active)
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(ReactivateGameObject(obj, delay));
+        }
+    }
 
 
     // Coroutine to reactivate the game object
