@@ -524,11 +524,52 @@ public class CarController2 : MonoBehaviour
 
     private void ShiftUp()
     {
+        StartCoroutine(ShiftUpCoroutine());
+    }
+
+    private IEnumerator ShiftUpCoroutine()
+    {
         currentGear++;
         lastShiftTime = Time.time;
         AdjustAcceleration();
-        currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
+
+        float rpmDrop = 0f;
+        switch (currentGear)
+        {
+            case 1: rpmDrop = 2000f; break;
+            case 2: rpmDrop = 1800f; break;
+            case 3: rpmDrop = 1500f; break;
+            case 4: rpmDrop = 1200f; break;
+            default: rpmDrop = 1000f; break;
+        }
+
+        float targetRPM = Mathf.Clamp(currentRPM - rpmDrop, minRPM, maxRPM);
+        float startRPM = currentRPM;
+        float elapsedTime = 0f;
+        float duration = 0.5f; // Time in seconds to smoothly drop RPM
+        bool isHoldingRPM = true;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            currentRPM = Mathf.Lerp(startRPM, targetRPM, elapsedTime / duration);
+            yield return null;
+        }
+
+        currentRPM = targetRPM;
+
+        // **Hold the dropped RPM for a short duration before allowing recalculations**
+        yield return new WaitForSeconds(0.5f);
+        isHoldingRPM = false;
     }
+
+    //private void ShiftUp()
+    //{
+    //    currentGear++;
+    //    lastShiftTime = Time.time;
+    //    AdjustAcceleration();
+    //    currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
+    //}
 
     private void ShiftDown()
     {
