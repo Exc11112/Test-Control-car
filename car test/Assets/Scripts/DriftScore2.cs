@@ -190,7 +190,7 @@ public class DriftScore2 : MonoBehaviour
                 bar1.value = 0f;
                 if (speedDisplay != null) speedDisplay.countdownTime += Plustime;
             }
-            StartCoroutine(ReactivateGameObject(collision.gameObject, Random.Range(15f, 20f)));
+            StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f)); ;
             collision.gameObject.SetActive(false);
         }
 
