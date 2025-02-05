@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CarController2 : MonoBehaviour
 {
-    private float moveInput;
+    public float moveInput;
     public float turnInput;
     private bool isCarGrounded;
     public float currentSpeed;
@@ -105,6 +105,7 @@ public class CarController2 : MonoBehaviour
     public Transform[] RightRayOrigins;
     public Transform[] LeftRayOrigins;
     public Animator[] carAnimators;
+    public GameObject Backlight;
 
     void Start()
     {
@@ -271,6 +272,15 @@ public class CarController2 : MonoBehaviour
                     AdjustAcceleration();
                 }
             }
+        }
+
+        if (moveInput < 0)
+        {
+            Backlight.SetActive(true);
+        }
+        else
+        {
+            Backlight.SetActive(false);
         }
 
         float raycastDistance = 0.3f;
