@@ -112,6 +112,13 @@ public class DriftScore2 : MonoBehaviour
             PlayBarAnimation();
         }
 
+        if (!wasDrifting && isCurrentlyDrifting)
+        {
+            bar2Triggered = false;
+            bar3Triggered = false;
+            bar4Triggered = false;
+        }
+
         wasDrifting = isCurrentlyDrifting;
         wasAboveSpeedThreshold = isCurrentlyAboveSpeedThreshold;
 
@@ -124,8 +131,10 @@ public class DriftScore2 : MonoBehaviour
 
             if (driftTime >= multiplierIncreaseInterval && driftMultiplier < 5f)
             {
+                currentMultiplier++;
                 driftMultiplier++;
                 driftTime = 0f;
+                UpdateMultiplierText();
             }
         }
         else
@@ -188,16 +197,16 @@ public class DriftScore2 : MonoBehaviour
             if (bar1.value >= maxBar1)
             {
                 bar1.value = 0f;
-                if (speedDisplay != null) speedDisplay.countdownTime += Plustime;
+                if (speedDisplay != null) speedDisplay.countdownTime += timePlusIncrement;
             }
-            StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f)); ;
+            StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
 
         if (collision.gameObject.CompareTag("HeartPlus"))
         {
             progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
-            UpdateBarsVisual(); // Add this new method call
+            UpdateBarsVisual();
             StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
@@ -229,13 +238,10 @@ public class DriftScore2 : MonoBehaviour
     {
         if (!car.isDrifting) return;
 
-        float increment = Time.deltaTime * EnergyIncreaseRate; // Fixed increment rate for bar1
-        bar1.value += increment;
-
+        bar1.value += Time.deltaTime * EnergyIncreaseRate;
         if (bar1.value >= maxBar1)
         {
             bar1.value = 0f;
-
             if (speedDisplay != null)
             {
                 speedDisplay.countdownTime += Plustime;
@@ -245,60 +251,21 @@ public class DriftScore2 : MonoBehaviour
     private void UpdateBar2To4()
     {
         if (!car.isDrifting) return;
-
-        // Only handle automatic increment here
-        float increment = Time.deltaTime * HeartIncreaseRate;
-        progressBar2To4 = Mathf.Min(progressBar2To4 + increment, maxBar2 + maxBar3 + maxBar4);
-        UpdateBarsVisual(); // Update visuals after automatic increment
+        progressBar2To4 = Mathf.Min(progressBar2To4 + (Time.deltaTime * HeartIncreaseRate), maxBar2 + maxBar3 + maxBar4);
+        UpdateBarsVisual();
     }
 
     private void UpdateBarsVisual()
     {
-        if (progressBar2To4 <= maxBar2)
-        {
-            bool wasBar2Increasing = bar2.value < progressBar2To4; // Check if bar2 was increasing
-            bar2.value = progressBar2To4;
-            bar3.value = 0;
-            bar4.value = 0;
+        bar2.value = Mathf.Min(progressBar2To4, maxBar2);
+        bar3.value = Mathf.Min(Mathf.Max(0, progressBar2To4 - maxBar2), maxBar3);
+        bar4.value = Mathf.Max(0, progressBar2To4 - maxBar2 - maxBar3);
 
-            if (/*wasBar2Increasing*/bar2.value <= maxBar2 && !bar2Triggered)
-            {
-                TriggerAnimation("Ivy Like 0"); // Play while bar2 is collecting
-                bar2Triggered = true;
-            }
-
-            if (bar2.value >= maxBar2 && !bar2Triggered)
-            {
-                TriggerAnimation("Ivy Like"); // Play when bar2 is FULL
-                bar2Triggered = true;
-            }
-        }
-        else if (progressBar2To4 <= maxBar2 + maxBar3)
-        {
-            bar2.value = maxBar2;
-            bar3.value = progressBar2To4 - maxBar2;
-            bar4.value = 0;
-
-            if (bar3.value >= maxBar3 && !bar3Triggered)
-            {
-                TriggerAnimation("Ivy Like 1");
-                bar3Triggered = true;
-            }
-        }
-        else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
-        {
-            bar2.value = maxBar2;
-            bar3.value = maxBar3;
-            bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
-
-            if (bar4.value >= maxBar4 && !bar4Triggered)
-            {
-                TriggerAnimation("Ivy Like 2");
-                bar4Triggered = true;
-            }
-        }
+        if (!bar2Triggered && bar2.value > 0 && bar2.value < maxBar2) { TriggerAnimation("Ivy Like 0"); bar2Triggered = true; }
+        if (bar2.value >= maxBar2 && !bar2Triggered) { TriggerAnimation("Ivy Like"); bar2Triggered = true; }
+        if (bar3.value >= maxBar3 && !bar3Triggered) { TriggerAnimation("Ivy Like 1"); bar3Triggered = true; }
+        if (bar4.value >= maxBar4 && !bar4Triggered) { TriggerAnimation("Ivy Like 2"); bar4Triggered = true; }
     }
-
 
     private void TriggerAnimation(string animTrigger)
     {
