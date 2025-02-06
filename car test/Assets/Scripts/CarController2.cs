@@ -107,6 +107,10 @@ public class CarController2 : MonoBehaviour
     public Animator[] carAnimators;
     public GameObject Backlight;
 
+    public AudioClip[] collisionSounds; // Assign two sounds in the Inspector
+    public AudioSource audioSource;
+    private bool canPlaySound = true; // Cooldown control
+
     void Start()
     {
         carRigidbody = GetComponent<Rigidbody>();
@@ -387,6 +391,23 @@ public class CarController2 : MonoBehaviour
 
         // Stop drifting when hitting a wall
         isDrifting = false;
+
+        // Play a random collision sound if available
+        if (canPlaySound && collisionSounds.Length > 0)
+        {
+            // Play sound IMMEDIATELY
+            int randomIndex = Random.Range(0, collisionSounds.Length);
+            audioSource.PlayOneShot(collisionSounds[randomIndex]);
+
+            // Start cooldown
+            StartCoroutine(SoundCooldown());
+        }
+    }
+    IEnumerator SoundCooldown()
+    {
+        canPlaySound = false; // Block new sounds
+        yield return new WaitForSeconds(0.5f);
+        canPlaySound = true; // Re-enable sounds
     }
 
     void HandleRaycasts()

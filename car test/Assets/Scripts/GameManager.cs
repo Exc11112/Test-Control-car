@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +13,10 @@ public class GameManager : MonoBehaviour
     private bool gameEnded;
     private Dictionary<CarController2, float> carIn3DObjectTimes = new Dictionary<CarController2, float>();
     private List<DriftScore2> activeVictoryDrifts = new List<DriftScore2>(); // Tracks active victory conditions
+    public AudioSource[] audioSources;  // Assign in Inspector
+    public AudioClip victorySound;  // Assign your sound clip in inspector
+    private int lastUsedSourceIndex = 0;
+    private HashSet<CarController2> carsThatPlayedSound = new HashSet<CarController2>();
 
     void Update()
     {
@@ -35,6 +40,13 @@ public class GameManager : MonoBehaviour
             if (carIn3DObjectTimes.TryGetValue(car, out float entryTime))
             {
                 float timeInside = Time.time - entryTime;
+
+                if (timeInside >= 2f && !carsThatPlayedSound.Contains(car))
+                {
+                    PlayVictorySound();
+                    carsThatPlayedSound.Add(car);
+                }
+
                 if (timeInside >= 2f)
                 {
                     EndGame(true, driftScore);
@@ -52,6 +64,20 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+    void PlayVictorySound()
+    {
+        if (victorySound == null || audioSources == null) return;
+
+        // Find the first available audio source that's not playing
+        foreach (AudioSource source in audioSources)
+        {
+            if (source != null && !source.isPlaying)
+            {
+                source.PlayOneShot(victorySound);
+                break; // Stop after finding first available
+            }
+        }
+    }
 
     public void OnCarEnter3DObject(CarController2 car, DriftScore2 driftScore)
     {
@@ -63,10 +89,8 @@ public class GameManager : MonoBehaviour
 
     public void OnCarExit3DObject(CarController2 car, DriftScore2 driftScore)
     {
-        if (carIn3DObjectTimes.ContainsKey(car))
-        {
-            carIn3DObjectTimes.Remove(car);
-        }
+        carIn3DObjectTimes.Remove(car);
+        carsThatPlayedSound.Remove(car);
     }
 
     void EndGame(bool isVictory, DriftScore2 winningDriftScore)

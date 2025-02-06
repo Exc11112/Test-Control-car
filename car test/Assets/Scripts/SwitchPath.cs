@@ -8,6 +8,7 @@ public class SwitchParth : MonoBehaviour
     public string switch2Layer = "switch2";
     public string swap1Layer = "swap1";
     public string swap2Layer = "swap2";
+    public float ReactiveTime = 30f;
 
     private List<GameObject> deactivatedObjects = new List<GameObject>();
 
@@ -20,6 +21,10 @@ public class SwitchParth : MonoBehaviour
                 DeactivateObjectsInLayer(swap1Layer);
                 DeactivateObjectsInLayer(switch1Layer);
                 DeactivateObjectsInLayer(switch2Layer);
+
+                // Cancel any pending reactivation and schedule a new one
+                CancelInvoke(nameof(ReactivateDeactivatedLayers));
+                Invoke(nameof(ReactivateDeactivatedLayers), ReactiveTime);
             }
 
             if (gameObject.layer == LayerMask.NameToLayer(switch2Layer))
@@ -27,6 +32,10 @@ public class SwitchParth : MonoBehaviour
                 DeactivateObjectsInLayer(swap2Layer);
                 DeactivateObjectsInLayer(switch1Layer);
                 DeactivateObjectsInLayer(switch2Layer);
+
+                // Cancel any pending reactivation and schedule a new one
+                CancelInvoke(nameof(ReactivateDeactivatedLayers));
+                Invoke(nameof(ReactivateDeactivatedLayers), ReactiveTime);
             }
         }
     }
@@ -38,7 +47,7 @@ public class SwitchParth : MonoBehaviour
 
         foreach (GameObject obj in objectsInLayer)
         {
-            if (obj.layer == layer)
+            if (obj.layer == layer && obj.activeSelf)
             {
                 obj.SetActive(false);
                 deactivatedObjects.Add(obj);

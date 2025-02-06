@@ -64,6 +64,11 @@ public class DriftScore2 : MonoBehaviour
     private bool wasDrifting = false;
     private bool wasAboveSpeedThreshold = false;
 
+    public AudioClip TimeSound;
+    public AudioClip HeartSound;
+    [Range(0, 1)] public float bothVolume = 1f;
+    public AudioSource audioSource; // Assign this in the Inspector
+
     private void Start()
     {
         // Initialize sliders
@@ -76,6 +81,12 @@ public class DriftScore2 : MonoBehaviour
         bar2.value = 0f;
         bar3.value = 0f;
         bar4.value = 0f;
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        audioSource.volume = bothVolume;
 
         // Dynamically find car and SpeedDisplay if not set
         if (car == null)
@@ -198,6 +209,21 @@ public class DriftScore2 : MonoBehaviour
                 bar1.value = 0f;
                 if (speedDisplay != null) speedDisplay.countdownTime += timePlusIncrement;
             }
+
+            // Play TimeSound with specified volume
+            if (TimeSound != null)
+            {
+                // Play using either assigned AudioSource or create temporary one
+                if (audioSource != null)
+                {
+                    audioSource.PlayOneShot(TimeSound, bothVolume);
+                }
+                else
+                {
+                    AudioSource.PlayClipAtPoint(TimeSound, transform.position, bothVolume);
+                }
+            }
+
             StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
@@ -206,6 +232,19 @@ public class DriftScore2 : MonoBehaviour
         {
             progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
             UpdateBarsVisual();
+
+            if (HeartSound != null)
+            {
+                if (audioSource != null)
+                {
+                    audioSource.PlayOneShot(HeartSound, bothVolume);
+                }
+                else
+                {
+                    AudioSource.PlayClipAtPoint(HeartSound, transform.position, bothVolume);
+                }
+            }
+
             StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
