@@ -27,7 +27,7 @@ public class DriftScore2 : MonoBehaviour
 
     public float progressBar2To4 = 0f; // Points used for bar2, bar3, and bar4
 
-    public float Plustime = 0f;
+    public float Plustime = 10f;
     public float EnergyIncreaseRate = 10f;
     public float HeartIncreaseRate = 50f;
 
@@ -43,7 +43,6 @@ public class DriftScore2 : MonoBehaviour
     private float driftTime = 0f; // Total drift duration
     private float multiplierIncreaseInterval = 2f; // Time required to increase multiplier
     private int currentMultiplier = 1; // Current score multiplier
-    private const int maxMultiplier = 5; // Maximum multiplier
 
     [Header("Wall Detection")]
     public float wallRaycastDistance = 1f;
@@ -267,20 +266,6 @@ public class DriftScore2 : MonoBehaviour
         if (bar4.value >= maxBar4 && !bar4Triggered) { TriggerAnimation("Ivy Like 2"); bar4Triggered = true; }
     }
 
-    private void TriggerAnimation(string animTrigger)
-    {
-        if (carAnimator != null)
-        {
-            carAnimator.SetTrigger(animTrigger);
-        }
-    }
-
-
-    private void UpdateMultiplierText()
-    {
-        multiplierText.text = "x" + currentMultiplier;
-    }
-
     private void ApplyWallPenalty()
     {
         if (Time.time >= lastWallHitTime + wallCooldown)
@@ -301,6 +286,15 @@ public class DriftScore2 : MonoBehaviour
             UpdateBarsVisual();
         }
     }
+
+    private void TriggerAnimation(string animTrigger)
+    {
+        if (carAnimator != null)
+        {
+            carAnimator.SetTrigger(animTrigger);
+        }
+    }
+
     private void PlayBarAnimation()
     {
         if (bar4.value >= maxBar4)
@@ -318,6 +312,21 @@ public class DriftScore2 : MonoBehaviour
         else if (bar2.value <= maxBar2)
         {
             TriggerAnimation("Ivy Like 0");
+        }
+    }
+    private void UpdateMultiplierText()
+    {
+        multiplierText.text = "x" + currentMultiplier;
+    }
+
+    public void AddPoints(int amount)
+    {
+        driftScore += amount;
+
+        // Update the UI immediately after adding points
+        if (driftScoreText != null)
+        {
+            driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
         }
     }
 

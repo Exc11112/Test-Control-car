@@ -283,7 +283,7 @@ public class CarController2 : MonoBehaviour
             Backlight.SetActive(false);
         }
 
-        float raycastDistance = 0.3f;
+        float raycastDistance = 0.2f;
         LayerMask wallLayer = LayerMask.GetMask("wall");
 
         foreach (Transform frontRay in frontRayOrigins)
@@ -308,23 +308,6 @@ public class CarController2 : MonoBehaviour
                 break;
             }
         }
-
-        void HandleWallCollision(Vector3 collisionNormal)
-        {
-            Vector3 incomingVelocity = carRigidbody.velocity;
-
-            // Perfect mirror reflection with velocity preservation
-            if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
-            {
-                Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
-                carRigidbody.velocity = reflectedVelocity;
-
-                // Add rotational force for more realistic bounce
-                Vector3 torque = Vector3.Cross(collisionNormal, incomingVelocity.normalized) * 50f;
-                carRigidbody.AddTorque(torque, ForceMode.Impulse);
-            }
-        }
-
         HandleDrifting();
         HandleOversteerUndersteer();
         AdjustAcceleration();
@@ -387,6 +370,25 @@ public class CarController2 : MonoBehaviour
         }
     }
 
+    void HandleWallCollision(Vector3 collisionNormal)
+    {
+        Vector3 incomingVelocity = carRigidbody.velocity;
+
+        // Perfect mirror reflection with velocity preservation
+        if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
+        {
+            Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
+            carRigidbody.velocity = reflectedVelocity;
+
+            // Add rotational force for more realistic bounce
+            Vector3 torque = Vector3.Cross(collisionNormal, incomingVelocity.normalized) * 50f;
+            carRigidbody.AddTorque(torque, ForceMode.Impulse);
+        }
+
+        // Stop drifting when hitting a wall
+        isDrifting = false;
+    }
+
     void HandleRaycasts()
     {
         float raycastDistance = 0.3f;
@@ -405,6 +407,7 @@ public class CarController2 : MonoBehaviour
             {
                 Debug.Log("hitr - Hit " + hit.collider.name);
                 rightHit = true;
+                HandleWallCollision(hit.normal); // Call collision handling
                 break;
             }
         }
@@ -416,8 +419,9 @@ public class CarController2 : MonoBehaviour
 
             if (Physics.Raycast(frontRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
             {
-                Debug.Log("hitl - Hit " + hit.collider.name);
+                Debug.Log("hitf - Hit " + hit.collider.name);
                 frontHit = true;
+                HandleWallCollision(hit.normal); // Call collision handling
                 break;
             }
         }
@@ -431,12 +435,14 @@ public class CarController2 : MonoBehaviour
             {
                 Debug.Log("hitl - Hit " + hit.collider.name);
                 leftHit = true;
+                HandleWallCollision(hit.normal); // Call collision handling
                 break;
             }
         }
 
         HandleAnimation(rightHit, leftHit, frontHit);
     }
+
 
     void HandleAnimation(bool rightHit, bool leftHit, bool frontHit)
     {
@@ -572,14 +578,6 @@ public class CarController2 : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         isHoldingRPM = false;
     }
-
-    //private void ShiftUp()
-    //{
-    //    currentGear++;
-    //    lastShiftTime = Time.time;
-    //    AdjustAcceleration();
-    //    currentRPM = Mathf.Clamp(currentRPM / gearRatios[currentGear], minRPM, maxRPM);
-    //}
 
     private void ShiftDown()
     {
