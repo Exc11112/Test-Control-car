@@ -108,29 +108,26 @@ public class DriftScore2 : MonoBehaviour
     void Update()
     {
         bool isCurrentlyDrifting = car.isDrifting;
-        bool isCurrentlyAboveSpeedThreshold = car.currentSpeed >= car.driftThresholdSpeed;
+
 
         // If the car WAS drifting but now it's not, trigger an animation
-        if (wasDrifting && !isCurrentlyDrifting)
+        if (wasDrifting && !isCurrentlyDrifting && driftTime > 0.5f)
         {
             PlayBarAnimation();
+            driftTime = 0f;
         }
 
-        // If the car WAS below the speed threshold but now it's above, trigger an animation
-        if (!wasAboveSpeedThreshold && isCurrentlyAboveSpeedThreshold)
-        {
-            PlayBarAnimation();
-        }
 
         if (!wasDrifting && isCurrentlyDrifting)
         {
-            bar2Triggered = false;
-            bar3Triggered = false;
-            bar4Triggered = false;
+            // Reset triggers but NOT the progress
+            bar2Triggered = (progressBar2To4 >= maxBar2);
+            bar3Triggered = (progressBar2To4 >= maxBar2 + maxBar3);
+            bar4Triggered = (progressBar2To4 >= maxBar2 + maxBar3 + maxBar4);
         }
 
         wasDrifting = isCurrentlyDrifting;
-        wasAboveSpeedThreshold = isCurrentlyAboveSpeedThreshold;
+        
 
         if (car.isDrifting)
         {
@@ -289,20 +286,58 @@ public class DriftScore2 : MonoBehaviour
     private void UpdateBar2To4()
     {
         if (!car.isDrifting) return;
-        progressBar2To4 = Mathf.Min(progressBar2To4 + (Time.deltaTime * HeartIncreaseRate), maxBar2 + maxBar3 + maxBar4);
+
+        float newProgress = progressBar2To4 + (Time.deltaTime * HeartIncreaseRate);
+        progressBar2To4 = Mathf.Min(newProgress, maxBar2 + maxBar3 + maxBar4);
+
         UpdateBarsVisual();
     }
 
     private void UpdateBarsVisual()
     {
-        bar2.value = Mathf.Min(progressBar2To4, maxBar2);
-        bar3.value = Mathf.Min(Mathf.Max(0, progressBar2To4 - maxBar2), maxBar3);
-        bar4.value = Mathf.Max(0, progressBar2To4 - maxBar2 - maxBar3);
+        float totalProgress = progressBar2To4;
 
-        if (!bar2Triggered && bar2.value > 0 && bar2.value < maxBar2) { TriggerAnimation("Ivy Like 0"); bar2Triggered = true; }
-        if (bar2.value >= maxBar2 && !bar2Triggered) { TriggerAnimation("Ivy Like"); bar2Triggered = true; }
-        if (bar3.value >= maxBar3 && !bar3Triggered) { TriggerAnimation("Ivy Like 1"); bar3Triggered = true; }
-        if (bar4.value >= maxBar4 && !bar4Triggered) { TriggerAnimation("Ivy Like 2"); bar4Triggered = true; }
+        // Always show accumulated progress in the bars
+        if (totalProgress <= maxBar2)
+        {
+            bar2.value = totalProgress;
+            bar3.value = 0;
+            bar4.value = 0;
+
+            // Only trigger "full" animation when actually filled
+            if (totalProgress >= maxBar2 && !bar2Triggered)
+            {
+                TriggerAnimation("Ivy Like");
+                TriggerAnimation("Iris Like");
+                bar2Triggered = true;
+            }
+        }
+        else if (totalProgress <= maxBar2 + maxBar3)
+        {
+            bar2.value = maxBar2;
+            bar3.value = totalProgress - maxBar2;
+            bar4.value = 0;
+
+            if (totalProgress >= maxBar2 + maxBar3 && !bar3Triggered)
+            {
+                TriggerAnimation("Ivy Like 1");
+                TriggerAnimation("Iris Like 1");
+                bar3Triggered = true;
+            }
+        }
+        else
+        {
+            bar2.value = maxBar2;
+            bar3.value = maxBar3;
+            bar4.value = totalProgress - (maxBar2 + maxBar3);
+
+            if (totalProgress >= maxBar2 + maxBar3 + maxBar4 && !bar4Triggered)
+            {
+                TriggerAnimation("Ivy Like 2");
+                TriggerAnimation("Iris Like2");
+                bar4Triggered = true;
+            }
+        }
     }
 
     private void ApplyWallPenalty()
@@ -339,18 +374,22 @@ public class DriftScore2 : MonoBehaviour
         if (bar4.value >= maxBar4)
         {
             TriggerAnimation("Ivy Like 2");
+            TriggerAnimation("Iris Like2");
         }
         else if (bar3.value >= maxBar3)
         {
             TriggerAnimation("Ivy Like 1");
+            TriggerAnimation("Iris Like 1");
         }
         else if (bar2.value >= maxBar2)
         {
             TriggerAnimation("Ivy Like");
+            TriggerAnimation("Iris Like");
         }
         else if (bar2.value <= maxBar2)
         {
             TriggerAnimation("Ivy Like 0");
+            TriggerAnimation("Iris Like 0");
         }
     }
     private void UpdateMultiplierText()

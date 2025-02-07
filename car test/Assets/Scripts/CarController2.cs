@@ -315,7 +315,10 @@ public class CarController2 : MonoBehaviour
         HandleDrifting();
         HandleOversteerUndersteer();
         AdjustAcceleration();
-        HandleRaycasts();
+        if(currentSpeed >= 50f || currentSpeed <= -20f)
+        {
+            HandleRaycasts();
+        }
     }
 
     private void FixedUpdate()
@@ -393,7 +396,7 @@ public class CarController2 : MonoBehaviour
         isDrifting = false;
 
         // Play a random collision sound if available
-        if (canPlaySound && collisionSounds.Length > 0)
+        if (canPlaySound && collisionSounds.Length > 0 && (currentSpeed >= 50f || currentSpeed <= -20f))
         {
             // Play sound IMMEDIATELY
             int randomIndex = Random.Range(0, collisionSounds.Length);
@@ -473,25 +476,33 @@ public class CarController2 : MonoBehaviour
             animator.ResetTrigger("Ivy Hit Left");
             animator.ResetTrigger("Ivy Idle");
             animator.ResetTrigger("Ivy Hit Front");
+            animator.ResetTrigger("Iris Hit Front");
+            animator.ResetTrigger("Iris Hit Right");
+            animator.ResetTrigger("Iris Hit Left");
+            animator.ResetTrigger("Iris Idle");
 
             if (rightHit)
             {
                 Debug.Log("Setting Right Trigger");
                 animator.SetTrigger("Ivy Hit Right");
+                animator.SetTrigger("Iris Hit Right");
             }
             else if (leftHit)
             {
                 Debug.Log("Setting Left Trigger");
                 animator.SetTrigger("Ivy Hit Left");
+                animator.SetTrigger("Iris Hit Left");
             }
             else if (frontHit)
             {
                 animator.SetTrigger("Ivy Hit Front");
+                animator.SetTrigger("Iris Hit Front");
             }
             else
             {
                 Debug.Log("Setting Idle Trigger");
                 animator.SetTrigger("Ivy Idle");
+                animator.SetTrigger("Iris Idle");
             }
         }
     }
