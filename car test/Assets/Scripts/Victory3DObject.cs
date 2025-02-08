@@ -42,8 +42,18 @@ public class Victory3DObject : MonoBehaviour
             case "Finish Point3":
                 victoryIndex = 3;
                 break;
+            case "Finish Point4":
+                victoryIndex = 1;
+                break;
+            case "Finish Point5":
+                victoryIndex = 2;
+                break;
+            case "Finish Point6":
+                victoryIndex = 3;
+                break;
             default:
-                return;
+                Debug.LogError("Unexpected gameObject.name: " + gameObject.name); // Log the error first
+                return;  // Exit after logging
         }
 
         if (victoryIndex == 0 || gameManager == null)

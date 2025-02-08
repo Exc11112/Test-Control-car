@@ -105,6 +105,7 @@ public class GameManager : MonoBehaviour
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
 
             int victoryIndex = Array.IndexOf(driftScores, winningDriftScore);
+            Debug.Log("Victory Index: " + victoryIndex);
             ReceiveVictoryIndex(victoryIndex);
         }
         else
@@ -170,5 +171,7 @@ public class GameManager : MonoBehaviour
         }
 
         activeDriftScore.victoryUIObjects[index - 1].SetActive(true);
+        Debug.Log($"Index passed: {index}, UI Array Length: {activeDriftScore.victoryUIObjects.Length}");
+
     }
 }
