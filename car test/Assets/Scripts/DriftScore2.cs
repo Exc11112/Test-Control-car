@@ -108,26 +108,29 @@ public class DriftScore2 : MonoBehaviour
     void Update()
     {
         bool isCurrentlyDrifting = car.isDrifting;
-
+        bool isCurrentlyAboveSpeedThreshold = car.currentSpeed >= car.driftThresholdSpeed;
 
         // If the car WAS drifting but now it's not, trigger an animation
-        if (wasDrifting && !isCurrentlyDrifting && driftTime > 0.5f)
+        if (wasDrifting && !isCurrentlyDrifting)
         {
             PlayBarAnimation();
-            driftTime = 0f;
         }
 
-
+        // If the car WAS below the speed threshold but now it's above, trigger an animation
+        if (!wasAboveSpeedThreshold && isCurrentlyAboveSpeedThreshold)
+        {
+            PlayBarAnimation();
+        }
         if (!wasDrifting && isCurrentlyDrifting)
         {
-            // Reset triggers but NOT the progress
-            bar2Triggered = (progressBar2To4 >= maxBar2);
-            bar3Triggered = (progressBar2To4 >= maxBar2 + maxBar3);
-            bar4Triggered = (progressBar2To4 >= maxBar2 + maxBar3 + maxBar4);
+            bar2Triggered = false;
+            bar3Triggered = false;
+            bar4Triggered = false;
         }
 
         wasDrifting = isCurrentlyDrifting;
-        
+        wasAboveSpeedThreshold = isCurrentlyAboveSpeedThreshold;
+
 
         if (car.isDrifting)
         {
@@ -295,49 +298,69 @@ public class DriftScore2 : MonoBehaviour
 
     private void UpdateBarsVisual()
     {
-        float totalProgress = progressBar2To4;
-
-        // Always show accumulated progress in the bars
-        if (totalProgress <= maxBar2)
+        if (progressBar2To4 <= maxBar2)
         {
-            bar2.value = totalProgress;
+            bool wasBar2Increasing = bar2.value < progressBar2To4; // Check if bar2 was increasing
+            bar2.value = progressBar2To4;
             bar3.value = 0;
             bar4.value = 0;
+            if (/*wasBar2Increasing*/bar2.value <= maxBar2 && !bar2Triggered)
+            {
+                TriggerAnimation("Ivy Like 0");
+                TriggerAnimation("Iris Like 0");// Play while bar2 is collecting
+                bar2Triggered = true;
+            }
 
-            // Only trigger "full" animation when actually filled
-            if (totalProgress >= maxBar2 && !bar2Triggered)
+            if (bar2.value >= maxBar2 && !bar2Triggered)
             {
                 TriggerAnimation("Ivy Like");
-                TriggerAnimation("Iris Like");
+                TriggerAnimation("Iris Like");// Play when bar2 is FULL
                 bar2Triggered = true;
             }
         }
-        else if (totalProgress <= maxBar2 + maxBar3)
+        else if (progressBar2To4 <= maxBar2 + maxBar3)
         {
             bar2.value = maxBar2;
-            bar3.value = totalProgress - maxBar2;
+            bar3.value = progressBar2To4 - maxBar2;
             bar4.value = 0;
 
-            if (totalProgress >= maxBar2 + maxBar3 && !bar3Triggered)
+            if (bar3.value >= maxBar3 && !bar3Triggered)
             {
                 TriggerAnimation("Ivy Like 1");
                 TriggerAnimation("Iris Like 1");
                 bar3Triggered = true;
             }
         }
-        else
+        else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
         {
             bar2.value = maxBar2;
             bar3.value = maxBar3;
-            bar4.value = totalProgress - (maxBar2 + maxBar3);
+            bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
 
-            if (totalProgress >= maxBar2 + maxBar3 + maxBar4 && !bar4Triggered)
+            if (bar4.value >= maxBar4 && !bar4Triggered)
             {
                 TriggerAnimation("Ivy Like 2");
                 TriggerAnimation("Iris Like2");
                 bar4Triggered = true;
             }
         }
+        else
+        {
+            bar2.value = maxBar2;
+            bar3.value = maxBar3;
+            bar4.value = maxBar4;
+        }
+
+        if (bar2.value >= maxBar2 && !bar2Triggered)
+        {
+            TriggerAnimation("Ivy Like");
+            TriggerAnimation("Iris Like");
+            bar2Triggered = true;
+        }
+
+        if (bar2.value < maxBar2) bar2Triggered = false;
+        if (bar3.value < maxBar3) bar3Triggered = false;
+        if (bar4.value < maxBar4) bar4Triggered = false;
     }
 
     private void ApplyWallPenalty()
