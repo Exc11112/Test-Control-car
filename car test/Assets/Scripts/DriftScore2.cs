@@ -4,45 +4,45 @@ using UnityEngine.UI;
 
 public class DriftScore2 : MonoBehaviour
 {
-    public SpeedDisplay speedDisplay; // Reference to SpeedDisplay script
+    // Existing variables
+    public SpeedDisplay speedDisplay;
     private float driftScore = 0f;
     public CarController2 car;
     public Rigidbody carRigidbody;
 
-    public Text driftScoreText; // UI text to display the score
-    public Text multiplierText; // UI text to display the multiplier
+    public Text driftScoreText;
+    public Text multiplierText;
 
-    public string fpointLayer = "fpoint"; // Name of the layer for the final point
-    public string wallTag = "wall"; // Tag for wall objects
+    public string fpointLayer = "fpoint";
+    public string wallTag = "wall";
 
-    public Slider bar1; // Slider for the first bar
-    public Slider bar2; // Slider for the second bar
-    public Slider bar3; // Slider for the third bar
-    public Slider bar4; // Slider for the fourth bar
+    public Slider bar1;
+    public Slider bar2;
+    public Slider bar3;
+    public Slider bar4;
 
-    public float maxBar1 = 100f; // Max points for bar1
-    public float maxBar2 = 500f; // Max points for bar2
-    public float maxBar3 = 1000f; // Max points for bar3
-    public float maxBar4 = 2500f; // Max points for bar4
+    public float maxBar1 = 100f;
+    public float maxBar2 = 500f;
+    public float maxBar3 = 1000f;
+    public float maxBar4 = 2500f;
 
-    public float progressBar2To4 = 0f; // Points used for bar2, bar3, and bar4
-
+    public float progressBar2To4 = 0f;
     public float Plustime = 10f;
     public float EnergyIncreaseRate = 10f;
     public float HeartIncreaseRate = 50f;
 
-    public float timePenalty = 5f; // Time reduction when hitting a wall
-    public float scorePenalty = 50f; // Drift score reduction when hitting a wall
-    public float wallCooldown = 5f; // Cooldown time between penalties
+    public float timePenalty = 5f;
+    public float scorePenalty = 50f;
+    public float wallCooldown = 5f;
 
-    public float timePlusIncrement = 10f; // Amount to increase bar1 for TimePlus
-    public float heartPlusIncrement = 50f; // Amount to increase bar2-bar4 for HeartPlus
+    public float timePlusIncrement = 10f;
+    public float heartPlusIncrement = 50f;
 
-    private float lastWallHitTime = -Mathf.Infinity; // Track the last wall collision time
-    private float driftMultiplier = 1f; // Current score multiplier
-    private float driftTime = 0f; // Total drift duration
-    private float multiplierIncreaseInterval = 2f; // Time required to increase multiplier
-    private int currentMultiplier = 1; // Current score multiplier
+    private float lastWallHitTime = -Mathf.Infinity;
+    private float driftMultiplier = 1f;
+    private float driftTime = 0f;
+    private float multiplierIncreaseInterval = 2f;
+    private int currentMultiplier = 1;
 
     [Header("Wall Detection")]
     public float wallRaycastDistance = 1f;
@@ -52,7 +52,7 @@ public class DriftScore2 : MonoBehaviour
 
     [Header("Victory Configuration")]
     public GameObject[] victoryUIObjects;
-    public GameObject[] victory3DObjects; 
+    public GameObject[] victory3DObjects;
     public GameObject[] gameWinObjects;
     public bool activateAllVictoryObjects = true;
     public Animator carAnimator;
@@ -67,11 +67,26 @@ public class DriftScore2 : MonoBehaviour
     public AudioClip TimeSound;
     public AudioClip HeartSound;
     [Range(0, 1)] public float bothVolume = 1f;
-    public AudioSource audioSource; // Assign this in the Inspector
+    public AudioSource audioSource;
+
+    // Existing variables remain the same...
+    [Header("HeartPlus Configuration")]
+    public float heartPlusDelay = 1f; // Time to wait before applying PlusScore
+    private float plusScore = 0f;      // Temporary score buffer
+    private Coroutine plusScoreCoroutine; // Reference to our delay coroutine
+
+    [Header("Wall Penalty Configuration")]
+    public float penaltyDelay = 1f;
+    private int pendingHits = 0;
+    private Coroutine pendingPenaltyCoroutine;
+
+    // Add these new variables with the existing ones
+    private float currentDriftScore = 0f;
+    private float currentBarProgress = 0f;
+    private int wallHitsDuringDrift = 0;
 
     private void Start()
     {
-        // Initialize sliders
         bar1.maxValue = maxBar1;
         bar2.maxValue = maxBar2;
         bar3.maxValue = maxBar3;
@@ -88,16 +103,8 @@ public class DriftScore2 : MonoBehaviour
         }
         audioSource.volume = bothVolume;
 
-        // Dynamically find car and SpeedDisplay if not set
-        if (car == null)
-        {
-            car = FindObjectOfType<CarController2>();
-        }
-
-        if (speedDisplay == null)
-        {
-            speedDisplay = FindObjectOfType<SpeedDisplay>();
-        }
+        if (car == null) car = FindObjectOfType<CarController2>();
+        if (speedDisplay == null) speedDisplay = FindObjectOfType<SpeedDisplay>();
 
         if (car == null || speedDisplay == null)
         {
@@ -110,13 +117,29 @@ public class DriftScore2 : MonoBehaviour
         bool isCurrentlyDrifting = car.isDrifting;
         bool isCurrentlyAboveSpeedThreshold = car.currentSpeed >= car.driftThresholdSpeed;
 
-        // If the car WAS drifting but now it's not, trigger an animation
+        // Handle drift start
+        if (!wasDrifting && isCurrentlyDrifting)
+        {
+            // Transfer any pending hits to drift penalties
+            wallHitsDuringDrift += pendingHits;
+            pendingHits = 0;
+
+            // Cancel pending penalty application
+            if (pendingPenaltyCoroutine != null)
+            {
+                StopCoroutine(pendingPenaltyCoroutine);
+                pendingPenaltyCoroutine = null;
+            }
+        }
+
+        // Handle drift end
         if (wasDrifting && !isCurrentlyDrifting)
         {
             PlayBarAnimation();
+            ApplyDriftResults();
         }
 
-        // If the car WAS below the speed threshold but now it's above, trigger an animation
+        // Animation triggers
         if (!wasAboveSpeedThreshold && isCurrentlyAboveSpeedThreshold)
         {
             PlayBarAnimation();
@@ -131,12 +154,11 @@ public class DriftScore2 : MonoBehaviour
         wasDrifting = isCurrentlyDrifting;
         wasAboveSpeedThreshold = isCurrentlyAboveSpeedThreshold;
 
-
+        // Drift score accumulation
         if (car.isDrifting)
         {
             float speed = carRigidbody.velocity.magnitude;
-            driftScore += Time.deltaTime * speed * driftMultiplier;
-            driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
+            currentDriftScore += Time.deltaTime * speed * driftMultiplier;
             driftTime += Time.deltaTime;
 
             if (driftTime >= multiplierIncreaseInterval && driftMultiplier < 5f)
@@ -161,11 +183,29 @@ public class DriftScore2 : MonoBehaviour
             lastWallRaycastTime = Time.time;
         }
     }
+
+    private void ApplyDriftResults()
+    {
+        float totalToAdd = currentBarProgress + plusScore;
+        progressBar2To4 = Mathf.Min(progressBar2To4 + totalToAdd, maxBar2 + maxBar3 + maxBar4);
+        plusScore = 0f;
+        currentBarProgress = 0f;
+
+        // Cancel any pending delayed application
+        if (plusScoreCoroutine != null) StopCoroutine(plusScoreCoroutine);
+
+        UpdateBarsVisual();
+
+        // Reset accumulators
+        currentDriftScore = 0f;
+        currentBarProgress = 0f;
+        wallHitsDuringDrift = 0;
+    }
+
     void CheckWallRaycasts()
     {
         if (car == null) return;
 
-        // Front wall detection
         foreach (Transform rayOrigin in car.frontRayOrigins)
         {
             if (Physics.Raycast(rayOrigin.position, rayOrigin.forward, wallRaycastDistance, wallLayer))
@@ -175,7 +215,6 @@ public class DriftScore2 : MonoBehaviour
             }
         }
 
-        // Rear wall detection
         foreach (Transform rayOrigin in car.backRayOrigins)
         {
             if (Physics.Raycast(rayOrigin.position, -rayOrigin.forward, wallRaycastDistance, wallLayer))
@@ -188,19 +227,16 @@ public class DriftScore2 : MonoBehaviour
 
     public void HandleCarCollision(Collision collision)
     {
-        // Final point collision
         if (collision.gameObject.layer == LayerMask.NameToLayer(fpointLayer))
         {
             driftScoreText.text = "Final Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
         }
 
-        // Wall collision (physical)
         if (collision.gameObject.CompareTag(wallTag))
         {
             ApplyWallPenalty();
         }
 
-        // Collectible collision (original behavior)
         if (collision.gameObject.CompareTag("TimePlus"))
         {
             bar1.value = Mathf.Min(bar1.value + timePlusIncrement, maxBar1);
@@ -210,10 +246,8 @@ public class DriftScore2 : MonoBehaviour
                 if (speedDisplay != null) speedDisplay.countdownTime += timePlusIncrement;
             }
 
-            // Play TimeSound with specified volume
             if (TimeSound != null)
             {
-                // Play using either assigned AudioSource or create temporary one
                 if (audioSource != null)
                 {
                     audioSource.PlayOneShot(TimeSound, bothVolume);
@@ -230,42 +264,60 @@ public class DriftScore2 : MonoBehaviour
 
         if (collision.gameObject.CompareTag("HeartPlus"))
         {
-            progressBar2To4 = Mathf.Min(progressBar2To4 + heartPlusIncrement, maxBar2 + maxBar3 + maxBar4);
-            UpdateBarsVisual();
+            // Add to temporary buffer instead of direct progress
+            plusScore += heartPlusIncrement;
 
-            if (HeartSound != null)
-            {
-                if (audioSource != null)
-                {
-                    audioSource.PlayOneShot(HeartSound, bothVolume);
-                }
-                else
-                {
-                    AudioSource.PlayClipAtPoint(HeartSound, transform.position, bothVolume);
-                }
-            }
+            // Restart the delay timer
+            if (plusScoreCoroutine != null) StopCoroutine(plusScoreCoroutine);
+            plusScoreCoroutine = StartCoroutine(ApplyPlusScoreDelayed());
 
+            // Visual feedback without changing real progress
+            StartCoroutine(TemporaryVisualFeedback());
+
+            // Sound and deactivation remains the same
+            if (HeartSound != null) { /*...*/ }
             StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
 
-        // Reset multiplier
         currentMultiplier = 1;
         driftTime = 0f;
         UpdateMultiplierText();
     }
+    private IEnumerator ApplyPlusScoreDelayed()
+    {
+        yield return new WaitForSeconds(heartPlusDelay);
+
+        // Apply the buffered score to real progress
+        progressBar2To4 = Mathf.Min(progressBar2To4 + plusScore, maxBar2 + maxBar3 + maxBar4);
+        plusScore = 0f;
+        UpdateBarsVisual();
+    }
+    private IEnumerator TemporaryVisualFeedback()
+    {
+        float originalProgress = progressBar2To4;
+        float targetProgress = originalProgress + plusScore;
+
+        while (plusScore > 0)
+        {
+            // Show temporary progress preview
+            float displayProgress = Mathf.Min(originalProgress + plusScore, maxBar2 + maxBar3 + maxBar4);
+            UpdateBarsVisual(displayProgress);
+            yield return null;
+        }
+
+        // Restore actual progress display
+        UpdateBarsVisual();
+    }
 
     private void StartReactivateCoroutine(GameObject obj, float delay)
     {
-        // If none are active, fallback to running on this script (if active)
         if (gameObject.activeInHierarchy)
         {
             StartCoroutine(ReactivateGameObject(obj, delay));
         }
     }
 
-
-    // Coroutine to reactivate the game object
     private IEnumerator ReactivateGameObject(GameObject obj, float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -286,42 +338,43 @@ public class DriftScore2 : MonoBehaviour
             }
         }
     }
+
     private void UpdateBar2To4()
     {
         if (!car.isDrifting) return;
 
-        float newProgress = progressBar2To4 + (Time.deltaTime * HeartIncreaseRate);
-        progressBar2To4 = Mathf.Min(newProgress, maxBar2 + maxBar3 + maxBar4);
+        currentBarProgress += Time.deltaTime * HeartIncreaseRate;
+        currentBarProgress = Mathf.Min(currentBarProgress,
+            (maxBar2 + maxBar3 + maxBar4) - progressBar2To4 - plusScore);
 
         UpdateBarsVisual();
     }
 
-    private void UpdateBarsVisual()
+    private void UpdateBarsVisual(float customProgress = -1)
     {
-        if (progressBar2To4 <= maxBar2)
+        float progressToShow = customProgress >= 0 ? customProgress :
+                             car.isDrifting ? progressBar2To4 + currentBarProgress :
+                             progressBar2To4;
+
+
+        if (progressToShow <= maxBar2)
         {
-            bool wasBar2Increasing = bar2.value < progressBar2To4; // Check if bar2 was increasing
-            bar2.value = progressBar2To4;
+            bar2.value = progressToShow;
             bar3.value = 0;
             bar4.value = 0;
-            if (/*wasBar2Increasing*/bar2.value <= maxBar2 && !bar2Triggered)
-            {
-                TriggerAnimation("Ivy Like 0");
-                TriggerAnimation("Iris Like 0");// Play while bar2 is collecting
-                bar2Triggered = true;
-            }
 
-            if (bar2.value >= maxBar2 && !bar2Triggered)
+            if (!bar2Triggered)
             {
-                TriggerAnimation("Ivy Like");
-                TriggerAnimation("Iris Like");// Play when bar2 is FULL
+                bool isFull = progressToShow >= maxBar2;
+                TriggerAnimation(isFull ? "Ivy Like" : "Ivy Like 0");
+                TriggerAnimation(isFull ? "Iris Like" : "Iris Like 0");
                 bar2Triggered = true;
             }
         }
-        else if (progressBar2To4 <= maxBar2 + maxBar3)
+        else if (progressToShow <= maxBar2 + maxBar3)
         {
             bar2.value = maxBar2;
-            bar3.value = progressBar2To4 - maxBar2;
+            bar3.value = progressToShow - maxBar2;
             bar4.value = 0;
 
             if (bar3.value >= maxBar3 && !bar3Triggered)
@@ -331,11 +384,11 @@ public class DriftScore2 : MonoBehaviour
                 bar3Triggered = true;
             }
         }
-        else if (progressBar2To4 <= maxBar2 + maxBar3 + maxBar4)
+        else if (progressToShow <= maxBar2 + maxBar3 + maxBar4)
         {
             bar2.value = maxBar2;
             bar3.value = maxBar3;
-            bar4.value = progressBar2To4 - (maxBar2 + maxBar3);
+            bar4.value = progressToShow - (maxBar2 + maxBar3);
 
             if (bar4.value >= maxBar4 && !bar4Triggered)
             {
@@ -351,6 +404,7 @@ public class DriftScore2 : MonoBehaviour
             bar4.value = maxBar4;
         }
 
+        // Update trigger states
         if (bar2.value >= maxBar2 && !bar2Triggered)
         {
             TriggerAnimation("Ivy Like");
@@ -365,23 +419,69 @@ public class DriftScore2 : MonoBehaviour
 
     private void ApplyWallPenalty()
     {
-        if (Time.time >= lastWallHitTime + wallCooldown)
+        if (Time.time < lastWallHitTime + wallCooldown) return;
+
+        lastWallHitTime = Time.time;
+
+        // Always apply time penalty immediately
+        if (speedDisplay != null)
         {
-            lastWallHitTime = Time.time;
-            driftScore = Mathf.Max(0, driftScore - scorePenalty);
-            driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
-
-            if (speedDisplay != null)
-            {
-                speedDisplay.countdownTime = Mathf.Max(0, speedDisplay.countdownTime - timePenalty);
-            }
-
-            bar1.value = Mathf.Max(0, bar1.value - scorePenalty);
-            progressBar2To4 = Mathf.Max(0, progressBar2To4 - scorePenalty);
-
-            // Add this line to update the bars
-            UpdateBarsVisual();
+            speedDisplay.countdownTime = Mathf.Max(0, speedDisplay.countdownTime - timePenalty);
         }
+
+        if (car.isDrifting)
+        {
+            // Existing drift penalty handling
+            wallHitsDuringDrift++;
+            bar1.value = Mathf.Max(0, bar1.value - scorePenalty);
+        }
+        else
+        {
+            // New delayed penalty system
+            pendingHits++;
+
+            // Restart delay timer
+            if (pendingPenaltyCoroutine != null) StopCoroutine(pendingPenaltyCoroutine);
+            pendingPenaltyCoroutine = StartCoroutine(ApplyPendingPenalty());
+
+            // Show temporary visual feedback
+            StartCoroutine(TemporaryPenaltyPreview());
+        }
+    }
+    private IEnumerator ApplyPendingPenalty()
+    {
+        yield return new WaitForSeconds(penaltyDelay);
+
+        // Apply accumulated penalties
+        int hitsToApply = pendingHits;
+        pendingHits = 0;
+
+        driftScore = Mathf.Max(0, driftScore - (hitsToApply * scorePenalty));
+        progressBar2To4 = Mathf.Max(0, progressBar2To4 - (hitsToApply * scorePenalty));
+        UpdateBarsVisual();
+
+        driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
+    }
+    private IEnumerator TemporaryPenaltyPreview()
+    {
+        float originalScore = driftScore;
+        float originalProgress = progressBar2To4;
+
+        while (pendingHits > 0)
+        {
+            // Show preview of penalty
+            float previewScore = Mathf.Max(originalScore - (pendingHits * scorePenalty), 0);
+            float previewProgress = Mathf.Max(originalProgress - (pendingHits * scorePenalty), 0);
+
+            driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(previewScore).ToString();
+            UpdateBarsVisual(previewProgress);
+
+            yield return null;
+        }
+
+        // Restore actual values
+        driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
+        UpdateBarsVisual();
     }
 
     private void TriggerAnimation(string animTrigger)
@@ -415,6 +515,7 @@ public class DriftScore2 : MonoBehaviour
             TriggerAnimation("Iris Like 0");
         }
     }
+
     private void UpdateMultiplierText()
     {
         multiplierText.text = "x" + currentMultiplier;
@@ -423,12 +524,9 @@ public class DriftScore2 : MonoBehaviour
     public void AddPoints(int amount)
     {
         driftScore += amount;
-
-        // Update the UI immediately after adding points
         if (driftScoreText != null)
         {
             driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
         }
     }
-
 }
