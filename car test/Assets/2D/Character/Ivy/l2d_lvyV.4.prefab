@@ -5541,7 +5541,7 @@ MonoBehaviour:
   progressBar2To4: 0
   Plustime: 10
   EnergyIncreaseRate: 5
-  HeartIncreaseRate: 15
+  HeartIncreaseRate: 30
   timePenalty: 5
   scorePenalty: 50
   wallCooldown: 5
@@ -5560,6 +5560,8 @@ MonoBehaviour:
   HeartSound: {fileID: 0}
   bothVolume: 1
   audioSource: {fileID: 0}
+  heartPlusDelay: 1
+  penaltyDelay: 1
 --- !u!114 &1695999829279950121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5609,6 +5611,8 @@ MonoBehaviour:
   HeartSound: {fileID: 0}
   bothVolume: 0.133
   audioSource: {fileID: 0}
+  heartPlusDelay: 1
+  penaltyDelay: 1
 --- !u!1 &8131129869973759347
 GameObject:
   m_ObjectHideFlags: 0

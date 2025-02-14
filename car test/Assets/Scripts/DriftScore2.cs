@@ -269,10 +269,10 @@ public class DriftScore2 : MonoBehaviour
 
             // Restart the delay timer
             if (plusScoreCoroutine != null) StopCoroutine(plusScoreCoroutine);
-            plusScoreCoroutine = StartCoroutine(ApplyPlusScoreDelayed());
+            SafeStartCoroutine(ApplyPlusScoreDelayed(), ref plusScoreCoroutine);
 
             // Visual feedback without changing real progress
-            StartCoroutine(TemporaryVisualFeedback());
+            SafeStartCoroutine(TemporaryVisualFeedback(), ref plusScoreCoroutine);
 
             // Sound and deactivation remains the same
             if (HeartSound != null) { /*...*/ }
@@ -287,7 +287,7 @@ public class DriftScore2 : MonoBehaviour
     private IEnumerator ApplyPlusScoreDelayed()
     {
         yield return new WaitForSeconds(heartPlusDelay);
-
+        if (!gameObject.activeInHierarchy) yield break;
         // Apply the buffered score to real progress
         progressBar2To4 = Mathf.Min(progressBar2To4 + plusScore, maxBar2 + maxBar3 + maxBar4);
         plusScore = 0f;
@@ -295,6 +295,7 @@ public class DriftScore2 : MonoBehaviour
     }
     private IEnumerator TemporaryVisualFeedback()
     {
+        if (!gameObject.activeInHierarchy) yield break;
         float originalProgress = progressBar2To4;
         float targetProgress = originalProgress + plusScore;
 
@@ -309,6 +310,18 @@ public class DriftScore2 : MonoBehaviour
         // Restore actual progress display
         UpdateBarsVisual();
     }
+    private void SafeStartCoroutine(IEnumerator routine, ref Coroutine coroutineReference)
+    {
+        if (gameObject.activeInHierarchy)
+        {
+            if (coroutineReference != null)
+            {
+                StopCoroutine(coroutineReference);
+            }
+            coroutineReference = StartCoroutine(routine);
+        }
+    }
+
 
     private void StartReactivateCoroutine(GameObject obj, float delay)
     {
@@ -442,15 +455,16 @@ public class DriftScore2 : MonoBehaviour
 
             // Restart delay timer
             if (pendingPenaltyCoroutine != null) StopCoroutine(pendingPenaltyCoroutine);
-            pendingPenaltyCoroutine = StartCoroutine(ApplyPendingPenalty());
+            SafeStartCoroutine(ApplyPendingPenalty(), ref pendingPenaltyCoroutine);
 
             // Show temporary visual feedback
-            StartCoroutine(TemporaryPenaltyPreview());
+            SafeStartCoroutine(TemporaryPenaltyPreview(), ref pendingPenaltyCoroutine);
         }
     }
     private IEnumerator ApplyPendingPenalty()
     {
         yield return new WaitForSeconds(penaltyDelay);
+        if (!gameObject.activeInHierarchy) yield break;
 
         // Apply accumulated penalties
         int hitsToApply = pendingHits;
@@ -464,6 +478,7 @@ public class DriftScore2 : MonoBehaviour
     }
     private IEnumerator TemporaryPenaltyPreview()
     {
+        if (!gameObject.activeInHierarchy) yield break;
         float originalScore = driftScore;
         float originalProgress = progressBar2To4;
 
