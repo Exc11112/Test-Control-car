@@ -274,8 +274,18 @@ public class DriftScore2 : MonoBehaviour
             // Visual feedback without changing real progress
             SafeStartCoroutine(TemporaryVisualFeedback(), ref plusScoreCoroutine);
 
-            // Sound and deactivation remains the same
-            if (HeartSound != null) { /*...*/ }
+            if (HeartSound != null)
+            {
+                if (audioSource != null)
+                {
+                    audioSource.PlayOneShot(HeartSound, bothVolume);
+                }
+                else
+                {
+                    AudioSource.PlayClipAtPoint(HeartSound, transform.position, bothVolume);
+                }
+            }
+
             StartReactivateCoroutine(collision.gameObject, Random.Range(15f, 20f));
             collision.gameObject.SetActive(false);
         }
