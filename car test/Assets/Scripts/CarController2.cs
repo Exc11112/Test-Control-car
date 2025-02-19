@@ -110,9 +110,13 @@ public class CarController2 : MonoBehaviour
     public AudioClip[] collisionSounds; // Assign two sounds in the Inspector
     public AudioSource audioSource;
     private bool canPlaySound = true; // Cooldown control
+    private CarUIManager carUIManager;
+    private float lastWallHitTime = -Mathf.Infinity;
+    public float wallCooldown = 5f;
 
     void Start()
     {
+        carUIManager = GetComponent<CarUIManager>(); // Link to the Car UI Manager
         carRigidbody = GetComponent<Rigidbody>();
         carRigidbody.centerOfMass = new Vector3(0, -0.5f, 0); // Adjust car's center of mass
         currentSpeed = 0f;
@@ -146,6 +150,12 @@ public class CarController2 : MonoBehaviour
 
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
+        if (isDrifting)
+        {
+            carUIManager.UpdateDriftScore(10 * Time.deltaTime); // Example drift score increment
+        }
+
+            CheckWallCollision();
 
         if (isNeutral)
         {
@@ -506,7 +516,24 @@ public class CarController2 : MonoBehaviour
             }
         }
     }
+    private void CheckWallCollision()
+    {
+        if (Time.time < lastWallHitTime + wallCooldown) return;
 
+        foreach (Transform rayOrigin in transform)
+        {
+            if (Physics.Raycast(rayOrigin.position, rayOrigin.forward, 1f, LayerMask.GetMask("wall")))
+            {
+                ApplyWallPenalty();
+                break;
+            }
+        }
+    }
+    private void ApplyWallPenalty()
+    {
+        lastWallHitTime = Time.time;
+        carUIManager.ApplyWallPenalty(); // Notify the UI Manager
+    }
 
     private void UpdateWheelRotations()
     {

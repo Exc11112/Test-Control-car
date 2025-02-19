@@ -81,8 +81,8 @@ public class DriftScore2 : MonoBehaviour
     private Coroutine pendingPenaltyCoroutine;
 
     // Add these new variables with the existing ones
-    private float currentDriftScore = 0f;
     private float currentBarProgress = 0f;
+    private float currentDriftScore = 0f;
     private int wallHitsDuringDrift = 0;
 
     private void Start()
