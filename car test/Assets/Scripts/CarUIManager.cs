@@ -13,11 +13,11 @@ public class CarUIManager : MonoBehaviour
         }
     }
 
-    public void UpdateDriftScore(float score)
+    public void UpdateDriftScore()
     {
         foreach (var manager in uiTypeManagers)
         {
-            manager.UpdateDriftScore(score);
+            manager.UpdateDriftScore(); // Remove parameter
         }
     }
     public void ApplyWallPenalty()

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +7,9 @@ public class UITypeManager : MonoBehaviour
 {
     public int UIType; // 1 = UI1, 2 = UI2, etc.
     public CarController2 car;
+    public Rigidbody carRigidbody;
 
+    // UI Elements Lists
     public List<Text> driftScoreTexts = new List<Text>();
     public List<Text> multiplierTexts = new List<Text>();
     public List<Slider> bar1List = new List<Slider>();
@@ -16,43 +17,126 @@ public class UITypeManager : MonoBehaviour
     public List<Slider> bar3List = new List<Slider>();
     public List<Slider> bar4List = new List<Slider>();
 
-    public Animator[] carAnimator; // Fixed array declaration
+    // Animation
+    public Animator[] carAnimators;
+    public string fpointLayer = "fpoint";
+    public string wallTag = "wall";
 
-    public Transform[] originTransformFront; // Fixed array declaration
-    public Transform[] originTransformRight; // Fixed array declaration
-    public Transform[] originTransformLeft; // Fixed array declaration
-
+    // Progress Tracking
     private float driftScore = 0f;
     private float progressBar2To4 = 0f;
     private float bar1Progress = 0f;
+    private float driftMultiplier = 1f;
+    private float driftTime = 0f;
+    private int currentMultiplier = 1;
+    private const float multiplierIncreaseInterval = 2f;
 
+    // Settings
     public float timeIncreaseRate = 10f;
     public float heartIncreaseRate = 50f;
     public float heartPlusIncrement = 50f;
-    public float EnergyIncreaseRate = 15f;
+    public float energyIncreaseRate = 15f;
     public float maxBar1 = 100f;
     public float maxBar2 = 500f;
     public float maxBar3 = 1000f;
     public float maxBar4 = 2500f;
 
+    // Collision Handling
+    public LayerMask wallLayer;
+    public float timePenalty = 5f;
+    public float scorePenalty = 50f;
+    public float wallCooldown = 5f;
+    private float lastWallHitTime = -Mathf.Infinity;
+
+    // Audio
+    public AudioClip timeSound;
+    public AudioClip heartSound;
+    [Range(0, 1)] public float audioVolume = 1f;
+    private AudioSource audioSource;
+
+    // State Tracking
+    private bool wasDrifting = false;
     private bool bar2Triggered = false;
     private bool bar3Triggered = false;
     private bool bar4Triggered = false;
-    private float wallRaycastDistance = 0.3f;
-    private LayerMask wallLayer; // Fixed LayerMask
-
-    private UIHandler uiHandler; // Reference to UIHandler instead of UITypeManager
+    private int pendingHits = 0;
+    private Coroutine pendingPenaltyCoroutine;
+    private float plusScore = 0f;
+    private Coroutine plusScoreCoroutine;
+    private SpeedDisplay speedDisplay;
 
     private void Start()
     {
-        wallLayer = LayerMask.GetMask("wall"); // Fixed LayerMask assignment
-        uiHandler = FindObjectOfType<UIHandler>(); // Get UIHandler instance
+        speedDisplay = FindObjectOfType<SpeedDisplay>();
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.volume = audioVolume;
+
+        foreach (var bar in bar1List) bar.maxValue = maxBar1;
+        foreach (var bar in bar2List) bar.maxValue = maxBar2;
+        foreach (var bar in bar3List) bar.maxValue = maxBar3;
+        foreach (var bar in bar4List) bar.maxValue = maxBar4;
+
+        ResetAllBars();
     }
 
     private void Update()
     {
-        CheckWallRaycasts();
+        HandleDriftState();
+        UpdateBar1();
+        UpdateBar2To4();
     }
+
+    private void HandleDriftState()
+    {
+        bool isDrifting = car.isDrifting;
+
+        if (!wasDrifting && isDrifting)
+        {
+            pendingHits = 0;
+            if (pendingPenaltyCoroutine != null) StopCoroutine(pendingPenaltyCoroutine);
+        }
+
+        if (wasDrifting && !isDrifting)
+        {
+            ApplyDriftResults();
+        }
+
+        wasDrifting = isDrifting;
+
+        if (isDrifting) UpdateDriftScore();
+    }
+
+    public void UpdateDriftScore()
+    {
+        // Only calculate score while drifting
+        if (!car.isDrifting) return;
+
+        // Get current car speed from Rigidbody
+        float speed = carRigidbody.velocity.magnitude;
+
+        // Calculate base score increment
+        float scoreIncrement = Time.deltaTime * speed * driftMultiplier;
+
+        // Apply to total drift score
+        driftScore += scoreIncrement;
+
+        // Update multiplier timer
+        driftTime += Time.deltaTime;
+
+        // Handle multiplier increases
+        if (driftTime >= multiplierIncreaseInterval && driftMultiplier < 5f)
+        {
+            currentMultiplier++;
+            driftMultiplier++;
+            driftTime = 0f;
+            UpdateAllMultiplierTexts();
+        }
+
+        // Update UI elements
+        UpdateAllScoreTexts();
+
+    }
+
     public void RegisterUI(Text scoreText, Text multiplierText, Slider bar1, Slider bar2, Slider bar3, Slider bar4)
     {
         if (!driftScoreTexts.Contains(scoreText)) driftScoreTexts.Add(scoreText);
@@ -63,185 +147,192 @@ public class UITypeManager : MonoBehaviour
         if (!bar4List.Contains(bar4)) bar4List.Add(bar4);
     }
 
-    void CheckWallRaycasts()
+    private void UpdateBar1()
     {
-        bool hitFront = false, hitRight = false, hitLeft = false;
+        if (!car.isDrifting) return;
 
-        foreach (Transform front in originTransformFront)
+        bar1Progress += Time.deltaTime * energyIncreaseRate;
+        bar1Progress = Mathf.Clamp(bar1Progress, 0, maxBar1);
+
+        foreach (var bar in bar1List)
         {
-            if (Physics.Raycast(front.position, transform.forward, wallRaycastDistance, wallLayer))
+            bar.value = bar1Progress;
+            if (bar.value >= maxBar1)
             {
-                hitFront = true;
-                break;
+                bar1Progress = 0;
+                speedDisplay.countdownTime += timeIncreaseRate;
             }
         }
-
-        foreach (Transform right in originTransformRight)
-        {
-            if (Physics.Raycast(right.position, transform.forward, wallRaycastDistance, wallLayer))
-            {
-                hitRight = true;
-                break;
-            }
-        }
-
-        foreach (Transform left in originTransformLeft)
-        {
-            if (Physics.Raycast(left.position, transform.forward, wallRaycastDistance, wallLayer))
-            {
-                hitLeft = true;
-                break;
-            }
-        }
-
-        if (hitFront)
-            TriggerAnimation("Ivy Hit Front");
-        else if (hitRight)
-            TriggerAnimation("Ivy Hit Right");
-        else if (hitLeft)
-            TriggerAnimation("Ivy Hit Left");
     }
 
-    public void UpdateDriftScore(float score)
+    private void UpdateBar2To4()
     {
-        driftScore += score;
+        if (!car.isDrifting) return;
 
-        foreach (var text in driftScoreTexts)
-            text.text = "Drift Score: " + Mathf.RoundToInt(driftScore);
-
-        UpdateBar1();
-        UpdateBar2To4();
+        progressBar2To4 += Time.deltaTime * heartIncreaseRate;
+        progressBar2To4 = Mathf.Clamp(progressBar2To4, 0, maxBar2 + maxBar3 + maxBar4);
+        UpdateAllBarsVisual();
     }
 
-    void UpdateBar1()
+    private void UpdateAllBarsVisual(float customProgress = -1)
     {
-        if (car.isDrifting)
-        {
-            uiHandler.bar1.value += Time.deltaTime * EnergyIncreaseRate; // Fixed reference to UIHandler
-        }
-
-        uiHandler.bar1.value = Mathf.Min(uiHandler.bar1.value + 10f, maxBar1);
-    }
-
-    void UpdateBar2To4()
-    {
-        if (car.isDrifting)
-        {
-            progressBar2To4 += Time.deltaTime * heartIncreaseRate;
-        }
-
-        if (progressBar2To4 >= maxBar2 && !bar2Triggered)
-        {
-            bar2Triggered = true;
-            TriggerAnimation("Ivy Like 0");
-        }
-
-        if (progressBar2To4 >= maxBar3 && !bar3Triggered)
-        {
-            bar3Triggered = true;
-            TriggerAnimation("Ivy Like");
-        }
-
-        if (progressBar2To4 >= maxBar4 && !bar4Triggered)
-        {
-            bar4Triggered = true;
-            TriggerAnimation("Ivy Like 1");
-        }
-
-        if (progressBar2To4 >= maxBar4)
-        {
-            progressBar2To4 = maxBar4;
-            TriggerAnimation("Ivy Like 2");
-        }
-    }
-
-    public void CollectHeartPlus()
-    {
-        if (progressBar2To4 < maxBar4)
-        {
-            progressBar2To4 += heartPlusIncrement;
-            UpdateBar2To4();
-        }
-        else
-        {
-            TriggerAnimation("Ivy Like 2");
-        }
-    }
-
-    private void UpdateBarsVisual()
-    {
-        float progress = progressBar2To4;
+        float progress = customProgress >= 0 ? customProgress : progressBar2To4;
 
         foreach (var bar in bar2List) bar.value = Mathf.Clamp(progress, 0, maxBar2);
-        progress -= maxBar2;
-        foreach (var bar in bar3List) bar.value = Mathf.Clamp(progress, 0, maxBar3);
-        progress -= maxBar3;
-        foreach (var bar in bar4List) bar.value = Mathf.Clamp(progress, 0, maxBar4);
+        foreach (var bar in bar3List) bar.value = Mathf.Clamp(progress - maxBar2, 0, maxBar3);
+        foreach (var bar in bar4List) bar.value = Mathf.Clamp(progress - (maxBar2 + maxBar3), 0, maxBar4);
 
-        PlayBarAnimation();
+        HandleBarAnimations(progress);
+    }
+
+    private void HandleBarAnimations(float progress)
+    {
+        if (progress >= maxBar2 + maxBar3 + maxBar4)
+        {
+            TriggerAnimations("Ivy Like 2");
+        }
+        else if (progress >= maxBar2 + maxBar3)
+        {
+            TriggerAnimations("Ivy Like 1");
+        }
+        else if (progress >= maxBar2)
+        {
+            TriggerAnimations("Ivy Like");
+        }
     }
 
     public void HandleCarCollision(Collision collision)
     {
         if (collision.gameObject.CompareTag("TimePlus"))
         {
-            foreach (var bar in bar1List)
-            {
-                bar.value = Mathf.Min(bar.value + 10f, maxBar1);
-            }
-            collision.gameObject.SetActive(false);
+            foreach (var bar in bar1List) bar.value = Mathf.Min(bar.value + 10f, maxBar1);
+            PlaySound(timeSound);
+            StartCoroutine(ReactivateObject(collision.gameObject, 15f));
         }
 
         if (collision.gameObject.CompareTag("HeartPlus"))
         {
-            progressBar2To4 = Mathf.Min(progressBar2To4 + 50f, maxBar2 + maxBar3 + maxBar4);
-            UpdateBarsVisual();
-            TriggerAnimation("HeartCollected");
-            collision.gameObject.SetActive(false);
+            plusScore += heartPlusIncrement;
+            if (plusScoreCoroutine != null) StopCoroutine(plusScoreCoroutine);
+            plusScoreCoroutine = StartCoroutine(ApplyDelayedScore());
+            PlaySound(heartSound);
+            StartCoroutine(ReactivateObject(collision.gameObject, 15f));
         }
+
+        if (collision.gameObject.CompareTag(wallTag))
+        {
+            ApplyWallPenalty();
+        }
+
+        ResetMultiplier();
     }
 
-    private void TriggerAnimation(string animTrigger)
+    private IEnumerator ApplyDelayedScore()
     {
-        if (carAnimator != null)
-        {
-            foreach (var animator in carAnimator)
-            {
-                animator.SetTrigger(animTrigger);
-                StartCoroutine(ResetToIdle(animator, animTrigger)); // Start coroutine to reset animation
-            }
-        }
-    }
-
-    // Coroutine to wait for animation to finish and reset to Ivy Idle
-    private IEnumerator ResetToIdle(Animator animator, string animTrigger)
-    {
-        yield return null; // Ensure the next frame starts first
-
-        AnimatorStateInfo animState = animator.GetCurrentAnimatorStateInfo(0);
-        while (animState.IsName(animTrigger) && animState.normalizedTime < 1.0f)
-        {
-            yield return null; // Wait until animation finishes
-            animState = animator.GetCurrentAnimatorStateInfo(0);
-        }
-
-        animator.SetTrigger("Ivy Idle"); // Reset to Idle after animation finishes
-    }
-
-
-    private void PlayBarAnimation()
-    {
-        if (progressBar2To4 >= maxBar2 + maxBar3 + maxBar4)
-        {
-            TriggerAnimation("Ivy Like 2");
-            TriggerAnimation("Iris Like 2");
-        }
+        yield return new WaitForSeconds(1f);
+        progressBar2To4 = Mathf.Min(progressBar2To4 + plusScore, maxBar2 + maxBar3 + maxBar4);
+        plusScore = 0f;
+        UpdateAllBarsVisual();
     }
 
     public void ApplyWallPenalty()
     {
-        driftScore = Mathf.Max(0, driftScore - 50f); // Reduce drift score
-        progressBar2To4 = Mathf.Max(0, progressBar2To4 - 50f); // Reduce progress bar
-        UpdateBarsVisual();
+        if (Time.time < lastWallHitTime + wallCooldown) return;
+
+        lastWallHitTime = Time.time;
+        speedDisplay.countdownTime = Mathf.Max(0, speedDisplay.countdownTime - timePenalty);
+
+        if (car.isDrifting)
+        {
+            bar1Progress = Mathf.Max(0, bar1Progress - scorePenalty);
+        }
+        else
+        {
+            pendingHits++;
+            if (pendingPenaltyCoroutine != null) StopCoroutine(pendingPenaltyCoroutine);
+            pendingPenaltyCoroutine = StartCoroutine(ApplyPendingPenalties());
+        }
+    }
+
+    private IEnumerator ApplyPendingPenalties()
+    {
+        yield return new WaitForSeconds(1f);
+        driftScore = Mathf.Max(0, driftScore - (pendingHits * scorePenalty));
+        progressBar2To4 = Mathf.Max(0, progressBar2To4 - (pendingHits * scorePenalty));
+        pendingHits = 0;
+        UpdateAllBarsVisual();
+        UpdateAllScoreTexts();
+    }
+
+    private void ResetAllBars()
+    {
+        foreach (var bar in bar1List) bar.value = 0;
+        foreach (var bar in bar2List) bar.value = 0;
+        foreach (var bar in bar3List) bar.value = 0;
+        foreach (var bar in bar4List) bar.value = 0;
+    }
+
+    private void UpdateAllScoreTexts()
+    {
+        foreach (var text in driftScoreTexts)
+            text.text = "Drift Score: " + Mathf.RoundToInt(driftScore);
+    }
+
+    private void UpdateAllMultiplierTexts()
+    {
+        foreach (var text in multiplierTexts)
+            text.text = "x" + currentMultiplier;
+    }
+
+    private void ResetMultiplier()
+    {
+        currentMultiplier = 1;
+        driftMultiplier = 1f;
+        UpdateAllMultiplierTexts();
+    }
+
+    private void TriggerAnimations(string trigger)
+    {
+        foreach (var animator in carAnimators)
+            animator.SetTrigger(trigger);
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip != null) audioSource.PlayOneShot(clip, audioVolume);
+    }
+
+    private IEnumerator ReactivateObject(GameObject obj, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        obj.SetActive(true);
+    }
+
+    private void ApplyDriftResults()
+    {
+        progressBar2To4 = Mathf.Min(progressBar2To4 + plusScore, maxBar2 + maxBar3 + maxBar4);
+        plusScore = 0f;
+        UpdateAllBarsVisual();
+    }
+    private void OnEnable()
+    {
+        CarController2.OnWallCollision += HandleWallCollisionUI;
+    }
+
+    private void OnDisable()
+    {
+        CarController2.OnWallCollision -= HandleWallCollisionUI;
+    }
+    private void HandleWallCollisionUI(Vector3 collisionDirection)
+    {
+        // Convert physics direction to animation triggers
+        if (collisionDirection == Vector3.right)
+            TriggerAnimations("Ivy Hit Right");
+        else if (collisionDirection == Vector3.left)
+            TriggerAnimations("Ivy Hit Left");
+        else if (collisionDirection == Vector3.forward)
+            TriggerAnimations("Ivy Hit Front");
+
+        ApplyWallPenalty(); // Handle UI-specific penalties
     }
 }

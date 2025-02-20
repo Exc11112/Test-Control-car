@@ -114,6 +114,9 @@ public class CarController2 : MonoBehaviour
     private float lastWallHitTime = -Mathf.Infinity;
     public float wallCooldown = 5f;
 
+    public delegate void CollisionAction(Vector3 direction);
+    public static event CollisionAction OnWallCollision;
+
     void Start()
     {
         carUIManager = GetComponent<CarUIManager>(); // Link to the Car UI Manager
@@ -150,10 +153,7 @@ public class CarController2 : MonoBehaviour
 
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
-        if (isDrifting)
-        {
-            carUIManager.UpdateDriftScore(10 * Time.deltaTime); // Example drift score increment
-        }
+
 
             CheckWallCollision();
 
@@ -415,6 +415,7 @@ public class CarController2 : MonoBehaviour
             // Start cooldown
             StartCoroutine(SoundCooldown());
         }
+        carUIManager.ApplyWallPenalty();
     }
     IEnumerator SoundCooldown()
     {
@@ -425,94 +426,87 @@ public class CarController2 : MonoBehaviour
 
     void HandleRaycasts()
     {
-        float raycastDistance = 0.3f;
+        float raycastDistance = 1f; // Increased distance for better detection
         LayerMask wallLayer = LayerMask.GetMask("wall");
         bool rightHit = false;
         bool leftHit = false;
         bool frontHit = false;
-        Debug.Log("Wall LayerMask value: " + wallLayer.value);
 
+        // Right side detection
         foreach (Transform rightRay in RightRayOrigins)
         {
-            Vector3 direction = rightRay.forward;
-            Debug.DrawRay(rightRay.position, direction * raycastDistance, Color.green);
-
-            if (Physics.Raycast(rightRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            Debug.DrawRay(rightRay.position, rightRay.forward * raycastDistance, Color.green);
+            if (Physics.Raycast(rightRay.position, rightRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
             {
-                Debug.Log("hitr - Hit " + hit.collider.name);
                 rightHit = true;
-                HandleWallCollision(hit.normal); // Call collision handling
+                HandleWallCollision(hit.normal);
                 break;
             }
         }
 
+        // Front detection
         foreach (Transform frontRay in frontRayOrigins)
         {
-            Vector3 direction = frontRay.forward;
-            Debug.DrawRay(frontRay.position, direction * raycastDistance, Color.blue);
-
-            if (Physics.Raycast(frontRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.blue);
+            if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
             {
-                Debug.Log("hitf - Hit " + hit.collider.name);
                 frontHit = true;
-                HandleWallCollision(hit.normal); // Call collision handling
+                HandleWallCollision(hit.normal);
                 break;
             }
         }
 
+        // Left side detection
         foreach (Transform leftRay in LeftRayOrigins)
         {
-            Vector3 direction = leftRay.forward;
-            Debug.DrawRay(leftRay.position, direction * raycastDistance, Color.yellow);
-
-            if (Physics.Raycast(leftRay.position, direction, out RaycastHit hit, raycastDistance, wallLayer))
+            Debug.DrawRay(leftRay.position, leftRay.forward * raycastDistance, Color.yellow);
+            if (Physics.Raycast(leftRay.position, leftRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
             {
-                Debug.Log("hitl - Hit " + hit.collider.name);
                 leftHit = true;
-                HandleWallCollision(hit.normal); // Call collision handling
+                HandleWallCollision(hit.normal);
                 break;
             }
         }
 
         HandleAnimation(rightHit, leftHit, frontHit);
-    }
 
+        if (rightHit || leftHit || frontHit)
+        {
+            // Get collision direction
+            Vector3 collisionDir = rightHit ? Vector3.right :
+                                 leftHit ? Vector3.left :
+                                 Vector3.forward;
+
+            // Trigger event
+            OnWallCollision?.Invoke(collisionDir);
+        }
+    }
 
     void HandleAnimation(bool rightHit, bool leftHit, bool frontHit)
     {
         foreach (Animator animator in carAnimators)
         {
+            // Only reset relevant triggers
             animator.ResetTrigger("Ivy Hit Right");
             animator.ResetTrigger("Ivy Hit Left");
-            animator.ResetTrigger("Ivy Idle");
             animator.ResetTrigger("Ivy Hit Front");
-            animator.ResetTrigger("Iris Hit Front");
-            animator.ResetTrigger("Iris Hit Right");
-            animator.ResetTrigger("Iris Hit Left");
-            animator.ResetTrigger("Iris Idle");
+            animator.ResetTrigger("Ivy Idle");
 
             if (rightHit)
             {
-                Debug.Log("Setting Right Trigger");
                 animator.SetTrigger("Ivy Hit Right");
-                animator.SetTrigger("Iris Hit Right");
             }
             else if (leftHit)
             {
-                Debug.Log("Setting Left Trigger");
                 animator.SetTrigger("Ivy Hit Left");
-                animator.SetTrigger("Iris Hit Left");
             }
             else if (frontHit)
             {
                 animator.SetTrigger("Ivy Hit Front");
-                animator.SetTrigger("Iris Hit Front");
             }
             else
             {
-                Debug.Log("Setting Idle Trigger");
                 animator.SetTrigger("Ivy Idle");
-                animator.SetTrigger("Iris Idle");
             }
         }
     }
