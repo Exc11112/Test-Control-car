@@ -223,6 +223,22 @@ public class DriftScore2 : MonoBehaviour
                 break;
             }
         }
+        foreach (Transform rightRay in car.RightRayOrigins)
+        {
+            if (Physics.Raycast(rightRay.position, rightRay.forward, out RaycastHit hit, wallRaycastDistance, wallLayer))
+            {
+                ApplyWallPenalty();
+                break;
+            }
+        }
+        foreach (Transform leftRay in car.LeftRayOrigins)
+        {
+            if (Physics.Raycast(leftRay.position, leftRay.forward, out RaycastHit hit, wallRaycastDistance, wallLayer))
+            {
+                ApplyWallPenalty();
+                break;
+            }
+        }
     }
 
     public void HandleCarCollision(Collision collision)

@@ -110,16 +110,10 @@ public class CarController2 : MonoBehaviour
     public AudioClip[] collisionSounds; // Assign two sounds in the Inspector
     public AudioSource audioSource;
     private bool canPlaySound = true; // Cooldown control
-    private CarUIManager carUIManager;
-    private float lastWallHitTime = -Mathf.Infinity;
-    public float wallCooldown = 5f;
 
-    public delegate void CollisionAction(Vector3 direction);
-    public static event CollisionAction OnWallCollision;
 
     void Start()
     {
-        carUIManager = GetComponent<CarUIManager>(); // Link to the Car UI Manager
         carRigidbody = GetComponent<Rigidbody>();
         carRigidbody.centerOfMass = new Vector3(0, -0.5f, 0); // Adjust car's center of mass
         currentSpeed = 0f;
@@ -153,9 +147,6 @@ public class CarController2 : MonoBehaviour
 
         moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal");
-
-
-            CheckWallCollision();
 
         if (isNeutral)
         {
@@ -415,7 +406,6 @@ public class CarController2 : MonoBehaviour
             // Start cooldown
             StartCoroutine(SoundCooldown());
         }
-        carUIManager.ApplyWallPenalty();
     }
     IEnumerator SoundCooldown()
     {
@@ -426,7 +416,7 @@ public class CarController2 : MonoBehaviour
 
     void HandleRaycasts()
     {
-        float raycastDistance = 1f; // Increased distance for better detection
+        float raycastDistance = 0.2f; // Increased distance for better detection
         LayerMask wallLayer = LayerMask.GetMask("wall");
         bool rightHit = false;
         bool leftHit = false;
@@ -470,63 +460,45 @@ public class CarController2 : MonoBehaviour
 
         HandleAnimation(rightHit, leftHit, frontHit);
 
-        if (rightHit || leftHit || frontHit)
-        {
-            // Get collision direction
-            Vector3 collisionDir = rightHit ? Vector3.right :
-                                 leftHit ? Vector3.left :
-                                 Vector3.forward;
-
-            // Trigger event
-            OnWallCollision?.Invoke(collisionDir);
-        }
     }
 
     void HandleAnimation(bool rightHit, bool leftHit, bool frontHit)
     {
         foreach (Animator animator in carAnimators)
         {
-            // Only reset relevant triggers
             animator.ResetTrigger("Ivy Hit Right");
             animator.ResetTrigger("Ivy Hit Left");
-            animator.ResetTrigger("Ivy Hit Front");
             animator.ResetTrigger("Ivy Idle");
+            animator.ResetTrigger("Ivy Hit Front");
+            animator.ResetTrigger("Iris Hit Front");
+            animator.ResetTrigger("Iris Hit Right");
+            animator.ResetTrigger("Iris Hit Left");
+            animator.ResetTrigger("Iris Idle");
 
             if (rightHit)
             {
+                Debug.Log("Setting Right Trigger");
                 animator.SetTrigger("Ivy Hit Right");
+                animator.SetTrigger("Iris Hit Right");
             }
             else if (leftHit)
             {
+                Debug.Log("Setting Left Trigger");
                 animator.SetTrigger("Ivy Hit Left");
+                animator.SetTrigger("Iris Hit Left");
             }
             else if (frontHit)
             {
                 animator.SetTrigger("Ivy Hit Front");
+                animator.SetTrigger("Iris Hit Front");
             }
             else
             {
+                Debug.Log("Setting Idle Trigger");
                 animator.SetTrigger("Ivy Idle");
+                animator.SetTrigger("Iris Idle");
             }
         }
-    }
-    private void CheckWallCollision()
-    {
-        if (Time.time < lastWallHitTime + wallCooldown) return;
-
-        foreach (Transform rayOrigin in transform)
-        {
-            if (Physics.Raycast(rayOrigin.position, rayOrigin.forward, 1f, LayerMask.GetMask("wall")))
-            {
-                ApplyWallPenalty();
-                break;
-            }
-        }
-    }
-    private void ApplyWallPenalty()
-    {
-        lastWallHitTime = Time.time;
-        carUIManager.ApplyWallPenalty(); // Notify the UI Manager
     }
 
     private void UpdateWheelRotations()
