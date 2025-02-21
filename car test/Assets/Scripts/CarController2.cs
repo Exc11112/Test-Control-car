@@ -110,6 +110,8 @@ public class CarController2 : MonoBehaviour
     public AudioClip[] collisionSounds; // Assign two sounds in the Inspector
     public AudioSource audioSource;
     private bool canPlaySound = true; // Cooldown control
+    private bool isSlowingDown = false;
+    public float slowDownRate = 1000f; // Adjust for slower or faster deceleration
 
 
     void Start()
@@ -313,6 +315,29 @@ public class CarController2 : MonoBehaviour
                 break;
             }
         }
+
+        if (isSlowingDown)
+        {
+            // Stop slowing if player tries to reverse
+            if (moveInput < 0)
+            {
+                isSlowingDown = false;
+            }
+            else
+            {
+                // Gradually reduce speed and RPM to 0
+                currentSpeed = Mathf.MoveTowards(currentSpeed, 0, slowDownRate * Time.deltaTime);
+                currentRPM = Mathf.MoveTowards(currentRPM, 0, slowDownRate * 100 * Time.deltaTime);
+
+                // Stop slowing when speed reaches 0
+                if (currentSpeed <= 0.1f)
+                {
+                    currentSpeed = 0;
+                    currentRPM = 0;
+                    isSlowingDown = false; // Stop process
+                }
+            }
+        }
         HandleDrifting();
         HandleOversteerUndersteer();
         AdjustAcceleration();
@@ -380,21 +405,25 @@ public class CarController2 : MonoBehaviour
 
     void HandleWallCollision(Vector3 collisionNormal)
     {
-        Vector3 incomingVelocity = carRigidbody.velocity;
+        // Only start slowing down if speed is greater than 40
+        if (!isSlowingDown && Mathf.Abs(currentSpeed) > 40f)
+        {
+            isSlowingDown = true;
+        }
 
-        // Perfect mirror reflection with velocity preservation
+        // Reflect velocity for a slight bounce effect
+        Vector3 incomingVelocity = carRigidbody.velocity;
         if (Vector3.Dot(incomingVelocity.normalized, collisionNormal) < 0)
         {
             Vector3 reflectedVelocity = Vector3.Reflect(incomingVelocity, collisionNormal) * 0.7f;
             carRigidbody.velocity = reflectedVelocity;
 
-            // Add rotational force for more realistic bounce
+            // Add rotational force for a realistic bounce
             Vector3 torque = Vector3.Cross(collisionNormal, incomingVelocity.normalized) * 50f;
             carRigidbody.AddTorque(torque, ForceMode.Impulse);
         }
 
-        // Stop drifting when hitting a wall
-        isDrifting = false;
+        isDrifting = false; // Stop drifting after hitting a wall
 
         // Play a random collision sound if available
         if (canPlaySound && collisionSounds.Length > 0 && (currentSpeed >= 50f || currentSpeed <= -20f))
