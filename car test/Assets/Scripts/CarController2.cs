@@ -111,7 +111,7 @@ public class CarController2 : MonoBehaviour
     public AudioSource audioSource;
     private bool canPlaySound = true; // Cooldown control
     private bool isSlowingDown = false;
-    public float slowDownRate = 1000f; // Adjust for slower or faster deceleration
+    public float slowDownRate = 0f; // Adjust for slower or faster deceleration
 
 
     void Start()
@@ -299,7 +299,7 @@ public class CarController2 : MonoBehaviour
 
             if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit frontHit, raycastDistance, wallLayer))
             {
-                HandleWallCollision(frontHit.normal);
+                HandleWallCollision(frontHit.normal, true, false);
                 break;
             }
         }
@@ -311,7 +311,7 @@ public class CarController2 : MonoBehaviour
 
             if (Physics.Raycast(backRay.position, -backRay.forward, out RaycastHit backHit, raycastDistance, wallLayer))
             {
-                HandleWallCollision(backHit.normal);
+                HandleWallCollision(backHit.normal, false, true);
                 break;
             }
         }
@@ -319,7 +319,7 @@ public class CarController2 : MonoBehaviour
         if (isSlowingDown)
         {
             // Stop slowing if player tries to reverse
-            if (moveInput < 0)
+            if (moveInput < 0 || moveInput > 0)
             {
                 isSlowingDown = false;
             }
@@ -403,13 +403,14 @@ public class CarController2 : MonoBehaviour
         }
     }
 
-    void HandleWallCollision(Vector3 collisionNormal)
+    void HandleWallCollision(Vector3 collisionNormal, bool isFront, bool isBack)
     {
         // Only start slowing down if speed is greater than 40
-        if (!isSlowingDown && Mathf.Abs(currentSpeed) > 40f)
+        if (!isSlowingDown && ((isFront && currentSpeed > 40f) || (isBack && currentSpeed < -20f)))
         {
             isSlowingDown = true;
         }
+
 
         // Reflect velocity for a slight bounce effect
         Vector3 incomingVelocity = carRigidbody.velocity;
@@ -445,44 +446,58 @@ public class CarController2 : MonoBehaviour
 
     void HandleRaycasts()
     {
-        float raycastDistance = 0.2f; // Increased distance for better detection
+        float raycastDistance = 0.2f;
         LayerMask wallLayer = LayerMask.GetMask("wall");
         bool rightHit = false;
         bool leftHit = false;
         bool frontHit = false;
+        bool backHit = false;
 
-        // Right side detection
+
+        // Front collision detection (Triggers slowdown if moving forward fast)
+        foreach (Transform frontRay in frontRayOrigins)
+        {
+            Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.red);
+            if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
+            {
+                frontHit = true;
+                HandleWallCollision(hit.normal, true, false); // Front hit, check slowdown for forward movement
+                break;
+            }
+        }
+
+        // Back collision detection (Triggers slowdown if reversing fast)
+        foreach (Transform backRay in backRayOrigins)
+        {
+            Debug.DrawRay(backRay.position, -backRay.forward * raycastDistance, Color.blue);
+            if (Physics.Raycast(backRay.position, -backRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
+            {
+                backHit = true;
+                HandleWallCollision(hit.normal, false, true); // Back hit, check slowdown for reverse movement
+                break;
+            }
+        }
+
+        // Right collision detection (Only Reflects)
         foreach (Transform rightRay in RightRayOrigins)
         {
             Debug.DrawRay(rightRay.position, rightRay.forward * raycastDistance, Color.green);
             if (Physics.Raycast(rightRay.position, rightRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
             {
                 rightHit = true;
-                HandleWallCollision(hit.normal);
+                HandleWallCollision(hit.normal, false, false); // Only Reflection, no slowdown
                 break;
             }
         }
 
-        // Front detection
-        foreach (Transform frontRay in frontRayOrigins)
-        {
-            Debug.DrawRay(frontRay.position, frontRay.forward * raycastDistance, Color.blue);
-            if (Physics.Raycast(frontRay.position, frontRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
-            {
-                frontHit = true;
-                HandleWallCollision(hit.normal);
-                break;
-            }
-        }
-
-        // Left side detection
+        // Left collision detection (Only Reflects)
         foreach (Transform leftRay in LeftRayOrigins)
         {
             Debug.DrawRay(leftRay.position, leftRay.forward * raycastDistance, Color.yellow);
             if (Physics.Raycast(leftRay.position, leftRay.forward, out RaycastHit hit, raycastDistance, wallLayer))
             {
                 leftHit = true;
-                HandleWallCollision(hit.normal);
+                HandleWallCollision(hit.normal, false, false); // Only Reflection, no slowdown
                 break;
             }
         }
