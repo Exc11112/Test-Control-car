@@ -251,16 +251,21 @@ public class CarController2 : MonoBehaviour
             AdjustAcceleration();
         }
 
-        if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.S))
-        {
-            isSKeyPressed = true;
-            sKeyPressTime = Time.time;
-        }
+        //if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.S))
+        //{
+        //    isSKeyPressed = true;
+        //    sKeyPressTime = Time.time;
+        //}
 
-        if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
+        //if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
+        //{
+        //    isEnhancedTurning = true;
+        //    isSKeyPressed = false;
+        //}
+
+        if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.Space))
         {
             isEnhancedTurning = true;
-            isSKeyPressed = false;
         }
 
         if (isEnhancedTurning)
@@ -273,6 +278,12 @@ public class CarController2 : MonoBehaviour
             else
             {
                 if (Time.time - lastTurnInputTime >= turnResetDelay)
+                {
+                    isDrifting = false;
+                    isEnhancedTurning = false;
+                    AdjustAcceleration();
+                }
+                else if (isEnhancedTurning && isDrifting && Input.GetKeyDown(KeyCode.Space))
                 {
                     isDrifting = false;
                     isEnhancedTurning = false;

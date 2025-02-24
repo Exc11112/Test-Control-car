@@ -432,7 +432,7 @@ public class DriftScore2 : MonoBehaviour
             if (bar4.value >= maxBar4 && !bar4Triggered)
             {
                 TriggerAnimation("Ivy Like 2");
-                TriggerAnimation("Iris Like2");
+                TriggerAnimation("Iris Like 2");
                 bar4Triggered = true;
             }
         }
@@ -538,7 +538,7 @@ public class DriftScore2 : MonoBehaviour
         if (bar4.value >= maxBar4)
         {
             TriggerAnimation("Ivy Like 2");
-            TriggerAnimation("Iris Like2");
+            TriggerAnimation("Iris Like 2");
         }
         else if (bar3.value >= maxBar3)
         {
