@@ -50,6 +50,9 @@ public class DriftScore2 : MonoBehaviour
     private float wallRaycastCooldown = 0.1f;
     private float lastWallRaycastTime;
 
+    [Header("UI Configuration")]
+    public int currentUIIndex = 0; // Default to the first UI element
+
     [Header("Victory Configuration")]
     public GameObject[] victoryUIObjects;
     public GameObject[] victory3DObjects;

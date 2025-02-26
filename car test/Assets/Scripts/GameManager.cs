@@ -103,16 +103,14 @@ public class GameManager : MonoBehaviour
         {
             SetObjectsActive(winningDriftScore.gameWinObjects, true);
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
-
-            int victoryIndex = Array.IndexOf(driftScores, winningDriftScore);
-            Debug.Log("Victory Index: " + victoryIndex);
-            ReceiveVictoryIndex(victoryIndex);
+            ReceiveVictoryIndex(winningDriftScore); // Now passes DriftScore2 directly
         }
         else
         {
             SetObjectsActive(gameOverObjects, true);
         }
 
+        // Disable cars and speed displays
         foreach (DriftScore2 driftScore in driftScores)
         {
             if (driftScore.car != null) driftScore.car.enabled = false;
@@ -131,47 +129,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ReceiveVictoryIndex(int index)
+    public void ReceiveVictoryIndex(DriftScore2 winningDriftScore)
     {
-        if (driftScores == null || driftScores.Length == 0)
+        if (winningDriftScore == null || winningDriftScore.victoryUIObjects == null)
         {
+            Debug.LogError("Winning DriftScore2 or its UI array is null.");
             return;
         }
 
-        DriftScore2 activeDriftScore = null;
-        foreach (DriftScore2 driftScore in driftScores)
+        // Deactivate all UI elements for this DriftScore2
+        foreach (GameObject obj in winningDriftScore.victoryUIObjects)
         {
-            if (driftScore != null && driftScore.victory3DObjects != null)
-            {
-                foreach (GameObject obj in driftScore.victory3DObjects)
-                {
-                    if (obj != null && obj.activeSelf)
-                    {
-                        activeDriftScore = driftScore;
-                        break;
-                    }
-                }
-            }
-            if (activeDriftScore != null) break;
+            if (obj != null) obj.SetActive(false);
         }
 
-        if (index <= 0 || activeDriftScore == null || activeDriftScore.victoryUIObjects == null || activeDriftScore.victoryUIObjects.Length == 0)
+        // Activate the UI element based on currentUIIndex
+        int uiIndex = winningDriftScore.currentUIIndex;
+        if (uiIndex >= 0 && uiIndex < winningDriftScore.victoryUIObjects.Length)
         {
-            return;
+            winningDriftScore.victoryUIObjects[uiIndex].SetActive(true);
+            Debug.Log($"Activated UI index {uiIndex} for {winningDriftScore.name}");
         }
-
-        if (index - 1 < 0 || index - 1 >= activeDriftScore.victoryUIObjects.Length)
-        {
-            return;
-        }
-
-        foreach (GameObject obj in activeDriftScore.victoryUIObjects)
-        {
-            obj.SetActive(false);
-        }
-
-        activeDriftScore.victoryUIObjects[index - 1].SetActive(true);
-        Debug.Log($"Index passed: {index}, UI Array Length: {activeDriftScore.victoryUIObjects.Length}");
-
     }
 }

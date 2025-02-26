@@ -62,8 +62,6 @@ public class WaypointFollower : MonoBehaviour
 
     void ReachWaypoint()
     {
-        Debug.Log("Reached waypoint: " + currentWaypointIndex);
-
         currentWaypointIndex++;
 
         if (currentWaypointIndex >= waypoints.Length)
