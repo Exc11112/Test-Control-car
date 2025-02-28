@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 
         foreach (DriftScore2 driftScore in driftScores)
         {
-            float totalBarsMax = driftScore.maxBar2 + driftScore.maxBar3 + driftScore.maxBar4;
+            float totalBarsMax = driftScore.H1 + driftScore.H2 + driftScore.H3;
             if (driftScore.progressBar2To4 >= totalBarsMax && !activeVictoryDrifts.Contains(driftScore))
             {
                 SetObjectsActive(driftScore.victory3DObjects, true);
