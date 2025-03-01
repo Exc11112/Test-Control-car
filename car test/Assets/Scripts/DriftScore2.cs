@@ -187,6 +187,7 @@ public class DriftScore2 : MonoBehaviour
         progressBar2To4 = Mathf.Min(progressBar2To4 + totalToAdd, H1 + H2 + H3);
         plusScore = 0f;
         currentBarProgress = 0f;
+        AddPoints(Mathf.RoundToInt(currentDriftScore));
 
         // Cancel any pending delayed application
         if (plusScoreCoroutine != null) StopCoroutine(plusScoreCoroutine);

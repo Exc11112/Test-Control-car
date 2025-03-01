@@ -251,44 +251,25 @@ public class CarController2 : MonoBehaviour
             AdjustAcceleration();
         }
 
-        //if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.S))
-        //{
-        //    isSKeyPressed = true;
-        //    sKeyPressTime = Time.time;
-        //}
+        isEnhancedTurning = Input.GetKey(KeyCode.Space) && currentSpeed > driftThresholdSpeed;
+        isDrifting = isEnhancedTurning;
 
-        //if (isSKeyPressed && Input.GetKeyDown(KeyCode.W) && (Time.time - sKeyPressTime) <= maxTimeBetweenSAndW)
-        //{
-        //    isEnhancedTurning = true;
-        //    isSKeyPressed = false;
-        //}
-
-        if (!isEnhancedTurning && currentSpeed > driftThresholdSpeed && Input.GetKeyDown(KeyCode.Space))
+        if (isDrifting)
         {
-            isEnhancedTurning = true;
-        }
-
-        if (isEnhancedTurning)
-        {
+            lastTurnInputTime = Time.time; // Keep drifting as long as Space is held
+                                           // Extend drift time by pressing A/D (optional)
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
             {
-                isDrifting = true;
-                lastTurnInputTime = Time.time;
+                lastTurnInputTime = Time.time; // Reset drift timer while steering
             }
-            else
+        }
+        else
+        {
+            if (Time.time - lastTurnInputTime >= turnResetDelay)
             {
-                if (Time.time - lastTurnInputTime >= turnResetDelay)
-                {
-                    isDrifting = false;
-                    isEnhancedTurning = false;
-                    AdjustAcceleration();
-                }
-                else if (isEnhancedTurning && isDrifting && Input.GetKeyDown(KeyCode.Space))
-                {
-                    isDrifting = false;
-                    isEnhancedTurning = false;
-                    AdjustAcceleration();
-                }
+                isDrifting = false;
+                isEnhancedTurning = false;
+                AdjustAcceleration();
             }
         }
 
@@ -690,34 +671,27 @@ public class CarController2 : MonoBehaviour
     {
         if (isDrifting)
         {
-            // Reduce lateral friction when drifting
+            // Reduce lateral friction
             WheelFrictionCurve driftFriction = rearLeftWheelCollider.sidewaysFriction;
-            driftFriction.stiffness = normalLateralFriction = 0.5f;
+            driftFriction.stiffness = 0.5f;
             rearLeftWheelCollider.sidewaysFriction = driftFriction;
             rearRightWheelCollider.sidewaysFriction = driftFriction;
 
-            // Adjust the steering angle based on the current input
-            float targetSteerAngle = maxSteerAngle * turnInput; // steerInput is between -1 and 1
-            steerAngle = Mathf.Lerp(steerAngle, targetSteerAngle * driftSteerAngleMultiplier, Time.deltaTime * 2f);
+            // Adjust steering based on A/D input
+            float driftDirection = Input.GetAxis("Horizontal");
+            steerAngle = driftDirection * driftSteerAngle;
         }
         else
         {
-            // Restore normal friction when not drifting
+            // Restore normal friction
             WheelFrictionCurve normalFriction = rearLeftWheelCollider.sidewaysFriction;
-            normalFriction.stiffness = normalLateralFriction = 2f;
+            normalFriction.stiffness = 2f;
             rearLeftWheelCollider.sidewaysFriction = normalFriction;
             rearRightWheelCollider.sidewaysFriction = normalFriction;
-
-            // Reset the steering angle based on input
-            steerAngle = Mathf.Lerp(steerAngle, maxSteerAngle * turnInput, Time.deltaTime * 10f);
-            if (Mathf.Abs(steerAngle) < 1f)
-            {
-                steerAngle = 0f;
-            }
-
+            steerAngle = maxSteerAngle * turnInput; // Default steering
         }
 
-        // Apply the adjusted steer angle to the front wheels
+        // Apply steering angle
         frontLeftWheelCollider.steerAngle = steerAngle;
         frontRightWheelCollider.steerAngle = steerAngle;
     }
