@@ -5392,7 +5392,6 @@ GameObject:
   - component: {fileID: 8415631681497638061}
   - component: {fileID: 8106499219901204939}
   - component: {fileID: 5489485408593309555}
-  - component: {fileID: 1695999829279950121}
   m_Layer: 5
   m_Name: l2d_lvyV.4
   m_TagString: Untagged
@@ -5532,12 +5531,10 @@ MonoBehaviour:
   wallTag: wall
   bar1: {fileID: 0}
   bar2: {fileID: 0}
-  bar3: {fileID: 0}
-  bar4: {fileID: 0}
   maxBar1: 100
-  maxBar2: 500
-  maxBar3: 1000
-  maxBar4: 1500
+  H1: 500
+  H2: 1000
+  H3: 2500
   progressBar2To4: 0
   Plustime: 10
   EnergyIncreaseRate: 5
@@ -5551,6 +5548,7 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 0
+  currentUIIndex: 0
   victoryUIObjects: []
   victory3DObjects: []
   gameWinObjects: []
@@ -5562,57 +5560,31 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   heartPlusDelay: 1
   penaltyDelay: 1
---- !u!114 &1695999829279950121
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8112329902029117164}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speedDisplay: {fileID: 0}
-  car: {fileID: 0}
-  carRigidbody: {fileID: 0}
-  driftScoreText: {fileID: 0}
-  multiplierText: {fileID: 0}
-  fpointLayer: fpoint
-  wallTag: wall
-  bar1: {fileID: 0}
-  bar2: {fileID: 0}
-  bar3: {fileID: 0}
-  bar4: {fileID: 0}
-  maxBar1: 100
-  maxBar2: 500
-  maxBar3: 1000
-  maxBar4: 1500
-  progressBar2To4: 0
-  Plustime: 10
-  EnergyIncreaseRate: 5
-  HeartIncreaseRate: 15
-  timePenalty: 5
-  scorePenalty: 50
-  wallCooldown: 5
-  timePlusIncrement: 10
-  heartPlusIncrement: 50
-  wallRaycastDistance: 1
-  wallLayer:
-    serializedVersion: 2
-    m_Bits: 0
-  victoryUIObjects: []
-  victory3DObjects: []
-  gameWinObjects: []
-  activateAllVictoryObjects: 1
-  carAnimator: {fileID: 0}
-  TimeSound: {fileID: 0}
-  HeartSound: {fileID: 0}
-  bothVolume: 0.133
-  audioSource: {fileID: 0}
-  heartPlusDelay: 1
-  penaltyDelay: 1
+  hitClips:
+  - {fileID: 8300000, guid: 9cb37c3115f6bd04aac7bf79d2192deb, type: 3}
+  - {fileID: 8300000, guid: 9dee7ae8c8b85bb4f81148a213dc8af0, type: 3}
+  angryClips:
+  - {fileID: 8300000, guid: bd0e7bcae50642649b3b4daed3f1872b, type: 3}
+  - {fileID: 8300000, guid: 226eb6ba97e357447ab6202b3ee127da, type: 3}
+  - {fileID: 8300000, guid: c0402501546dff545b545550782126eb, type: 3}
+  like0Clips:
+  - {fileID: 8300000, guid: 7f7bbd56ca4ed00449398b82e6c18410, type: 3}
+  - {fileID: 8300000, guid: 81b18bf7d518c1841b1bc96e5722459b, type: 3}
+  likeClips:
+  - {fileID: 8300000, guid: 55e55ae59dce91f40a6f670db2dd4c64, type: 3}
+  - {fileID: 8300000, guid: 036022e7d07cef9409d6b43486803eb4, type: 3}
+  like1Clips:
+  - {fileID: 8300000, guid: cac7210364de792418ed43462f5f607b, type: 3}
+  - {fileID: 8300000, guid: 73255ce1581e8f94f9df29295c9326a6, type: 3}
+  - {fileID: 8300000, guid: 2546d2502850d234f9761b9d2f9281ea, type: 3}
+  like2Clips:
+  - {fileID: 8300000, guid: 3f69a61ac12e32d4fa0407d4aa3327dc, type: 3}
+  - {fileID: 8300000, guid: ad0728046fb380c4f882f96781461259, type: 3}
+  - {fileID: 8300000, guid: c18e965d36ba8b3478d32763691d4115, type: 3}
+  idleClips:
+  - {fileID: 8300000, guid: 3b6c7456b91d7dc4386aa5f4c6ca8e53, type: 3}
+  - {fileID: 8300000, guid: e313b62e49cc0164298a8c5173a67c9c, type: 3}
+  - {fileID: 8300000, guid: fc6f6b69474c310429365a3b74300220, type: 3}
 --- !u!1 &8131129869973759347
 GameObject:
   m_ObjectHideFlags: 0

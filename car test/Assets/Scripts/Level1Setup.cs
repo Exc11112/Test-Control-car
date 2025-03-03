@@ -11,6 +11,7 @@ public class Level1Setup : MonoBehaviour
     [Header("Characters")]
     public GameObject[] characters1; // UI elements for character index 0
     public GameObject[] characters2; // UI elements for character index 1
+    public GameObject[] characters3; // UI elements for character index 2
 
     [Header("Camera")]
     public DriftCamera driftCamera; // Reference to the DriftCamera in the scene
@@ -61,6 +62,12 @@ public class Level1Setup : MonoBehaviour
             Debug.Log("Character Index set to 1");
             SetupScene();
         }
+        else if (Input.GetKeyDown(KeyCode.Keypad6)) // NEW: Key for selecting the third character
+        {
+            SelectionData.SelectedCharacterIndex = 2;
+            Debug.Log("Character Index set to 2");
+            SetupScene();
+        }
     }
 
     private void SetupScene()
@@ -76,11 +83,19 @@ public class Level1Setup : MonoBehaviour
         {
             ActivateAllGameObjects(characters1);
             DeactivateAllGameObjects(characters2);
+            DeactivateAllGameObjects(characters3);
         }
         else if (SelectionData.SelectedCharacterIndex == 1)
         {
             ActivateAllGameObjects(characters2);
             DeactivateAllGameObjects(characters1);
+            DeactivateAllGameObjects(characters3);
+        }
+        else if (SelectionData.SelectedCharacterIndex == 2) // NEW: Handling third character
+        {
+            ActivateAllGameObjects(characters3);
+            DeactivateAllGameObjects(characters1);
+            DeactivateAllGameObjects(characters2);
         }
     }
 

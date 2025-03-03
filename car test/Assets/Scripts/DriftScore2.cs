@@ -86,6 +86,23 @@ public class DriftScore2 : MonoBehaviour
     private float currentDriftScore = 0f;
     private int wallHitsDuringDrift = 0;
 
+    [Header("Character Speech Clips")]
+    public AudioClip[] hitClips;  // Hit reaction
+    public AudioClip[] angryClips;  // Angry reaction after hit
+    public AudioClip[] like0Clips; // For progress < H1
+    public AudioClip[] likeClips;  // For progress between H1 and H2
+    public AudioClip[] like1Clips; // For progress between H2 and H3
+    public AudioClip[] like2Clips; // For progress >= H3
+    public AudioClip[] idleClips;  // Idle voice lines
+
+    [Header("Voice Settings")]
+    [Range(0f, 1f)] public float voiceVolume = 1.0f; // Controls all voice clip volumes
+
+    private AudioSource voiceAudioSource;
+    private bool firstIdlePlayed = false; // To track first idle clip
+    private float idleTimer = 0f;
+    private Coroutine angryClipCoroutine; // Add this line
+
     private void Start()
     {
         bar1.maxValue = maxBar1;
@@ -106,6 +123,21 @@ public class DriftScore2 : MonoBehaviour
         if (car == null || speedDisplay == null)
         {
             Debug.LogError("Car or SpeedDisplay references are missing in DriftScore2.");
+        }
+
+        if (voiceAudioSource == null)
+        {
+            voiceAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        voiceAudioSource.playOnAwake = false;
+        voiceAudioSource.loop = false;
+
+        // Play the first idle clip at the start
+        if (idleClips.Length > 0)
+        {
+            voiceAudioSource.PlayOneShot(idleClips[0]);
+            firstIdlePlayed = true;
         }
     }
 
@@ -132,8 +164,8 @@ public class DriftScore2 : MonoBehaviour
         // Handle drift end
         if (wasDrifting && !isCurrentlyDrifting)
         {
-            PlayBarAnimation();
-            ApplyDriftResults();
+            ApplyDriftResults(); // Apply scores first
+            PlayBarAnimation();  // Play animation & sound after drifting ends
         }
 
         // Animation triggers
@@ -173,11 +205,32 @@ public class DriftScore2 : MonoBehaviour
 
         UpdateBar1();
         UpdateBar2To4();
+        HandleIdleSpeech();
 
         if (Time.time - lastWallRaycastTime > wallRaycastCooldown)
         {
             CheckWallRaycasts();
             lastWallRaycastTime = Time.time;
+        }
+    }
+    private void HandleIdleSpeech()
+    {
+        if (!car.isDrifting && !voiceAudioSource.isPlaying)
+        {
+            idleTimer += Time.deltaTime;
+
+            if (idleTimer >= 5f)  // If idle for 10 seconds
+            {
+                if (Random.Range(0, 2) == 0)  // 1 in 2 chance
+                {
+                    PlayIdleClip();
+                }
+                idleTimer = 0f; // Reset timer
+            }
+        }
+        else
+        {
+            idleTimer = 0f; // Reset if not idle
         }
     }
 
@@ -199,6 +252,16 @@ public class DriftScore2 : MonoBehaviour
         currentBarProgress = 0f;
         wallHitsDuringDrift = 0;
     }
+    private void PlayIdleClip()
+    {
+        if (idleClips == null || idleClips.Length <= 1) return; // Ignore if no idle clips (or only one that was already played)
+
+        int startIndex = firstIdlePlayed ? 1 : 0; // Skip first clip after first play
+        AudioClip clip = idleClips[Random.Range(startIndex, idleClips.Length)];
+        voiceAudioSource.PlayOneShot(clip);
+        firstIdlePlayed = true;
+    }
+
 
     void CheckWallRaycasts()
     {
@@ -396,47 +459,69 @@ public class DriftScore2 : MonoBehaviour
         bar2.value = progressToShow;
 
         // Reset triggers if below thresholds
+        bool prevH1 = h1Triggered;
+        bool prevH2 = h2Triggered;
+        bool prevH3 = h3Triggered;
+
         h1Triggered = progressToShow >= H1;
         h2Triggered = progressToShow >= H1 + H2;
         h3Triggered = progressToShow >= H1 + H2 + H3;
 
-        // Trigger animations when thresholds are crossed
-        if (progressToShow >= H1 + H2 + H3 && !h3Triggered)
+        if (h3Triggered && !prevH3)
         {
-            TriggerAnimation("Ivy Like 2");
-            TriggerAnimation("Iris Like 2");
-            h3Triggered = true;
+            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", like2Clips);
         }
-        else if (progressToShow >= H1 + H2 && !h2Triggered)
+        else if (h2Triggered && !prevH2)
         {
-            TriggerAnimation("Ivy Like 1");
-            TriggerAnimation("Iris Like 1");
-            h2Triggered = true;
+            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", like1Clips);
         }
-        else if (progressToShow >= H1 && !h1Triggered)
+        else if (h1Triggered && !prevH1)
         {
-            TriggerAnimation("Ivy Like");
-            TriggerAnimation("Iris Like");
-            h1Triggered = true;
+            TriggerAnimationAndSound("Ivy Like", "Iris Like", likeClips);
         }
-        else if (progressToShow < H1)
+        else if (!h1Triggered && (prevH1 || prevH2 || prevH3))
         {
-            if (h1Triggered || h2Triggered || h3Triggered)
-            {
-                TriggerAnimation("Ivy Like 0");
-                TriggerAnimation("Iris Like 0");
-                h1Triggered = false;
-                h2Triggered = false;
-                h3Triggered = false;
-            }
+            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", like0Clips);
+            h1Triggered = false;
+            h2Triggered = false;
+            h3Triggered = false;
         }
     }
+    private void TriggerAnimationAndSound(string anim1, string anim2, AudioClip[] clips)
+    {
+        // Play animations
+        TriggerAnimation(anim1);
+        TriggerAnimation(anim2);
+
+        // Play sound if available
+        PlayRandomVoiceClip(clips);
+    }
+    // Helper function to play random voice clips
+    private void PlayRandomVoiceClip(AudioClip[] clips)
+    {
+        if (clips == null || clips.Length == 0 || voiceAudioSource == null) return;
+
+        if (!voiceAudioSource.isPlaying) // Prevent overlapping sounds
+        {
+            AudioClip clip = clips[Random.Range(0, clips.Length)];
+            voiceAudioSource.volume = voiceVolume; // Apply the voice volume setting
+            voiceAudioSource.PlayOneShot(clip);
+        }
+    }
+
 
     private void ApplyWallPenalty()
     {
         if (Time.time < lastWallHitTime + wallCooldown) return;
 
         lastWallHitTime = Time.time;
+
+        PlayRandomVoiceClip(hitClips);
+        // Delay before playing "angry" clip
+        if (angryClips != null && angryClips.Length > 0)
+        {
+            SafeStartCoroutine(PlayAngryClipWithDelay(1f), ref angryClipCoroutine);
+        }
 
         // Always apply time penalty immediately
         if (speedDisplay != null)
@@ -462,6 +547,11 @@ public class DriftScore2 : MonoBehaviour
             // Show temporary visual feedback
             SafeStartCoroutine(TemporaryPenaltyPreview(), ref pendingPenaltyCoroutine);
         }
+    }
+    private IEnumerator PlayAngryClipWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        PlayRandomVoiceClip(angryClips);
     }
     private IEnumerator ApplyPendingPenalty()
     {
@@ -511,29 +601,28 @@ public class DriftScore2 : MonoBehaviour
 
     private void PlayBarAnimation()
     {
+        if (wasDrifting) return; // Do nothing if still drifting
+
         float currentProgress = progressBar2To4 + currentBarProgress;
 
         if (currentProgress >= H1 + H2 + H3)
         {
-            TriggerAnimation("Ivy Like 2");
-            TriggerAnimation("Iris Like 2");
+            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", like2Clips);
         }
         else if (currentProgress >= H1 + H2)
         {
-            TriggerAnimation("Ivy Like 1");
-            TriggerAnimation("Iris Like 1");
+            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", like1Clips);
         }
         else if (currentProgress >= H1)
         {
-            TriggerAnimation("Ivy Like");
-            TriggerAnimation("Iris Like");
+            TriggerAnimationAndSound("Ivy Like", "Iris Like", likeClips);
         }
         else
         {
-            TriggerAnimation("Ivy Like 0");
-            TriggerAnimation("Iris Like 0");
+            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", like0Clips);
         }
     }
+
 
     private void UpdateMultiplierText()
     {

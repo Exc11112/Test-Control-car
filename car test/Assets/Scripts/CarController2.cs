@@ -108,10 +108,13 @@ public class CarController2 : MonoBehaviour
     public GameObject Backlight;
 
     public AudioClip[] collisionSounds; // Assign two sounds in the Inspector
+    public AudioClip gcrash;
+    public AudioClip[] Bgm;
     public AudioSource audioSource;
     private bool canPlaySound = true; // Cooldown control
     private bool isSlowingDown = false;
     public float slowDownRate = 0f; // Adjust for slower or faster deceleration
+    private bool wasAirborne = false; // Tracks if the car was previously in the air
 
 
     void Start()
@@ -134,6 +137,11 @@ public class CarController2 : MonoBehaviour
 
         checkpointTimes = new float[maxCheckpoints];
         currentAcceleration = baseAcceleration * gearRatios[currentGear];
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+        PlayBGM();
     }
 
     void Update()
@@ -385,8 +393,23 @@ public class CarController2 : MonoBehaviour
             transform.Rotate(0, newRotation, 0, Space.World);
         }
 
+        bool previouslyGrounded = isCarGrounded;
+
         RaycastHit hit;
         isCarGrounded = Physics.Raycast(transform.position, -transform.up, out hit, 1f, groundLayer);
+
+        if (!previouslyGrounded && isCarGrounded) // Car just landed
+        {
+            if (gcrash != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(gcrash);
+            }
+            wasAirborne = false; // Reset airborne flag
+        }
+        else if (previouslyGrounded && !isCarGrounded) // Car just became airborne
+        {
+            wasAirborne = true;
+        }
 
         if (isCarGrounded)
         {
@@ -755,5 +778,14 @@ public class CarController2 : MonoBehaviour
         // Apply half of the torque to the rear wheels
         rearLeftWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
         rearRightWheelCollider.motorTorque = moveInput * currentAcceleration / 2f;
+    }
+    void PlayBGM()
+    {
+        if (Bgm.Length > 0 && SelectionData.SelectedCharacterIndex < Bgm.Length)
+        {
+            audioSource.clip = Bgm[SelectionData.SelectedCharacterIndex];
+            audioSource.loop = true; // Loop the BGM
+            audioSource.Play();
+        }
     }
 }

@@ -7511,12 +7511,10 @@ MonoBehaviour:
   wallTag: wall
   bar1: {fileID: 0}
   bar2: {fileID: 0}
-  bar3: {fileID: 0}
-  bar4: {fileID: 0}
   maxBar1: 100
-  maxBar2: 500
-  maxBar3: 1000
-  maxBar4: 1500
+  H1: 500
+  H2: 1000
+  H3: 2500
   progressBar2To4: 0
   Plustime: 10
   EnergyIncreaseRate: 5
@@ -7530,6 +7528,7 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 8192
+  currentUIIndex: 0
   victoryUIObjects:
   - {fileID: 0}
   - {fileID: 0}
@@ -7550,6 +7549,33 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   heartPlusDelay: 1
   penaltyDelay: 1
+  hitClips:
+  - {fileID: 8300000, guid: f0afbffed319f3540ad7814751943c30, type: 3}
+  - {fileID: 8300000, guid: 74bca785bf3c92147825a5e131bc38dc, type: 3}
+  angryClips:
+  - {fileID: 8300000, guid: 506a056b5dfa1884cb636e3b28641b50, type: 3}
+  - {fileID: 8300000, guid: 01e7d8c088b7b064db774f908b2b82b5, type: 3}
+  - {fileID: 8300000, guid: a5219d2f1161429408d620681c9c1fb7, type: 3}
+  - {fileID: 8300000, guid: 037c86020ce618540a1d8011ebfd086b, type: 3}
+  like0Clips:
+  - {fileID: 8300000, guid: 3c7706ef31297b747ab9d5fd1f043559, type: 3}
+  - {fileID: 8300000, guid: d76b173fc1b746347b3f97fbdecb1dbe, type: 3}
+  likeClips:
+  - {fileID: 8300000, guid: 7434e498bd9cf2a4db571085372367f7, type: 3}
+  - {fileID: 8300000, guid: f1a1ddfa75036fc4ea6dccc3351ecfb3, type: 3}
+  - {fileID: 8300000, guid: 93f744cefe9a59740a0eb2e95583b0f7, type: 3}
+  like1Clips:
+  - {fileID: 8300000, guid: 12b8a41ae1ed23d4c84c7efb83b67194, type: 3}
+  - {fileID: 8300000, guid: 0411ec2202d29d1488fec14272698784, type: 3}
+  - {fileID: 8300000, guid: 1aa9859276541944f9bfb43fd383897b, type: 3}
+  like2Clips:
+  - {fileID: 8300000, guid: 3dc780f0700914e4fa8394a5417ca03b, type: 3}
+  - {fileID: 8300000, guid: 62e9138b6ddf4704383270fcc5e80451, type: 3}
+  - {fileID: 8300000, guid: e167a038a7ee9f24aa2161fc57f23f59, type: 3}
+  idleClips:
+  - {fileID: 8300000, guid: c3405661d7897d547b80093c03067039, type: 3}
+  - {fileID: 8300000, guid: 6899cf35899335448b3c3e64a4ce3da2, type: 3}
+  - {fileID: 8300000, guid: 56695e9224a5eef4ea6f4e9d30492e9d, type: 3}
 --- !u!1 &8406601999117053774
 GameObject:
   m_ObjectHideFlags: 0
