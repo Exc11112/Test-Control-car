@@ -115,10 +115,15 @@ public class CarController2 : MonoBehaviour
     private bool isSlowingDown = false;
     public float slowDownRate = 0f; // Adjust for slower or faster deceleration
     private bool wasAirborne = false; // Tracks if the car was previously in the air
+    private float gameStartTime;
+    private bool canPlayGcrash = false;
+
 
 
     void Start()
     {
+        gameStartTime = Time.time; // Record when the game starts
+        StartCoroutine(EnableGcrashAfterDelay(10f)); // Enable Gcrash after 10 seconds
         carRigidbody = GetComponent<Rigidbody>();
         carRigidbody.centerOfMass = new Vector3(0, -0.5f, 0); // Adjust car's center of mass
         currentSpeed = 0f;
@@ -400,7 +405,7 @@ public class CarController2 : MonoBehaviour
 
         if (!previouslyGrounded && isCarGrounded) // Car just landed
         {
-            if (gcrash != null && audioSource != null)
+            if (gcrash != null && audioSource != null && canPlayGcrash)
             {
                 audioSource.PlayOneShot(gcrash);
             }
@@ -787,5 +792,10 @@ public class CarController2 : MonoBehaviour
             audioSource.loop = true; // Loop the BGM
             audioSource.Play();
         }
+    }
+    private IEnumerator EnableGcrashAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        canPlayGcrash = true;
     }
 }

@@ -9,12 +9,6 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("Level1");
     }
 
-    public void OpenOptions()
-    {
-        // เปิดเมนู Options
-        Debug.Log("Options Menu Opened");
-    }
-
     public void ExitGame()
     {
         // ปิดโปรแกรม
@@ -31,5 +25,12 @@ public class MainMenu : MonoBehaviour
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("start_manu");
+    }
+
+    public void ReloadScene()
+    {
+        // Reload the current active scene
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
