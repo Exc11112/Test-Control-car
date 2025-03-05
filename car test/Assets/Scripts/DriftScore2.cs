@@ -103,6 +103,10 @@ public class DriftScore2 : MonoBehaviour
     private float idleTimer = 0f;
     private Coroutine angryClipCoroutine; // Add this line
 
+    private int debugLPressCount = 0;
+    private float debugLPressResetTime = 1.5f; // Reset if not pressed within 1.5 sec
+    private float lastLPressTime = 0f;
+
     private void Start()
     {
         bar1.maxValue = maxBar1;
@@ -212,6 +216,25 @@ public class DriftScore2 : MonoBehaviour
             CheckWallRaycasts();
             lastWallRaycastTime = Time.time;
         }
+
+        // Debug: Press 'L' 3 times to fill heart bar
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            if (Time.time - lastLPressTime > debugLPressResetTime)
+            {
+                debugLPressCount = 0; // Reset if too much time passed between presses
+            }
+
+            debugLPressCount++;
+            lastLPressTime = Time.time;
+
+            if (debugLPressCount >= 3)
+            {
+                FillHeartsDebug();
+                debugLPressCount = 0; // Reset counter
+            }
+        }
+
     }
     private void HandleIdleSpeech()
     {
@@ -493,9 +516,13 @@ public class DriftScore2 : MonoBehaviour
         TriggerAnimation(anim1);
         TriggerAnimation(anim2);
 
-        // Play sound if available
-        PlayRandomVoiceClip(clips);
+        // 1 in 3 chance to play the like sound
+        if (clips != null && clips.Length > 0 && Random.Range(0, 3) == 0)
+        {
+            PlayRandomVoiceClip(clips);
+        }
     }
+
     // Helper function to play random voice clips
     private void PlayRandomVoiceClip(AudioClip[] clips)
     {
@@ -518,7 +545,8 @@ public class DriftScore2 : MonoBehaviour
 
         PlayRandomVoiceClip(hitClips);
         // Delay before playing "angry" clip
-        if (angryClips != null && angryClips.Length > 0)
+        // 1 in 3 chance to play the angry sound
+        if (angryClips != null && angryClips.Length > 0 && Random.Range(0, 3) == 0)
         {
             SafeStartCoroutine(PlayAngryClipWithDelay(1f), ref angryClipCoroutine);
         }
@@ -636,5 +664,12 @@ public class DriftScore2 : MonoBehaviour
         {
             driftScoreText.text = "Drift Score: " + Mathf.RoundToInt(driftScore).ToString();
         }
+    }
+    private void FillHeartsDebug()
+    {
+        progressBar2To4 = H1 + H2 + H3; // Max out heart bar
+        UpdateBarsVisual(); // Refresh UI
+
+        Debug.Log("Debug: Hearts are now full!");
     }
 }
