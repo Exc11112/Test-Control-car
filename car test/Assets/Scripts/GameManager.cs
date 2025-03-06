@@ -7,7 +7,9 @@ public class GameManager : MonoBehaviour
 {
     public DriftScore2[] driftScores;    // Array of drift score components
     public SpeedDisplay[] speedDisplays; // Array of speed display components
-    public GameObject[] gameOverObjects; // Common defeat objects
+    public GameObject[] firstCharacterGameOverObjects;  // Array for Character 0
+    public GameObject[] secondCharacterGameOverObjects; // Array for Character 1
+    public GameObject[] thirdCharacterGameOverObjects;  // Array for Character 2
     public GameObject[] gameWinObjects;
 
     private bool gameEnded;
@@ -107,7 +109,22 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            SetObjectsActive(gameOverObjects, true);
+
+            int selectedCharacter = SelectionData.SelectedCharacterIndex; // Using your SelectionData
+
+            // Activate the corresponding game-over objects array based on the selected character
+            if (selectedCharacter == 0)
+            {
+                SetObjectsActive(firstCharacterGameOverObjects, true);
+            }
+            else if (selectedCharacter == 1)
+            {
+                SetObjectsActive(secondCharacterGameOverObjects, true);
+            }
+            else if (selectedCharacter == 2)
+            {
+                SetObjectsActive(thirdCharacterGameOverObjects, true);
+            }
         }
 
         // Disable cars and speed displays
@@ -123,6 +140,7 @@ public class GameManager : MonoBehaviour
 
     void SetObjectsActive(GameObject[] objects, bool state)
     {
+        if (objects == null) return;
         foreach (GameObject obj in objects)
         {
             if (obj != null) obj.SetActive(state);

@@ -48,6 +48,12 @@ public class Level1Setup : MonoBehaviour
             Debug.Log("Car Index set to 1");
             SetupScene();
         }
+        else if (Input.GetKeyDown(KeyCode.Keypad3))
+        {
+            SelectionData.SelectedCarIndex = 2;
+            Debug.Log("Car Index set to 2");
+            SetupScene();
+        }
 
         // Debug: Handle input for selecting characters
         if (Input.GetKeyDown(KeyCode.Keypad4))

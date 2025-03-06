@@ -5,8 +5,9 @@ public class MainMenu : MonoBehaviour
 {
     public void StartGame()
     {
-        // Check the stored day value and load the corresponding scene
-        int day = PlayerPrefs.GetInt("day", 1); // Default to 1 if not set
+        int day = PlayerPrefs.GetInt("day", 1); // Read the stored day
+
+        Debug.Log("Starting Game - Day: " + day); // Debug to check value
 
         switch (day)
         {
@@ -25,6 +26,7 @@ public class MainMenu : MonoBehaviour
                 break;
         }
     }
+
 
     public void ExitGame()
     {
@@ -56,7 +58,10 @@ public class MainMenu : MonoBehaviour
         SceneManager.LoadScene("Select");
     }
 
-
+    public void ToCutscene()
+    {
+        SceneManager.LoadScene("Cutscene");
+    }
     public void BlackToMenu()
     {
         Time.timeScale = 1f;

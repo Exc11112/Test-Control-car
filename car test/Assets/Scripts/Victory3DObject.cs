@@ -30,37 +30,6 @@ public class Victory3DObject : MonoBehaviour
             return;
         }
 
-        //int victoryIndex = 0;
-        //switch (gameObject.name)
-        //{
-        //    case "Finish Point1":
-        //        victoryIndex = 0;
-        //        break;
-        //    case "Finish Point2":
-        //        victoryIndex = 1;
-        //        break;
-        //    case "Finish Point3":
-        //        victoryIndex = 2;
-        //        break;
-        //    case "Finish Point4":
-        //        victoryIndex = 0;
-        //        break;
-        //    case "Finish Point5":
-        //        victoryIndex = 1;
-        //        break;
-        //    case "Finish Point6":
-        //        victoryIndex = 2;
-        //        break;
-        //    default:
-        //        Debug.LogError("Unexpected gameObject.name: " + gameObject.name); // Log the error first
-        //        return;  // Exit after logging
-        //}
-
-        //if (victoryIndex == 0 || gameManager == null)
-        //{
-        //    return;
-        //}
-
         foreach (DriftScore2 driftScore in associatedDriftScore)
         {
             if (driftScore != null && car == driftScore.car && gameManager != null)

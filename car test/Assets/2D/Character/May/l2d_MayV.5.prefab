@@ -4902,6 +4902,7 @@ GameObject:
   - component: {fileID: 5881166760935735072}
   - component: {fileID: 1683671273018364273}
   - component: {fileID: 2266387233690838409}
+  - component: {fileID: 690103479950902824}
   m_Layer: 0
   m_Name: l2d_MayV.5
   m_TagString: Untagged
@@ -5001,6 +5002,65 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &690103479950902824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4707954681188706115}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e900858302ce4014c97b6d732b578c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speedDisplay: {fileID: 0}
+  car: {fileID: 0}
+  carRigidbody: {fileID: 0}
+  driftScoreText: {fileID: 0}
+  multiplierText: {fileID: 0}
+  fpointLayer: fpoint
+  wallTag: wall
+  bar1: {fileID: 0}
+  bar2: {fileID: 0}
+  maxBar1: 100
+  H1: 500
+  H2: 1000
+  H3: 2500
+  progressBar2To4: 0
+  Plustime: 10
+  EnergyIncreaseRate: 10
+  HeartIncreaseRate: 50
+  timePenalty: 5
+  scorePenalty: 50
+  wallCooldown: 5
+  timePlusIncrement: 10
+  heartPlusIncrement: 50
+  wallRaycastDistance: 1
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 8192
+  currentUIIndex: 0
+  victoryUIObjects:
+  - {fileID: 0}
+  victory3DObjects: []
+  gameWinObjects: []
+  activateAllVictoryObjects: 1
+  carAnimator: {fileID: 0}
+  TimeSound: {fileID: 0}
+  HeartSound: {fileID: 0}
+  bothVolume: 1
+  audioSource: {fileID: 0}
+  heartPlusDelay: 1
+  penaltyDelay: 1
+  hitClips: []
+  angryClips: []
+  like0Clips: []
+  likeClips: []
+  like1Clips: []
+  like2Clips: []
+  idleClips: []
+  voiceVolume: 1
 --- !u!1 &4908071480103019771
 GameObject:
   m_ObjectHideFlags: 0

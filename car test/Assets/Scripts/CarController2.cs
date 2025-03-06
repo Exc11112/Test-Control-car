@@ -74,7 +74,6 @@ public class CarController2 : MonoBehaviour
     public float timer = 0f;
     public bool isTimerRunning = false;
     private float finishPointTime;
-    private float countdownTime = 300f; // 5 minutes in seconds
     private bool gameEnded = false;
 
     public string checkpointLayer = "checkpoint";
@@ -538,29 +537,37 @@ public class CarController2 : MonoBehaviour
             animator.ResetTrigger("Iris Hit Right");
             animator.ResetTrigger("Iris Hit Left");
             animator.ResetTrigger("Iris Idle");
+            animator.ResetTrigger("May Hit Front");
+            animator.ResetTrigger("May Hit Right");
+            animator.ResetTrigger("May Hit Left");
+            animator.ResetTrigger("May Idle");
 
             if (rightHit)
             {
                 Debug.Log("Setting Right Trigger");
                 animator.SetTrigger("Ivy Hit Right");
                 animator.SetTrigger("Iris Hit Right");
+                animator.SetTrigger("May Hit Right");
             }
             else if (leftHit)
             {
                 Debug.Log("Setting Left Trigger");
                 animator.SetTrigger("Ivy Hit Left");
                 animator.SetTrigger("Iris Hit Left");
+                animator.SetTrigger("May Hit Left");
             }
             else if (frontHit)
             {
                 animator.SetTrigger("Ivy Hit Front");
                 animator.SetTrigger("Iris Hit Front");
+                animator.SetTrigger("May Hit Front");
             }
             else
             {
                 Debug.Log("Setting Idle Trigger");
                 animator.SetTrigger("Ivy Idle");
                 animator.SetTrigger("Iris Idle");
+                animator.SetTrigger("May Idle");
             }
         }
     }

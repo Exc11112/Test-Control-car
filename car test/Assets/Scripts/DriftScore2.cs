@@ -492,29 +492,30 @@ public class DriftScore2 : MonoBehaviour
 
         if (h3Triggered && !prevH3)
         {
-            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", like2Clips);
+            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", "May Like 2", like2Clips);
         }
         else if (h2Triggered && !prevH2)
         {
-            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", like1Clips);
+            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", "May Like 1", like1Clips);
         }
         else if (h1Triggered && !prevH1)
         {
-            TriggerAnimationAndSound("Ivy Like", "Iris Like", likeClips);
+            TriggerAnimationAndSound("Ivy Like", "Iris Like", "May Like", likeClips);
         }
         else if (!h1Triggered && (prevH1 || prevH2 || prevH3))
         {
-            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", like0Clips);
+            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", "May Like 0", like0Clips);
             h1Triggered = false;
             h2Triggered = false;
             h3Triggered = false;
         }
     }
-    private void TriggerAnimationAndSound(string anim1, string anim2, AudioClip[] clips)
+    private void TriggerAnimationAndSound(string anim1, string anim2, string anim3, AudioClip[] clips)
     {
         // Play animations
         TriggerAnimation(anim1);
         TriggerAnimation(anim2);
+        TriggerAnimation(anim3);
 
         // 1 in 3 chance to play the like sound
         if (clips != null && clips.Length > 0 && Random.Range(0, 3) == 0)
@@ -635,19 +636,19 @@ public class DriftScore2 : MonoBehaviour
 
         if (currentProgress >= H1 + H2 + H3)
         {
-            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", like2Clips);
+            TriggerAnimationAndSound("Ivy Like 2", "Iris Like 2", "May Like 2", like2Clips);
         }
         else if (currentProgress >= H1 + H2)
         {
-            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", like1Clips);
+            TriggerAnimationAndSound("Ivy Like 1", "Iris Like 1", "May Like 1", like1Clips);
         }
         else if (currentProgress >= H1)
         {
-            TriggerAnimationAndSound("Ivy Like", "Iris Like", likeClips);
+            TriggerAnimationAndSound("Ivy Like", "Iris Like", "May Like", likeClips);
         }
         else
         {
-            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", like0Clips);
+            TriggerAnimationAndSound("Ivy Like 0", "Iris Like 0", "May Like 0", like0Clips);
         }
     }
 

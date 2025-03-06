@@ -15,7 +15,5 @@ public class SceneTransition : MonoBehaviour
         // Log for confirmation
         Debug.Log($"Car: {SelectionData.SelectedCarIndex}, Character: {SelectionData.SelectedCharacterIndex}");
 
-        // Load the next scene
-        SceneManager.LoadScene("Level1");
     }
 }
