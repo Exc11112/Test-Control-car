@@ -8,5 +8,11 @@ public class CharacterSelector : MonoBehaviour
     {
         SelectedCharacterIndex = characterIndex;
         Debug.Log("Character selected: " + SelectedCharacterIndex);
+
+        // Increase the selection count for the chosen character
+        string key = "Character_" + characterIndex;
+        int count = PlayerPrefs.GetInt(key, 0);
+        PlayerPrefs.SetInt(key, count + 1);
+        PlayerPrefs.Save();
     }
 }

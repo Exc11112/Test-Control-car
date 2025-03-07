@@ -101,18 +101,26 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0.2f;
         Cursor.lockState = CursorLockMode.None;
 
+        int selectedCharacter = SelectionData.SelectedCharacterIndex;
+
+        PlayerPrefs.SetInt("GameWon", isVictory ? 1 : 0);
+        PlayerPrefs.SetInt("LastSelectedCharacter", selectedCharacter);
+
         if (isVictory && winningDriftScore != null)
         {
+            // Get the index of the selected victory ending
+            int endingIndex = winningDriftScore.currentUIIndex; // Assuming this determines the ending
+            PlayerPrefs.SetInt("VictoryEndingIndex", endingIndex);
+            PlayerPrefs.SetInt("LastSelectedCharacter", selectedCharacter);
+            PlayerPrefs.SetInt("GameWon", 1);
+
             SetObjectsActive(winningDriftScore.gameWinObjects, true);
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
             ReceiveVictoryIndex(winningDriftScore); // Now passes DriftScore2 directly
         }
         else
         {
-
-            int selectedCharacter = SelectionData.SelectedCharacterIndex; // Using your SelectionData
-
-            // Activate the corresponding game-over objects array based on the selected character
+            // Activate game-over objects
             if (selectedCharacter == 0)
             {
                 SetObjectsActive(firstCharacterGameOverObjects, true);
@@ -125,6 +133,32 @@ public class GameManager : MonoBehaviour
             {
                 SetObjectsActive(thirdCharacterGameOverObjects, true);
             }
+
+            // Save loss data
+            PlayerPrefs.SetInt("VictoryEndingIndex", 3); // 3 = lose ending
+            PlayerPrefs.SetInt("GameWon", 0);
+
+            // New: Uncover index 4 (5th image) for the selected character's gallery
+            string galleryKey = selectedCharacter switch
+            {
+                0 => "Character1_Revealed",
+                1 => "Character2_Revealed",
+                2 => "Character3_Revealed",
+                _ => throw new System.ArgumentOutOfRangeException()
+            };
+
+            string revealedData = PlayerPrefs.GetString(galleryKey, "00000");
+            char[] dataArray = revealedData.ToCharArray();
+
+            // Ensure the array has at least 5 elements (indices 0-4)
+            if (dataArray.Length < 5)
+            {
+                dataArray = new char[] { '0', '0', '0', '0', '0' }; // Reset to default
+            }
+
+            dataArray[4] = '1'; // Set index 4 (5th image) to uncovered
+            PlayerPrefs.SetString(galleryKey, new string(dataArray));
+            PlayerPrefs.Save();
         }
 
         // Disable cars and speed displays
@@ -135,6 +169,29 @@ public class GameManager : MonoBehaviour
         foreach (SpeedDisplay display in speedDisplays)
         {
             display.enabled = false;
+        }
+        SaveGalleryUnlockData(selectedCharacter, PlayerPrefs.GetInt("VictoryEndingIndex", 3));
+        PlayerPrefs.Save();
+    }
+
+    private void SaveGalleryUnlockData(int characterIndex, int endingIndex)
+    {
+        string key = characterIndex switch
+        {
+            0 => "Character1_Revealed",
+            1 => "Character2_Revealed",
+            2 => "Character3_Revealed",
+            _ => throw new System.ArgumentOutOfRangeException()
+        };
+
+        string revealedData = PlayerPrefs.GetString(key, "00000");
+        char[] dataArray = revealedData.ToCharArray();
+
+        // Ensure endingIndex is within bounds (0-4)
+        if (endingIndex >= 0 && endingIndex < dataArray.Length)
+        {
+            dataArray[endingIndex] = '1';
+            PlayerPrefs.SetString(key, new string(dataArray));
         }
     }
 

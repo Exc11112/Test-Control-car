@@ -3,7 +3,9 @@ using UnityEngine.UI;
 
 public class DayDisplay : MonoBehaviour
 {
-    public Text dayText; // Drag your UI text here in the Inspector
+    public GameObject day1Object; // Assign GameObject for Day 1
+    public GameObject day2Object; // Assign GameObject for Day 2
+    public GameObject day3Object; // Assign GameObject for Day 3
 
     void Start()
     {
@@ -13,6 +15,10 @@ public class DayDisplay : MonoBehaviour
     public void UpdateDayText()
     {
         int day = PlayerPrefs.GetInt("day", 1); // Default to 1 if not set
-        dayText.text = "Day: " + day;
+
+        // Activate the correct GameObject and deactivate the others
+        day1Object.SetActive(day == 1);
+        day2Object.SetActive(day == 2);
+        day3Object.SetActive(day == 3);
     }
 }
