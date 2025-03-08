@@ -103,6 +103,7 @@ public class MainMenu : MonoBehaviour
 
         // Return to main menu
         Time.timeScale = 1f;
+        PlayerPrefs.SetInt("day", 1);
         SceneManager.LoadScene("start_manu");
     }
 

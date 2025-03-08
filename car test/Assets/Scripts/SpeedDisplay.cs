@@ -62,6 +62,11 @@ public class SpeedDisplay : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            countdownTime = 1f;
+            Debug.Log("Debug: countdownTime set to 1");
+        }
         // Display speed in km/h
         speed = target.velocity.magnitude * 3.6f;
 
