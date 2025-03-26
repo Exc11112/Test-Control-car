@@ -159,8 +159,27 @@ public class CarController2 : MonoBehaviour
         UpdateFrontWheelTurning();
         HandleTurning();  // Handle turning based on wheel colliders
 
-        moveInput = Input.GetAxisRaw("Vertical");
-        turnInput = Input.GetAxisRaw("Horizontal");
+        // Read input from both keyboard and Xbox controller
+        moveInput = Input.GetAxisRaw("Vertical") + Input.GetAxis("ControllerVertical");
+        turnInput = Input.GetAxisRaw("Horizontal") + Input.GetAxis("ControllerHorizontal");
+
+        // Read acceleration and braking from Xbox controller triggers
+        float accelerationInput = Input.GetAxis("ControllerTriggerRight");
+        float brakeInput = Input.GetAxis("ControllerTriggerLeft");
+
+        // Ensure triggers don't cause unexpected reversing
+        if (accelerationInput > 0.1f)
+        {
+            moveInput = accelerationInput;
+        }
+        else if (brakeInput > 0.1f)
+        {
+            moveInput = -brakeInput;
+        }
+        else if (Mathf.Abs(moveInput) < 0.1f)
+        {
+            moveInput = 0; // Prevent small drift input from causing unintended movement
+        }
 
         if (isNeutral)
         {
