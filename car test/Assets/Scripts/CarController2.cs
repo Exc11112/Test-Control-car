@@ -160,25 +160,34 @@ public class CarController2 : MonoBehaviour
         HandleTurning();  // Handle turning based on wheel colliders
 
         // Read input from both keyboard and Xbox controller
-        moveInput = Input.GetAxisRaw("Vertical") + Input.GetAxis("ControllerVertical");
+        moveInput = Input.GetAxisRaw("Vertical");
         turnInput = Input.GetAxisRaw("Horizontal") + Input.GetAxis("ControllerHorizontal");
 
         // Read acceleration and braking from Xbox controller triggers
         float accelerationInput = Input.GetAxis("ControllerTriggerRight");
-        float brakeInput = Input.GetAxis("ControllerTriggerLeft");
-
         // Ensure triggers don't cause unexpected reversing
         if (accelerationInput > 0.1f)
         {
             moveInput = accelerationInput;
         }
-        else if (brakeInput > 0.1f)
-        {
-            moveInput = -brakeInput;
-        }
         else if (Mathf.Abs(moveInput) < 0.1f)
         {
             moveInput = 0; // Prevent small drift input from causing unintended movement
+        }
+        if (Input.GetButton("ControllerA"))
+        {
+            moveInput = -1;
+        }
+
+        if (Input.GetButtonDown("ControllerRB") && currentGear < gearRatios.Length - 1)
+        {
+            ShiftUp();
+        }
+
+        // Shift Down (LB)
+        if (Input.GetButtonDown("ControllerLB") && currentGear > 0)
+        {
+            ShiftDown();
         }
 
         if (isNeutral)
@@ -281,15 +290,14 @@ public class CarController2 : MonoBehaviour
         {
             AdjustAcceleration();
         }
-
-        isEnhancedTurning = Input.GetKey(KeyCode.Space) && currentSpeed > driftThresholdSpeed;
+        isEnhancedTurning = Input.GetKey(KeyCode.Space) && currentSpeed > driftThresholdSpeed || Input.GetAxis("ControllerTriggerLeft") > 0.1f && currentSpeed > driftThresholdSpeed;
         isDrifting = isEnhancedTurning;
 
         if (isDrifting)
         {
             lastTurnInputTime = Time.time; // Keep drifting as long as Space is held
                                            // Extend drift time by pressing A/D (optional)
-            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D))
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D) || Mathf.Abs(Input.GetAxis("ControllerHorizontal")) > 0.1f)
             {
                 lastTurnInputTime = Time.time; // Reset drift timer while steering
             }
