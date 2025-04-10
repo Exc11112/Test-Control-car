@@ -106,6 +106,7 @@ public class DriftScore2 : MonoBehaviour
     private int debugLPressCount = 0;
     private float debugLPressResetTime = 1.5f; // Reset if not pressed within 1.5 sec
     private float lastLPressTime = 0f;
+    public UnityEngine.Audio.AudioMixerGroup mySpeechMixerGroup;
 
     private void Start()
     {
@@ -132,6 +133,7 @@ public class DriftScore2 : MonoBehaviour
         if (voiceAudioSource == null)
         {
             voiceAudioSource = gameObject.AddComponent<AudioSource>();
+            voiceAudioSource.outputAudioMixerGroup = mySpeechMixerGroup;
         }
 
         voiceAudioSource.playOnAwake = false;
@@ -540,7 +542,7 @@ public class DriftScore2 : MonoBehaviour
 
     private void ApplyWallPenalty()
     {
-        if (Time.time < lastWallHitTime + wallCooldown) return;
+        if (Time.time < lastWallHitTime + wallCooldown && car.currentSpeed > 20) return;
 
         lastWallHitTime = Time.time;
 
