@@ -5529,10 +5529,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minPitch: 0.2
   maxPitch: 0.55
-  engineVolume: 0.1
-  bgmVolume: 0.5
+  engineVolume: 0.2
+  bgmVolume: 0.7
   driftClip: {fileID: 8300000, guid: 3c16691e37541474aaffdc5cc1e9238d, type: 3}
   driftVolume: 0.2
+  myBgmMixerGroup: {fileID: -780081407944332505, guid: 6e7b49cf9cae80441aef82f8c96d1766, type: 2}
+  myEngineMixerGroup: {fileID: -6554345063279415878, guid: 6e7b49cf9cae80441aef82f8c96d1766, type: 2}
 --- !u!82 &4270212660424261135
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5542,10 +5544,10 @@ AudioSource:
   m_GameObject: {fileID: 8494772395469145189}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -6554345063279415878, guid: 6e7b49cf9cae80441aef82f8c96d1766, type: 2}
   m_audioClip: {fileID: 8300000, guid: 8bfe21bff405786499a884cbd7d353c1, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.4
+  m_Volume: 0.5
   m_Pitch: -0
   Loop: 1
   Mute: 0

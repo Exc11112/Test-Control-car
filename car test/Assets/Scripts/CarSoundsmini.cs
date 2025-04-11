@@ -14,12 +14,14 @@ public class CarSoundsmini : MonoBehaviour
 
     public AudioClip driftClip; // Assign drift sound in Inspector
     public float driftVolume = 0.5f; // Adjustable drift sound volume (default = 50%)
+    public UnityEngine.Audio.AudioMixerGroup myBgmMixerGroup;
+    public UnityEngine.Audio.AudioMixerGroup myEngineMixerGroup;
 
     void Start()
     {
         carController = GetComponent<CarController2>();
         engineAudio = GetComponent<AudioSource>();
-
+        engineAudio.outputAudioMixerGroup = myEngineMixerGroup;
         if (engineAudio == null)
         {
             Debug.LogError("No AudioSource found on the car!");
@@ -27,6 +29,7 @@ public class CarSoundsmini : MonoBehaviour
 
         // Create a separate AudioSource for BGM
         bgmAudio = gameObject.AddComponent<AudioSource>();
+        bgmAudio.outputAudioMixerGroup = myBgmMixerGroup;
         bgmAudio.loop = true;
         bgmAudio.playOnAwake = false;
         bgmAudio.volume = bgmVolume;

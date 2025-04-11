@@ -555,7 +555,7 @@ public class DriftScore2 : MonoBehaviour
         }
 
         // Always apply time penalty immediately
-        if (speedDisplay != null)
+        if (speedDisplay != null && Time.time < lastWallHitTime + wallCooldown && car.currentSpeed > 20)
         {
             speedDisplay.countdownTime = Mathf.Max(0, speedDisplay.countdownTime - timePenalty);
         }
