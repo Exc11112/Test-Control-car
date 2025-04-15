@@ -34,9 +34,12 @@ public class CarController2 : MonoBehaviour
     public float driftThresholdSpeed;
     private float lastTurnInputTime;
     private float turnResetDelay = 0.2f;
-
     public float turnAcceleration;
     public float turnDeceleration;
+    [Header("Turn Speed Adjustment Settings")]
+    [Range(0f, 1f)] public float turnSpeedMinFactor = 0.7f; // 70% of defaultTurnSpeed at max speed
+    [Range(1f, 1.5f)] public float turnSpeedMaxFactor = 1.3f; // 130% of defaultTurnSpeed at 0 speed
+
     public float dForce;
     public float alignToGroundTime;
     public LayerMask groundLayer;
@@ -622,7 +625,9 @@ public class CarController2 : MonoBehaviour
 
     void HandleTurning()
     {
-        float targetTurnSpeed = isDrifting ? defaultTurnSpeed * driftSteerAngleMultiplier : defaultTurnSpeed;
+        float speedRatio = Mathf.Clamp01(Mathf.Abs(currentSpeed) / maxFwdSpeed);
+        float speedAdjustedTurnFactor = Mathf.Lerp(turnSpeedMaxFactor, turnSpeedMinFactor, speedRatio);
+        float targetTurnSpeed = isDrifting ? defaultTurnSpeed * driftSteerAngleMultiplier : defaultTurnSpeed * speedAdjustedTurnFactor;
 
         // Smoothly adjust turn speed
         turnSpeed = Mathf.Lerp(turnSpeed, targetTurnSpeed, Time.deltaTime * 2f);
