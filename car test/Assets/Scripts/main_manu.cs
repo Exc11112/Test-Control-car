@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
+    public static bool isCutscene = false;
     public void StartGame()
     {
         int day = PlayerPrefs.GetInt("day", 1); // Read the stored day
@@ -61,7 +62,14 @@ public class MainMenu : MonoBehaviour
 
     public void ToCutscene()
     {
-        SceneManager.LoadScene("Cutscene");
+        if (!isCutscene)
+        {
+            isCutscene = true;  // Mark as having seen the cutscene
+            SceneManager.LoadScene("Cutscene");  // Load the cutscene
+            return;  // Stop the rest of the function
+        }
+
+        SelectScene();  // If cutscene already seen, go directly to select scene
     }
     public void BlackToMenu()
     {
@@ -104,6 +112,34 @@ public class MainMenu : MonoBehaviour
         // Return to main menu
         Time.timeScale = 1f;
         PlayerPrefs.SetInt("day", 1);
+        SceneManager.LoadScene("start_manu");
+    }
+    public void BlackToMenuButStopUI()
+    {
+        Time.timeScale = 1f;
+
+        string currentScene = SceneManager.GetActiveScene().name;
+
+        // Keep the day set to the current level
+        if (currentScene == "Level1")
+        {
+            PlayerPrefs.SetInt("day", 1);
+        }
+        else if (currentScene == "Level2")
+        {
+            PlayerPrefs.SetInt("day", 2);
+        }
+        else if (currentScene == "Level3")
+        {
+            PlayerPrefs.SetInt("day", 3);
+        }
+
+        // Undo the last character selection
+        CharacterSelector.UndoLastCharacterSelection();
+
+        PlayerPrefs.Save();
+
+        // Go back to main menu
         SceneManager.LoadScene("start_manu");
     }
 

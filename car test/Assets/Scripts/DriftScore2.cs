@@ -546,12 +546,19 @@ public class DriftScore2 : MonoBehaviour
 
         lastWallHitTime = Time.time;
 
-        PlayRandomVoiceClip(hitClips);
+        if (Time.time < lastWallHitTime + wallCooldown && car.currentSpeed > 20)
+        {
+            PlayRandomVoiceClip(hitClips);
+        }
+
         // Delay before playing "angry" clip
         // 1 in 3 chance to play the angry sound
-        if (angryClips != null && angryClips.Length > 0 && Random.Range(0, 3) == 0)
+        if (Time.time < lastWallHitTime + wallCooldown && car.currentSpeed > 20)
         {
-            SafeStartCoroutine(PlayAngryClipWithDelay(1f), ref angryClipCoroutine);
+            if (angryClips != null && angryClips.Length > 0 && Random.Range(0, 3) == 0)
+            {
+                SafeStartCoroutine(PlayAngryClipWithDelay(1f), ref angryClipCoroutine);
+            }
         }
 
         // Always apply time penalty immediately
