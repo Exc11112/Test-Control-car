@@ -119,7 +119,8 @@ public class CarController2 : MonoBehaviour
     private bool wasAirborne = false; // Tracks if the car was previously in the air
     private float gameStartTime;
     private bool canPlayGcrash = false;
-
+    private GameObject mtObject;
+    private GameObject atObject;
 
 
     void Start()
@@ -138,7 +139,10 @@ public class CarController2 : MonoBehaviour
         gear1Deceleration = deceleration;
 
         originalBaseAcceleration = baseAcceleration;
-
+        mtObject = GameObject.Find("MT");
+        atObject = GameObject.Find("AT");
+        Debug.Log(mtObject);
+        Debug.Log(atObject);
         isNeutral = true;
         neutralStartTime = Time.time;
 
@@ -157,7 +161,7 @@ public class CarController2 : MonoBehaviour
         {
             isManual = !isManual;
         }
-
+        GearmodeUi();
         UpdateWheelRotations();
         UpdateFrontWheelTurning();
         HandleTurning();  // Handle turning based on wheel colliders
@@ -378,6 +382,28 @@ public class CarController2 : MonoBehaviour
         if(currentSpeed >= 50f || currentSpeed <= -20f)
         {
             HandleRaycasts();
+        }
+    }
+
+    private void GearmodeUi()
+    {
+        if (mtObject == null || atObject == null)
+            return; // Exit if MT or AT not found
+
+        // Deactivate both first
+        mtObject.SetActive(false);
+        atObject.SetActive(false);
+
+        // Then activate according to isManual
+        if (isManual)
+        {
+            mtObject.SetActive(true);
+            atObject.SetActive(false);
+        }
+        else
+        {
+            mtObject.SetActive(false);
+            atObject.SetActive(true);
         }
     }
 
