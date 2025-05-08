@@ -119,8 +119,8 @@ public class CarController2 : MonoBehaviour
     private bool wasAirborne = false; // Tracks if the car was previously in the air
     private float gameStartTime;
     private bool canPlayGcrash = false;
-    private GameObject mtObject;
-    private GameObject atObject;
+    private GameObject[] mtObjects;
+    private GameObject[] atObjects;
 
 
     void Start()
@@ -139,10 +139,9 @@ public class CarController2 : MonoBehaviour
         gear1Deceleration = deceleration;
 
         originalBaseAcceleration = baseAcceleration;
-        mtObject = GameObject.Find("MT");
-        atObject = GameObject.Find("AT");
-        Debug.Log(mtObject);
-        Debug.Log(atObject);
+        mtObjects = GameObject.FindGameObjectsWithTag("MT");
+        atObjects = GameObject.FindGameObjectsWithTag("AT");
+
         isNeutral = true;
         neutralStartTime = Time.time;
 
@@ -387,26 +386,33 @@ public class CarController2 : MonoBehaviour
 
     private void GearmodeUi()
     {
-        if (mtObject == null || atObject == null)
-            return; // Exit if MT or AT not found
+        // Deactivate all first
+        foreach (GameObject mt in mtObjects)
+        {
+            if (mt != null) mt.SetActive(false);
+        }
 
-        // Deactivate both first
-        mtObject.SetActive(false);
-        atObject.SetActive(false);
+        foreach (GameObject at in atObjects)
+        {
+            if (at != null) at.SetActive(false);
+        }
 
         // Then activate according to isManual
         if (isManual)
         {
-            mtObject.SetActive(true);
-            atObject.SetActive(false);
+            foreach (GameObject mt in mtObjects)
+            {
+                if (mt != null) mt.SetActive(true);
+            }
         }
         else
         {
-            mtObject.SetActive(false);
-            atObject.SetActive(true);
+            foreach (GameObject at in atObjects)
+            {
+                if (at != null) at.SetActive(true);
+            }
         }
     }
-
     private void FixedUpdate()
     {
         if (isCarGrounded)
