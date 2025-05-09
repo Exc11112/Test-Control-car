@@ -61,6 +61,7 @@ public class GameManager : MonoBehaviour
         {
             if (speedDisplay.countdownTime <= 0)
             {
+                PlayVictorySound();
                 EndGame(false, null);
                 return;
             }
@@ -73,11 +74,9 @@ public class GameManager : MonoBehaviour
         // Find the first available audio source that's not playing
         foreach (AudioSource source in audioSources)
         {
-            if (source != null && !source.isPlaying)
-            {
                 source.PlayOneShot(victorySound);
+                Debug.Log("victorySound play");
                 break; // Stop after finding first available
-            }
         }
     }
 
@@ -103,23 +102,27 @@ public class GameManager : MonoBehaviour
 
         int selectedCharacter = SelectionData.SelectedCharacterIndex;
 
-        PlayerPrefs.SetInt("GameWon", isVictory ? 1 : 0);
-        PlayerPrefs.SetInt("LastSelectedCharacter", selectedCharacter);
-
         if (isVictory && winningDriftScore != null)
         {
             // Get the index of the selected victory ending
-            int endingIndex = winningDriftScore.currentUIIndex; // Assuming this determines the ending
+            int endingIndex = winningDriftScore.currentUIIndex; // Should be 0, 1, or 2
             PlayerPrefs.SetInt("VictoryEndingIndex", endingIndex);
             PlayerPrefs.SetInt("LastSelectedCharacter", selectedCharacter);
             PlayerPrefs.SetInt("GameWon", 1);
 
             SetObjectsActive(winningDriftScore.gameWinObjects, true);
             SetObjectsActive(winningDriftScore.victory3DObjects, true);
-            ReceiveVictoryIndex(winningDriftScore); // Now passes DriftScore2 directly
+            ReceiveVictoryIndex(winningDriftScore);
+            SaveGalleryUnlockData(selectedCharacter, endingIndex);
         }
         else
         {
+            // Set 5th image (index 4) for loss
+            int lossIndex = 4;
+            PlayerPrefs.SetInt("VictoryEndingIndex", lossIndex);
+            PlayerPrefs.SetInt("LastSelectedCharacter", selectedCharacter);
+            PlayerPrefs.SetInt("GameWon", 0);
+
             // Activate game-over objects
             if (selectedCharacter == 0)
             {
@@ -134,31 +137,8 @@ public class GameManager : MonoBehaviour
                 SetObjectsActive(thirdCharacterGameOverObjects, true);
             }
 
-            // Save loss data
-            PlayerPrefs.SetInt("VictoryEndingIndex", 3); // 3 = lose ending
-            PlayerPrefs.SetInt("GameWon", 0);
-
-            // New: Uncover index 4 (5th image) for the selected character's gallery
-            string galleryKey = selectedCharacter switch
-            {
-                0 => "Character1_Revealed",
-                1 => "Character2_Revealed",
-                2 => "Character3_Revealed",
-                _ => throw new System.ArgumentOutOfRangeException()
-            };
-
-            string revealedData = PlayerPrefs.GetString(galleryKey, "00000");
-            char[] dataArray = revealedData.ToCharArray();
-
-            // Ensure the array has at least 5 elements (indices 0-4)
-            if (dataArray.Length < 5)
-            {
-                dataArray = new char[] { '0', '0', '0', '0', '0' }; // Reset to default
-            }
-
-            dataArray[4] = '1'; // Set index 4 (5th image) to uncovered
-            PlayerPrefs.SetString(galleryKey, new string(dataArray));
-            PlayerPrefs.Save();
+            // Unlock the 5th image in gallery
+            SaveGalleryUnlockData(selectedCharacter, lossIndex);
         }
 
         // Disable cars and speed displays
@@ -170,7 +150,7 @@ public class GameManager : MonoBehaviour
         {
             display.enabled = false;
         }
-        SaveGalleryUnlockData(selectedCharacter, PlayerPrefs.GetInt("VictoryEndingIndex", 3));
+
         PlayerPrefs.Save();
     }
 

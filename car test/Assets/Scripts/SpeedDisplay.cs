@@ -29,6 +29,9 @@ public class SpeedDisplay : MonoBehaviour
     private bool isNeutral = false; // Update this value based on your game logic
     private bool hasStartedTimer = false;
     private float localTStart;      // Local copy of car.tStart for countdown handling
+    private int debugOPressCount = 0;
+    private float debugOPressResetTime = 1.5f; // Reset if not pressed within 1.5 sec
+    private float lastLPressTime = 0f;
 
     private void Start()
     {
@@ -64,8 +67,19 @@ public class SpeedDisplay : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.O))
         {
-            countdownTime = 1f;
-            Debug.Log("Debug: countdownTime set to 1");
+            if (Time.time - lastLPressTime > debugOPressResetTime)
+            {
+                debugOPressCount = 0; // Reset if too much time passed between presses
+            }
+
+            debugOPressCount++;
+            lastLPressTime = Time.time;
+
+            if (debugOPressCount >= 3)
+            {
+                countdownTime = 1;
+                debugOPressCount = 0; // Reset counter
+            }
         }
         // Display speed in km/h
         speed = target.velocity.magnitude * 3.6f;
